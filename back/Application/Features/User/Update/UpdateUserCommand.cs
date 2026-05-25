@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.Features.User.Update;
 
-public record UpdateUserCommand(UpdateUserDTO dto, Guid userId) : IRequest<Unit>;
+public record UpdateUserCommand(UpdateUserDTO dto) : IRequest<Unit>;

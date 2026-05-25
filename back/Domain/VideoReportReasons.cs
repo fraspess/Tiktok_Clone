@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Domain;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum ReportReasons
+public enum VideoReportReasons
 {
     FallBack = 0,
     [Description("Спам")] Spam = 1,

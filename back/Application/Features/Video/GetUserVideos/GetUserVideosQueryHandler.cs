@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Video.GetUserVideos
 {
-    public class GetUserVideosQueryHandler(IUnitOfWork _uow, IMapper _mapper)
+    public class GetUserVideosQueryHandler(IUnitOfWork _uow, IMapper _mapper, ICurrentUser currentUser)
         : IRequestHandler<GetUserVideosQuery, PagedResult<VideoDTO>>
     {
         public async Task<PagedResult<VideoDTO>> Handle(GetUserVideosQuery request, CancellationToken cancellationToken)
@@ -17,7 +17,7 @@ namespace Application.Features.Video.GetUserVideos
                 .GetAll()
                 .Where(v => v.UserId == request.UserId)
                 .OrderBy(v => v.CreatedAt)
-                .ProjectTo<VideoDTO>(_mapper.ConfigurationProvider, new { currentUserId = request.CurrentUserId })
+                .ProjectTo<VideoDTO>(_mapper.ConfigurationProvider, new { currentUserId = currentUser.Id })
                 .ToPagedResultAsync(request.Settings);
             return videos;
         }

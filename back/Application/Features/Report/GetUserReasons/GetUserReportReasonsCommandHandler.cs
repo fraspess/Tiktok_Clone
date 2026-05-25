@@ -3,13 +3,13 @@ using System.Reflection;
 using Domain;
 using MediatR;
 
-namespace Application.Features.Report.GetReasons;
+namespace Application.Features.Report.GetUserReasons;
 
-internal class GetReportReasonsCommandHandler : IRequestHandler<GetReportReasonsCommand, List<string>>
+public class GetUserReportReasonsCommandHandler : IRequestHandler<GetUserReportReasonsCommand, List<string>>
 {
-    public Task<List<string>> Handle(GetReportReasonsCommand request, CancellationToken cancellationToken)
+    public Task<List<string>> Handle(GetUserReportReasonsCommand request, CancellationToken cancellationToken)
     {
-        var reasons = Enum.GetValues<ReportReasons>()
+        var reasons = Enum.GetValues<UserReportReasons>()
             .Select(r => r.GetType()
                 .GetField(r.ToString())!
                 .GetCustomAttribute<DescriptionAttribute>()?.Description ?? r.ToString())

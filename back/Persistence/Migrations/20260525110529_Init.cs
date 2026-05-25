@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,6 +42,8 @@ namespace Persistence.Migrations
                     LastConfirmationEmailSentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     BannedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     BannedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    BanReason = table.Column<int>(type: "integer", nullable: true),
+                    IsBanned = table.Column<bool>(type: "boolean", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -239,8 +241,10 @@ namespace Persistence.Migrations
                     UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     BannedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     BannedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsBanned = table.Column<bool>(type: "boolean", nullable: false),
                     BanReason = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -300,8 +304,10 @@ namespace Persistence.Migrations
                     UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     BannedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     BannedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsBanned = table.Column<bool>(type: "boolean", nullable: false),
                     BanReason = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -336,8 +342,10 @@ namespace Persistence.Migrations
                     UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     BannedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     BannedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsBanned = table.Column<bool>(type: "boolean", nullable: false),
                     BanReason = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -476,12 +484,14 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SenderId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Reason = table.Column<int>(type: "integer", nullable: true),
                     OtherReason = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     ReportType = table.Column<string>(type: "character varying(13)", maxLength: 13, nullable: false),
                     CommentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Reason = table.Column<int>(type: "integer", nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    UserReportEntity_Reason = table.Column<int>(type: "integer", nullable: true),
                     VideoId = table.Column<Guid>(type: "uuid", nullable: true),
+                    VideoReportEntity_Reason = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.LIke.ToogleLike
 {
-    public class ToggleLikeCommandHandler(IUnitOfWork _uow) : IRequestHandler<ToogleLikeCommand, Unit>
+    public class ToggleLikeCommandHandler(IUnitOfWork _uow, ICurrentUser user) : IRequestHandler<ToogleLikeCommand, Unit>
     {
         // Якщо є лайк забирає, нема - ставить
         public async Task<Unit> Handle(ToogleLikeCommand request, CancellationToken cancellationToken)
@@ -13,13 +13,13 @@ namespace Application.Features.LIke.ToogleLike
             var video = await _uow.Videos.GetByIdAsync(request.VideoId)
                         ?? throw new NotFoundException("Відео не знайдено");
 
-            var existingLike = await _uow.Likes.GetLikeByUserAndVideoIdAsync(request.UserId, request.VideoId);
+            var existingLike = await _uow.Likes.GetLikeByUserAndVideoIdAsync(user.Id!.Value, request.VideoId);
 
             if (existingLike == null)
             {
                 await _uow.Likes.CreateAsync(new LikeEntity
                 {
-                    UserId = request.UserId,
+                    UserId = user.Id!.Value,
                     VideoId = request.VideoId
                 });
             }

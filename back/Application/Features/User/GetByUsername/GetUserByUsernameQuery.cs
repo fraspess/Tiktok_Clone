@@ -3,5 +3,5 @@ using MediatR;
 
 namespace Application.Features.User.GetByUsername
 {
-    public record GetUserByUsernameQuery(string Username, Guid? CurrentUserId) : IRequest<UserDTO>;
+    public record GetUserByUsernameQuery(string Username) : IRequest<UserDTO>;
 }

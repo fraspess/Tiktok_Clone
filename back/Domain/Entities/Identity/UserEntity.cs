@@ -2,6 +2,7 @@
 using Domain.Entities.Comment;
 using Domain.Entities.Conversation;
 using Domain.Entities.Favorite;
+using Domain.Entities.Interfaces;
 using Domain.Entities.Like;
 using Domain.Entities.Message;
 using Domain.Entities.Video;
@@ -49,5 +50,6 @@ public class UserEntity : IdentityUser<Guid>
 
     public Guid? BannedBy { get; set; }
     public DateTime? BannedAt { get; set; }
-    public bool IsBanned => BannedBy.HasValue;
+    public UserReportReasons? BanReason { get; set; }
+    public bool IsBanned { get; set; }
 }

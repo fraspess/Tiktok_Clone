@@ -2,5 +2,5 @@
 
 namespace Application.Features.Comment.Like
 {
-    public record LikeCommentCommand(Guid CommentId, Guid UserId) : IRequest<Unit>;
+    public record LikeCommentCommand(Guid CommentId) : IRequest<Unit>;
 }

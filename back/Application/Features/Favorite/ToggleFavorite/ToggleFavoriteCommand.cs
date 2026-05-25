@@ -2,5 +2,5 @@
 
 namespace Application.Features.Favorite.ToggleFavorite
 {
-    public record ToggleFavoriteCommand(Guid VideoId, Guid UserId) : IRequest<Unit>;
+    public record ToggleFavoriteCommand(Guid VideoId) : IRequest<Unit>;
 }

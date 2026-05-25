@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.GetMessages
 {
-    public class GetConversationMessagesQueryHandler(IUnitOfWork _uow, IMapper _mapper)
+    public class GetConversationMessagesQueryHandler(IUnitOfWork _uow, IMapper _mapper, ICurrentUser user)
         : IRequestHandler<GetConversationMessagesQuery, PagedResult<MessageDTO>>
     {
         public async Task<PagedResult<MessageDTO>> Handle(GetConversationMessagesQuery request,
@@ -22,14 +22,14 @@ namespace Application.Features.Conversation.GetMessages
                                    .FirstOrDefaultAsync(c => c.Id == request.ConversationId)
                                ?? throw new NotFoundException("Розмову не знайдено");
 
-            if (!conversation.Participants.Any(p => p.UserId == request.UserId))
+            if (conversation.Participants.All(p => p.UserId != user.Id))
                 throw new NotAllowedException("Ви не маєте прав на перегляд цієї сторінки.");
 
             var messages = await _uow.Messages
                 .GetAll()
                 .Where(m => m.ConversationId == request.ConversationId)
                 .OrderByDescending(m => m.CreatedAt)
-                .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider, new { currentUserId = request.UserId })
+                .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider, new { currentUserId = user.Id })
                 .ToPagedResultAsync(request.Settings);
 
             return messages;

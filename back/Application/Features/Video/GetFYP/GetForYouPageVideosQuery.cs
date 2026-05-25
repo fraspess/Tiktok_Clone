@@ -4,6 +4,6 @@ using MediatR;
 
 namespace Application.Features.Video.GetFYP
 {
-    public record GetForYouPageVideosQuery(PaginationSettings PaginationSettings, Guid? UserId)
+    public record GetForYouPageVideosQuery(PaginationSettings PaginationSettings)
         : IRequest<PagedResult<VideoDTO>>;
 }

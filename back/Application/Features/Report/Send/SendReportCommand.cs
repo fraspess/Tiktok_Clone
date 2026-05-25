@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.Features.Report.Send;
 
-public record SendReportCommand(Guid UserId, ReportDTO Dto) : IRequest<Unit>;
+public record SendReportCommand(ReportDTO Dto) : IRequest<Unit>;

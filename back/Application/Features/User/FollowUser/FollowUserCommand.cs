@@ -2,5 +2,5 @@
 
 namespace Application.Features.User.FollowUser
 {
-    public record FollowUserCommand(Guid FollowerId, Guid FollowingId) : IRequest<Unit>;
+    public record FollowUserCommand(Guid FollowingId) : IRequest<Unit>;
 }

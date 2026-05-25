@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.Features.AdminPanel.GetUserById;
 
-public record GetUserByIdCommand(Guid Id) : IRequest<SimpleUserDTO>;
+public record GetUserByIdCommand(Guid Id) : IRequest<GetUserAdminDTO>;

@@ -57,9 +57,14 @@ namespace Persistence.Services
                 throw new ValidationException("Невірний логін або пароль");
             }
 
-            if (user.EmailConfirmed == false)
+            if (!user.EmailConfirmed)
             {
                 throw new NotAllowedException("Підтвердіть свою електронну пошту, щоб увійти");
+            }
+
+            if (user.IsBanned is true)
+            {
+                throw new NotAllowedException("Аккаунт був заблокований");
             }
 
             return await _jwtTokenService.GenerateTokensAsync(user);

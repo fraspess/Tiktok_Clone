@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.GetAll
 {
-    public class GetConversationsQueryHandler(IUnitOfWork _uow, IMapper _mapper)
+    public class GetConversationsQueryHandler(IUnitOfWork _uow, IMapper _mapper, ICurrentUser user)
         : IRequestHandler<GetConversationsQuery, PagedResult<ConversationDTO>>
     {
         public async Task<PagedResult<ConversationDTO>> Handle(GetConversationsQuery request,
@@ -18,7 +18,7 @@ namespace Application.Features.Conversation.GetAll
             var convo = await _uow.Conversations
                 .GetAll()
                 .AsSplitQuery()
-                .Where(c => c.Participants.Any(p => p.UserId == request.UserId))
+                .Where(c => c.Participants.Any(p => p.UserId == user.Id))
                 .OrderByDescending(x => x.CreatedAt)
                 .ProjectTo<ConversationDTO>(_mapper.ConfigurationProvider)
                 .ToPagedResultAsync(request.PaginationSettings);

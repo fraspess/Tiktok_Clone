@@ -67,6 +67,11 @@ namespace Infrastructure.Services.Token
                 throw new UnauthorizedException("Не валідний refresh токен");
             }
 
+            if (user.IsBanned is true)
+            {
+                throw new NotAllowedException("Аккаунт заблокований");
+            }
+
             return await GenerateTokensAsync(user);
         }
 

@@ -7,7 +7,6 @@ namespace Domain.Entities.Report
     {
         public Guid SenderId { get; set; }
         public UserEntity Sender { get; init; } = null!;
-        public ReportReasons? Reason { get; set; }
         [MaxLength(255)]
         public String? OtherReason { get; set; }
     }

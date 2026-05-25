@@ -1,6 +1,5 @@
 ﻿using Application;
 using Application.Dtos.Video;
-using Application.Extensions;
 using Application.Features.Video.Delete;
 using Application.Features.Video.GetById;
 using Application.Features.Video.GetBySomeQuery;
@@ -12,7 +11,6 @@ using Application.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Api.Controllers.Video
 {
@@ -36,7 +34,7 @@ namespace Api.Controllers.Video
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVideoById(Guid id)
         {
-            var video = await _mediator.Send(new GetVideoByIdQuery(id, GetUserIfExists()));
+            var video = await _mediator.Send(new GetVideoByIdQuery(id));
             
             return Ok(ApiResponse<VideoDTO>.Success(video));
         }
@@ -45,8 +43,7 @@ namespace Api.Controllers.Video
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVideo(Guid id)
         {
-            var userId = User.GetUserId();
-            await _mediator.Send(new DeleteVideoCommand(id, userId));
+            await _mediator.Send(new DeleteVideoCommand(id));
             return Ok(ApiResponse<string>.Success("Відео успішно видалено"));
         }
 
@@ -56,8 +53,7 @@ namespace Api.Controllers.Video
         [HttpPost]
         public async Task<IActionResult> UploadVideo([FromForm] CreateVideoDTO dto)
         {
-            var userId = User.GetUserId();
-            await _mediator.Send(new UploadVideoCommand(dto, userId));
+            await _mediator.Send(new UploadVideoCommand(dto));
             return Ok(ApiResponse<string>.Success("Відео успішно відправлено на обробку."));
         }
 
@@ -66,7 +62,7 @@ namespace Api.Controllers.Video
         public async Task<IActionResult> GetForYouPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5)
         {
             var videos = await _mediator.Send(new GetForYouPageVideosQuery(
-                new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }, GetUserIfExists()));
+                new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
             return Ok(ApiResponse<PagedResult<VideoDTO>>.Success(videos));
         }
 
@@ -82,8 +78,8 @@ namespace Api.Controllers.Video
         public async Task<IActionResult> GetUserVideos(Guid id, int pageNumber = 1, int pageSize = 5)
         {
             var videos = await _mediator.Send(new GetUserVideosQuery(id,
-                new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }, GetUserIfExists()));
-            return Ok(ApiResponse<PagedResult<VideoDTO>>.Success(videos, null));
+                new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
+            return Ok(ApiResponse<PagedResult<VideoDTO>>.Success(videos));
         }
 
         [HttpGet("user/my")]
@@ -91,18 +87,9 @@ namespace Api.Controllers.Video
         public async Task<IActionResult> GetMyVideos(int pageNumber = 1, int pageSize = 5)
         {
             var videos = await _mediator.Send(new GetMyVideosQuery(
-                new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }, User.GetUserId()));
+                new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
             return Ok(ApiResponse<PagedResult<MyVideoDTO>>.Success(videos));
         }
-
-        private Guid? GetUserIfExists()
-        {
-            Guid? currentUserId = null;
-
-            if (User.Identity?.IsAuthenticated == true)
-                currentUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            return currentUserId;
-        }
+        
     }
 }

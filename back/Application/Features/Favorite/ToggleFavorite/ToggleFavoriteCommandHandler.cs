@@ -5,12 +5,12 @@ using MediatR;
 
 namespace Application.Features.Favorite.ToggleFavorite
 {
-    public class ToggleFavoriteCommandHandler(IUnitOfWork _uow) : IRequestHandler<ToggleFavoriteCommand, Unit>
+    public class ToggleFavoriteCommandHandler(IUnitOfWork _uow, ICurrentUser user) : IRequestHandler<ToggleFavoriteCommand, Unit>
     {
         public async Task<Unit> Handle(ToggleFavoriteCommand request, CancellationToken cancellationToken)
         {
             var videoId = request.VideoId;
-            var userId = request.UserId;
+            var userId = user.Id!.Value;
 
             var video = await _uow.Videos.GetByIdAsync(videoId)
                         ?? throw new NotFoundException("Відео не знайдено");

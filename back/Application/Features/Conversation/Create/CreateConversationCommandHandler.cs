@@ -8,14 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.Create
 {
-    public class CreateConversationCommandHandler(IUnitOfWork _uow, IMapper _mapper, IUserService _userManager)
+    public class CreateConversationCommandHandler(IUnitOfWork _uow, IMapper _mapper, IUserService _userManager, ICurrentUser currentUser)
         : IRequestHandler<CreateConversationCommand, ConversationDTO>
     {
         public async Task<ConversationDTO> Handle(CreateConversationCommand request,
             CancellationToken cancellationToken)
         {
             var participants = request.UsersIds;
-            var currentUserId = request.CurrentUserId;
+            var currentUserId = currentUser.Id!.Value;
 
             if (!participants.Contains(currentUserId))
             {

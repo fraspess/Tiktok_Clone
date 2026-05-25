@@ -21,7 +21,7 @@ namespace Api.Controllers.Comment
         [Authorize]
         public async Task<IActionResult> CreateComment([FromBody] CreateCommentDTO dto)
         {
-            await _mediator.Send(new CreateCommentCommand(dto, User.GetUserId()));
+            await _mediator.Send(new CreateCommentCommand(dto));
             return Ok(ApiResponse<object>.Success(null!, "Успішно створено коментар"));
         }
 
@@ -45,7 +45,7 @@ namespace Api.Controllers.Comment
         [Authorize]
         public async Task<IActionResult> DeleteComment(Guid commentId)
         {
-            await _mediator.Send(new DeleteCommentCommand(commentId, User.GetUserId()));
+            await _mediator.Send(new DeleteCommentCommand(commentId));
             return Ok(ApiResponse<object>.Success(null!, "Успішно видалено коментар"));
         }
 
@@ -54,7 +54,7 @@ namespace Api.Controllers.Comment
         [Authorize]
         public async Task<IActionResult> ToggleLikeComment([FromQuery] Guid commentId)
         {
-            await _mediator.Send(new LikeCommentCommand(commentId, User.GetUserId()));
+            await _mediator.Send(new LikeCommentCommand(commentId));
             return Ok(ApiResponse<object>.Success(null!));
         }
     }

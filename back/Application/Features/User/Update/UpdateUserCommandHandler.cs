@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.User.Update;
 
-internal class UpdateUserCommandHandler(UserManager<UserEntity> userManager, IImageService imageService) : IRequestHandler<UpdateUserCommand, Unit>
+internal class UpdateUserCommandHandler(UserManager<UserEntity> userManager, IImageService imageService, ICurrentUser currentUser) : IRequestHandler<UpdateUserCommand, Unit>
 {
     public async Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var id = request.userId;
+        var id = currentUser.Id!.Value;
         var dto = request.dto;
         
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id)

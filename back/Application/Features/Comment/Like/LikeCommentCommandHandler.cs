@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Comment.Like
 {
-    public class LikeCommentCommandHandler(IUnitOfWork _uow) : IRequestHandler<LikeCommentCommand, Unit>
+    public class LikeCommentCommandHandler(IUnitOfWork _uow, ICurrentUser currentUser) : IRequestHandler<LikeCommentCommand, Unit>
     {
         async Task<Unit> IRequestHandler<LikeCommentCommand, Unit>.Handle(LikeCommentCommand request,
             CancellationToken cancellationToken)
@@ -13,10 +13,10 @@ namespace Application.Features.Comment.Like
             var comment = await _uow.Comments.GetByIdAsync(request.CommentId)
                           ?? throw new NotFoundException("Коментарій не знайдено");
 
-            var isExists = comment.CommentLikes.FirstOrDefault(c => c.UserId == request.UserId);
+            var isExists = comment.CommentLikes.FirstOrDefault(c => c.UserId == currentUser.Id);
             if (isExists is null)
             {
-                isExists = new CommentLikeEntity() { CommentId = request.CommentId, UserId = request.UserId };
+                isExists = new CommentLikeEntity() { CommentId = request.CommentId, UserId = currentUser.Id!.Value };
                 comment.CommentLikes.Add(isExists);
                 await _uow.SaveChangesAsync();
             }

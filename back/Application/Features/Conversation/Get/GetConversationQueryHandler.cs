@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.Get
 {
-    internal class GetConversationQueryHandler(IUnitOfWork _uow, IMapper _mapper)
+    internal class GetConversationQueryHandler(IUnitOfWork _uow, IMapper _mapper, ICurrentUser user)
         : IRequestHandler<GetConversationQuery, ConversationDTO>
     {
         public async Task<ConversationDTO> Handle(GetConversationQuery request, CancellationToken cancellationToken)
@@ -18,7 +18,7 @@ namespace Application.Features.Conversation.Get
                                    .FirstOrDefaultAsync(c => c.Id == request.ConversationId)
                                ?? throw new NotFoundException("Розмову не знайдено");
 
-            if (!conversation.Participants.Any(p => p.UserId == request.CurrentUserId))
+            if (conversation.Participants.All(p => p.UserId != user.Id!.Value))
                 throw new NotAllowedException("Ви не маєте прав на перегляд цієї сторінки.");
 
             var dto = _mapper.Map<ConversationDTO>(conversation);

@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260517184213_init")]
-    partial class init
+    [Migration("20260525110529_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,6 +51,12 @@ namespace Persistence.Migrations
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid?>("ParentCommentId")
                         .HasColumnType("uuid");
@@ -261,6 +267,9 @@ namespace Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<int?>("BanReason")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("BannedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -288,6 +297,9 @@ namespace Persistence.Migrations
                     b.Property<string>("FirstName")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -458,6 +470,12 @@ namespace Persistence.Migrations
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsDelivered")
                         .HasColumnType("boolean");
 
@@ -497,9 +515,6 @@ namespace Persistence.Migrations
                     b.Property<string>("OtherReason")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
-
-                    b.Property<int?>("Reason")
-                        .HasColumnType("integer");
 
                     b.Property<string>("ReportType")
                         .IsRequired()
@@ -557,6 +572,12 @@ namespace Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("ProccessedInProcents")
                         .HasColumnType("integer");
@@ -690,6 +711,9 @@ namespace Persistence.Migrations
                     b.Property<Guid>("CommentId")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("Reason")
+                        .HasColumnType("integer");
+
                     b.HasIndex("CommentId", "SenderId")
                         .IsUnique();
 
@@ -700,11 +724,20 @@ namespace Persistence.Migrations
                 {
                     b.HasBaseType("Domain.Entities.Report.ReportEntity");
 
+                    b.Property<int?>("Reason")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasIndex("UserId", "SenderId")
                         .IsUnique();
+
+                    b.ToTable("Reports", t =>
+                        {
+                            t.Property("Reason")
+                                .HasColumnName("UserReportEntity_Reason");
+                        });
 
                     b.HasDiscriminator().HasValue("User");
                 });
@@ -713,11 +746,20 @@ namespace Persistence.Migrations
                 {
                     b.HasBaseType("Domain.Entities.Report.ReportEntity");
 
+                    b.Property<int?>("Reason")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("VideoId")
                         .HasColumnType("uuid");
 
                     b.HasIndex("VideoId", "SenderId")
                         .IsUnique();
+
+                    b.ToTable("Reports", t =>
+                        {
+                            t.Property("Reason")
+                                .HasColumnName("VideoReportEntity_Reason");
+                        });
 
                     b.HasDiscriminator().HasValue("Video");
                 });

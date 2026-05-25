@@ -2,7 +2,7 @@
 
 namespace Domain;
 
-public enum BanReasons
+public enum UserReportReasons
 {
     None = 0,
     [Description("Уособлення")]Impersonation = 1,
