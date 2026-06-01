@@ -29,7 +29,7 @@ public class ReportController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendReport(ReportDTO dto)
+    public async Task<IActionResult> SendReport([FromBody] ReportDTO dto)
     {
         await mediator.Send(new SendReportCommand(dto));
         return Ok(ApiResponse<object>.Success(null!, "Успішно відправлено скаргу!"));

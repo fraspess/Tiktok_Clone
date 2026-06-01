@@ -7,13 +7,11 @@ public class BannableSoftDeletableEntity : SoftDeletableEntity, IBannable
     public Guid? BannedBy { get; set; }
     public DateTime? BannedAt { get; set; }
     public bool IsBanned { get; set; } = false;
-    public UserReportReasons? BanReason { get; set; }
     
-    public void Ban(Guid by, UserReportReasons reason)
+    public void Ban(Guid by)
     {
         BannedBy = by;
         BannedAt = DateTime.UtcNow;
-        BanReason = reason;
         IsBanned = true;
     }
 
@@ -21,7 +19,6 @@ public class BannableSoftDeletableEntity : SoftDeletableEntity, IBannable
     {
         BannedBy = null;
         BannedAt = null;
-        BanReason = null;
         IsBanned = false;
     }
 }

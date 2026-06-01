@@ -13,7 +13,7 @@ namespace Application.Features.Video.ProcessInfoInPercent
             var video = await _uow.Videos.GetByIdAsyncIgnoreQueryFilters(request.VideoId)
                         ?? throw new NotFoundException("Відео не знайдено");
 
-            video.ProccessedInProcents = request.Percentage;
+            video.ProccessedInPercents = request.Percentage;
             await videoProcessingNotifier.SendVideoProcessingProgress(request.VideoId, video.UserId,
                 request.Percentage);
             await _uow.Videos.UpdateAsync(video);

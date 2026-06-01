@@ -3,5 +3,5 @@ using MediatR;
 
 namespace Application.Features.Conversation.Create
 {
-    public record CreateConversationCommand(List<Guid> UsersIds) : IRequest<ConversationDTO>;
+    public record CreateConversationCommand(List<Guid> UsersIds) : IRequest<ConversationDto>;
 }

@@ -17,10 +17,8 @@ public class UserEntity : IdentityUser<Guid>
     [MaxLength(50)] public string? LastName { get; set; }
     [MaxLength(50)] public string? FirstName { get; set; }
 
-    [MaxLength(160)] public string? Description { get; set; }
-
-    [MaxLength(255)] public string? Avatar { get; set; }
-
+    [MaxLength(160)] public string? Description { get; set; } = String.Empty;
+    
     public int RefreshTokenVersion { get; set; }
     
     public DateTime? LastUsernameChangedAt { get; set; }

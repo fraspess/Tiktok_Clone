@@ -16,9 +16,9 @@ internal class ChangeUsernameCommandHandler(UserManager<UserEntity> userManager,
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken: cancellationToken) 
                    ?? throw new NotFoundException("Користувача не знайдено");
         
-        if (user.LastUsernameChangedAt.HasValue && (DateTime.Now <=  user.LastUsernameChangedAt.Value.AddDays(30)))
+        if (user.LastUsernameChangedAt.HasValue && (DateTime.Now <=  user.LastUsernameChangedAt.Value.AddDays(7)))
         {
-            throw new BadRequestException("Ви можете змінювати ім'я користувача лише 1 раз в 30 днів");
+            throw new BadRequestException("Ви можете змінювати ім'я користувача лише 1 раз в 7 днів");
         }
 
         if (await userManager.FindByNameAsync(request.newUsername) is not null)

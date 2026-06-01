@@ -1,19 +1,18 @@
 ﻿using Application.Dtos.Video;
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Mapper;
 using Application.Pagination;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Video.GetBySomeQuery
 {
-    public class GetVideosBySomeStringQueryHandler(IUnitOfWork _uow, IMapper _mapper, IConfiguration config)
-        : IRequestHandler<GetVideosBySomeStringQuery, PagedResult<SimpleVideoDTO>>
+    public class GetVideosBySomeStringQueryHandler(IUnitOfWork _uow, ICurrentUser currentUser, VideoMapper videoMapper)
+        : IRequestHandler<GetVideosBySomeStringQuery, PagedResult<SimpleVideoDto>>
     {
-        public async Task<PagedResult<SimpleVideoDTO>> Handle(GetVideosBySomeStringQuery request,
+        public async Task<PagedResult<SimpleVideoDto>> Handle(GetVideosBySomeStringQuery request,
             CancellationToken cancellationToken)
         {
             var someString = request.SomeString.ToLower().Trim();
@@ -34,10 +33,11 @@ namespace Application.Features.Video.GetBySomeQuery
 
             var videos = await query
                 .OrderByDescending(v => v.CreatedAt)
-                .ProjectTo<SimpleVideoDTO>(_mapper.ConfigurationProvider, new {backendUrl = config["Backend:Url"]})
+                .ToProjectionDto(currentUser.Id)
                 .ToPagedResultAsync(request.Settings);
 
-            return videos;
+            var result = videos.MapItems(videoMapper.ToSimpleDto);
+            return result;
         }
     }
 }

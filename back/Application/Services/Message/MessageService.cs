@@ -1,14 +1,13 @@
 ﻿using Application.Dtos.Message;
 using Application.Interfaces;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Application.Mapper;
 using Domain.Entities.Message;
 using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Message
 {
-    public class MessageService(IUnitOfWork _uow, IMapper _mapper, IChatNotifier _notifier) : IMessageService
+    public class MessageService(IUnitOfWork _uow, MessageMapper _mapper, IChatNotifier _notifier) : IMessageService
     {
         public async Task FlushPendingAsync(Guid userId)
         {
@@ -20,12 +19,13 @@ namespace Application.Services.Message
                     m.Conversation.Participants
                         .Any(p => p.UserId == userId))
                 .OrderBy(m => m.CreatedAt)
-                .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
             if (!pendingMessages.Any()) return;
 
-            await _notifier.SendPendingMessagesAsync(userId, pendingMessages);
+
+            var dtos = pendingMessages.Select(m => _mapper.ToDto(m)).ToList();
+            await _notifier.SendPendingMessagesAsync(userId, dtos);
         }
 
         public async Task MarkAsDeliveredAsync(Guid userId, Guid messageId)

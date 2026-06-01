@@ -3,5 +3,5 @@ using MediatR;
 
 namespace Application.Features.Comment.Create
 {
-    public record CreateCommentCommand(CreateCommentDTO Dto) : IRequest<Unit>;
+    public record CreateCommentCommand(CreateCommentDto Dto) : IRequest<Unit>;
 }

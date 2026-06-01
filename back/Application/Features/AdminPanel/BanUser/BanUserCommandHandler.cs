@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.AdminPanel.BanUser;
 
-public class BanUserCommandHandler(UserManager<UserEntity> userManager, ICurrentUser currentUser) : IRequestHandler<BanUserCommand, Unit>
+internal class BanUserCommandHandler(UserManager<UserEntity> userManager, ICurrentUser currentUser) : IRequestHandler<BanUserCommand, Unit>
 {
     public async Task<Unit> Handle(BanUserCommand request, CancellationToken cancellationToken)
     {

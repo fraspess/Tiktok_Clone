@@ -5,5 +5,5 @@ using MediatR;
 namespace Application.Features.Video.GetUserVideos
 {
     public record GetUserVideosQuery(Guid UserId, PaginationSettings Settings)
-        : IRequest<PagedResult<VideoDTO>>;
+        : IRequest<PagedResult<VideoDto>>;
 }

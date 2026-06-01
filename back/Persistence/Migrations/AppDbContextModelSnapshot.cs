@@ -28,9 +28,6 @@ namespace Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("BanReason")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("BannedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -137,23 +134,8 @@ namespace Persistence.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime?>("LastReadAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
 
                     b.HasKey("ConversationId", "UserId");
 
@@ -259,10 +241,6 @@ namespace Persistence.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Avatar")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
 
                     b.Property<int?>("BanReason")
                         .HasColumnType("integer");
@@ -438,9 +416,6 @@ namespace Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("BanReason")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("BannedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -544,7 +519,7 @@ namespace Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("BanReason")
+                    b.Property<int>("BanReason")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("BannedAt")
@@ -576,7 +551,7 @@ namespace Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("ProccessedInProcents")
+                    b.Property<int>("ProccessedInPercents")
                         .HasColumnType("integer");
 
                     b.Property<int>("Status")

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.AdminPanel.UnbanUser;
 
-public class UnbanUserCommandHandler(UserManager<UserEntity> userManager) : IRequestHandler<UnbanUserCommand, Unit>
+internal class UnbanUserCommandHandler(UserManager<UserEntity> userManager) : IRequestHandler<UnbanUserCommand, Unit>
 {
     public async Task<Unit> Handle(UnbanUserCommand request, CancellationToken cancellationToken)
     {

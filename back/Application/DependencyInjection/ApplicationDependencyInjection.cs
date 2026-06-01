@@ -1,8 +1,9 @@
 ﻿using Application.Behaviors;
 using Application.Features.Video.Shared;
+using Application.Mapper;
+using Application.Options;
 using Application.Services.HashTag;
 using Application.Services.Message;
-using Application.Settings;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -19,31 +20,23 @@ namespace Application.DependencyInjection
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IHashTagService, HashTagService>();
 
-            services.AddOptions<EmailSettings>()
-                .BindConfiguration("SMTP")
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-            
-            services.AddOptions<JwtSettings>()
-                .BindConfiguration("Jwt")
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
-            services.AddAutoMapper(cfg => { cfg.LicenseKey = config["AutoMapper:Key"]; },
-                AppDomain.CurrentDomain.GetAssemblies());
-
             services.AddValidatorsFromAssembly(typeof(AssemblyReference).Assembly);
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddMediatR(opt =>
             {
                 opt.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly);
-                opt.LicenseKey = config["AutoMapper:Key"];
             });
 
 
             services.AddScoped<IDescriptionParser, DescriptionParser>();
-            
 
+            services.AddScoped<UserMapper>();
+            services.AddScoped<VideoMapper>();
+            services.AddScoped<ConversationMapper>();
+            services.AddScoped<MessageMapper>();
+            services.AddScoped<CommentMapper>();
+
+            services.AddConfigOptions(config);
             return services;
         }
     }

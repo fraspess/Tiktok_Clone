@@ -10,6 +10,9 @@ namespace Application.Features.Comment.Create
         public async Task<Unit> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
             var dto = request.Dto;
+            var video = await _uow.Videos.GetByIdAsync(dto.VideoId) 
+                        ?? throw new NotFoundException("Відео не знайдено");
+            
             var ownerId = currentUser.Id!.Value;
             if (dto.ParentCommentId is not null)
             {

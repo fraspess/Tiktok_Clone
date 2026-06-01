@@ -3,5 +3,5 @@ using MediatR;
 
 namespace Application.Features.Video.Upload
 {
-    public record UploadVideoCommand(CreateVideoDTO Dto) : IRequest<Unit>;
+    public record UploadVideoCommand(CreateVideoDto Dto) : IRequest<Unit>;
 }

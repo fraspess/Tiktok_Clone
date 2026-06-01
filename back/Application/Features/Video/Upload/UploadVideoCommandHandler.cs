@@ -25,7 +25,7 @@ namespace Application.Features.Video.Upload
                 UserId = currentUser.Id!.Value,
                 Description = parsedDescription.CleanText,
                 Status = VideoStatus.Processing,
-                ProccessedInProcents = 0
+                ProccessedInPercents = 0
             };
 
             var hashtags = await _hashtag.GetOrCreateAsync(parsedDescription.Tags);

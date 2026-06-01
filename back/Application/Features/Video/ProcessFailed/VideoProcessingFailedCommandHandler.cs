@@ -14,7 +14,7 @@ namespace Application.Features.Video.ProcessFailed
                         ?? throw new NotFoundException("Відео не знайдено");
 
             video.Status = VideoStatus.Failed;
-            video.ProccessedInProcents = 0;
+            video.ProccessedInPercents = 0;
 
             await _uow.Videos.UpdateAsync(video);
             await _uow.SaveChangesAsync();

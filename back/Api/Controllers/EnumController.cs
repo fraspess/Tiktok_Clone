@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using Application;
+using Application.Extensions;
 using Domain;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
@@ -29,10 +30,7 @@ public class EnumController : ControllerBase
             {
                 id = Convert.ToInt32(e),
                 name = e.ToString(),
-                description = e.GetType()
-                    .GetField(e.ToString())
-                    ?.GetCustomAttribute<DescriptionAttribute>()
-                    ?.Description 
+                description = e.GetDescription() 
             })
             .ToList();
         

@@ -15,9 +15,10 @@ namespace Domain.Entities.Video
 
         public UserEntity? Author { get; set; }
 
-        public int ProccessedInProcents { get; set; } // returned from microservice
+        public int ProccessedInPercents { get; set; } // returned from microservice
         
         public VideoStatus Status { get; set; }
+        public VideoReportReasons BanReason { get; set; }
 
         public ICollection<CommentEntity> Comments { get; set; } = new List<CommentEntity>();
 

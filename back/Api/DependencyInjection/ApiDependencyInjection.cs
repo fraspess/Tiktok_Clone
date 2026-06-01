@@ -96,6 +96,8 @@ namespace Api.DependencyInjection
                 {
                     [new OpenApiSecuritySchemeReference("bearer", document)] = []
                 });
+                
+                opt.UseInlineDefinitionsForEnums();
             });
 
             

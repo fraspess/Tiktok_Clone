@@ -1,19 +1,18 @@
 ﻿using Application.Dtos.Message;
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Mapper;
 using Application.Pagination;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.GetMessages
 {
-    public class GetConversationMessagesQueryHandler(IUnitOfWork _uow, IMapper _mapper, ICurrentUser user)
-        : IRequestHandler<GetConversationMessagesQuery, PagedResult<MessageDTO>>
+    public class GetConversationMessagesQueryHandler(IUnitOfWork _uow, MessageMapper messageMapper, ICurrentUser user)
+        : IRequestHandler<GetConversationMessagesQuery, PagedResult<MessageDto>>
     {
-        public async Task<PagedResult<MessageDTO>> Handle(GetConversationMessagesQuery request,
+        public async Task<PagedResult<MessageDto>> Handle(GetConversationMessagesQuery request,
             CancellationToken cancellationToken)
         {
             var conversation = await _uow.Conversations
@@ -29,10 +28,10 @@ namespace Application.Features.Conversation.GetMessages
                 .GetAll()
                 .Where(m => m.ConversationId == request.ConversationId)
                 .OrderByDescending(m => m.CreatedAt)
-                .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider, new { currentUserId = user.Id })
                 .ToPagedResultAsync(request.Settings);
 
-            return messages;
+            var result = messages.MapItems(messageMapper.ToDto);
+            return result;
         }
     }
 }

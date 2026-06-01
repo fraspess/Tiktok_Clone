@@ -4,7 +4,7 @@ namespace Application.Interfaces
 {
     public interface IChatNotifier
     {
-        Task SendMessageAsync(Guid recipientId, MessageDTO message);
-        Task SendPendingMessagesAsync(Guid recipientId, IEnumerable<MessageDTO> messages);
+        Task SendMessageAsync(Guid recipientId, MessageDto message);
+        Task SendPendingMessagesAsync(Guid recipientId, IEnumerable<MessageDto> messages);
     }
 }

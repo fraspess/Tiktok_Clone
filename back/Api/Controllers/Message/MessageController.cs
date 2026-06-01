@@ -18,7 +18,7 @@ namespace Api.Controllers.Message
         {
             var messages = await _mediator.Send(new GetMessagesQuery(conversationId,
                 new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-            return Ok(ApiResponse<PagedResult<MessageDTO>>.Success(messages));
+            return Ok(ApiResponse<PagedResult<MessageDto>>.Success(messages));
         }
     }
 }

@@ -25,8 +25,6 @@ namespace Persistence.Seeder
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<UserEntity>>();
             var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
             var imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
-            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             await context.Database.MigrateAsync();
             await SeedRolesAsync(roleManager);
@@ -78,7 +76,7 @@ namespace Persistence.Seeder
             {
                 var json = await File.ReadAllTextAsync(Path.Combine(environment.ContentRootPath, "Helpers",
                     "Users.json"));
-                var users = JsonConvert.DeserializeObject<List<SeedUserDTO>>(json);
+                var users = JsonConvert.DeserializeObject<List<SeedUserDto>>(json);
 
                 if (users == null)
                 {
@@ -94,7 +92,6 @@ namespace Persistence.Seeder
                         Email = user.Email,
                         FirstName = user.FirstName,
                         LastName = user.LastName,
-                        Avatar = await imageService.SaveImageAsync(user.Image!)
                     };
 
                     var result = await userManager.CreateAsync(newUser, user.Password!);
@@ -104,6 +101,7 @@ namespace Persistence.Seeder
                         if (resultR.Succeeded)
                         {
                             newUser.EmailConfirmed = true;
+                            await imageService.SaveImageAsync(user.Image!, newUser.Id);
                             await userManager.UpdateAsync(newUser);
                             Log.Information("User {UserName} seeded successfully", user.Username);
                         }
@@ -126,24 +124,6 @@ namespace Persistence.Seeder
                 Log.Information("Users already exists in database, skipping seeding");
             }
         }
-
-
-        public static async Task SeedVideosAsync(IConfiguration configuration, IMediator mediator,
-            UserManager<UserEntity> userManager, AppDbContext context)
-        {
-            if (context.Videos.Any()) return;
-
-            var key = configuration["Pexels:Key"]!;
-            var userIds = userManager.Users.Select(u => u.Id).ToArray();
-
-            var queries = new[] { "nature", "city", "food", "animals", "sports", "football" };
-
-            foreach (var query in queries)
-            {
-                var url = $"https://api.pexels.com/videos/search?query={query}&per_page=10&orientation=portrait";
-                await mediator.Send(new UploadVideoCommandDev(url, key, userIds,
-                    "Good description #salo #potuzhno #new-hashtag-test #new_hashtag_test"));
-            }
-        }
+        
     }
 }

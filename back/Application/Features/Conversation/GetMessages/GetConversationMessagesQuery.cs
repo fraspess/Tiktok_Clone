@@ -5,5 +5,5 @@ using MediatR;
 namespace Application.Features.Conversation.GetMessages
 {
     public record GetConversationMessagesQuery(Guid ConversationId, PaginationSettings Settings)
-        : IRequest<PagedResult<MessageDTO>>;
+        : IRequest<PagedResult<MessageDto>>;
 }

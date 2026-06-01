@@ -2,7 +2,7 @@
 
 namespace Domain.Entities.Conversation
 {
-    public class ConversationParticipant : AuditableEntity
+    public class ConversationParticipant
     {
         public Guid UserId { get; set; }
 

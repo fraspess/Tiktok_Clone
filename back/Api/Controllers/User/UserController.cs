@@ -53,7 +53,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("google")]
-    public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthDTO request)
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthDto request)
     {
         var tokens = await _mediator.Send(new GoogleAuthCommand(request.IdToken));
         AppendRefreshTokenCookie(tokens.RefreshToken);
@@ -64,8 +64,8 @@ public class UserController(IMediator _mediator) : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var result = await _mediator.Send(new GetCurrentUserQuery(User.GetUserId()));
-        return Ok(ApiResponse<UserMeDTO>.Success(result));
+        var result = await _mediator.Send(new GetCurrentUserQuery());
+        return Ok(ApiResponse<object>.Success(result));
     }
 
     [HttpPost("refresh")]
@@ -126,7 +126,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     {
         username = username.TrimStart('@');
         var profile = await _mediator.Send(new GetUserByUsernameQuery(username));
-        return Ok(ApiResponse<UserDTO>.Success(profile));
+        return Ok(ApiResponse<UserDto>.Success(profile));
     }
 
     [HttpPost("follow")]
@@ -139,7 +139,7 @@ public class UserController(IMediator _mediator) : ControllerBase
 
     [HttpPatch]
     [Authorize]
-    public async Task<IActionResult> Update([FromForm] UpdateUserDTO dto)
+    public async Task<IActionResult> Update([FromForm] UpdateUserDto dto)
     {
         await _mediator.Send(new UpdateUserCommand(dto));
         return Ok(ApiResponse<object>.Success(null!));
@@ -147,7 +147,7 @@ public class UserController(IMediator _mediator) : ControllerBase
 
     [HttpPatch("change-username")]
     [Authorize]
-    public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameUserDTO dto)
+    public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameUserDto dto)
     {
         await _mediator.Send(new ChangeUsernameCommand(dto.NewUsername));
         return Ok(ApiResponse<object>.Success(null!));

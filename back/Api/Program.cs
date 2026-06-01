@@ -64,6 +64,15 @@ try
             }
         }
     });
+
+    var imagesPath = Path.Combine(builder.Environment.ContentRootPath, "images");
+    Directory.CreateDirectory(imagesPath);
+    app.UseStaticFiles(new StaticFileOptions()
+    {
+        RequestPath = "/user-images",      
+        FileProvider = new PhysicalFileProvider(imagesPath)
+    });
+    
     app.UseAuthentication();
     app.UseAuthorization();
 

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.User.Update;
 
-internal class UpdateUserCommandHandler(UserManager<UserEntity> userManager, IImageService imageService, ICurrentUser currentUser) : IRequestHandler<UpdateUserCommand, Unit>
+internal class UpdateUserCommandHandler(UserManager<UserEntity> userManager, IImageService imageService, ICurrentUser currentUser, IStorageService storageService) : IRequestHandler<UpdateUserCommand, Unit>
 {
     public async Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
@@ -21,9 +21,8 @@ internal class UpdateUserCommandHandler(UserManager<UserEntity> userManager, IIm
 
         if (dto.Avatar is not null)
         {
-            imageService.DeleteImage(user.Avatar!);
-            var newImage = await imageService.SaveImageAsync(dto.Avatar);
-            user.Avatar = newImage;
+            await storageService.DeleteUserAvatars(user.Id);
+            await imageService.SaveImageAsync(dto.Avatar, user.Id);
         }
         
         await userManager.UpdateAsync(user);

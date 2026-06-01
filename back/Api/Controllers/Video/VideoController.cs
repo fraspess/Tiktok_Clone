@@ -36,7 +36,7 @@ namespace Api.Controllers.Video
         {
             var video = await _mediator.Send(new GetVideoByIdQuery(id));
             
-            return Ok(ApiResponse<VideoDTO>.Success(video));
+            return Ok(ApiResponse<VideoDto>.Success(video));
         }
 
         [Authorize]
@@ -51,7 +51,7 @@ namespace Api.Controllers.Video
         [RequestSizeLimit(500_000_000)]
         [RequestFormLimits(MultipartBodyLengthLimit = 500_000_000)]
         [HttpPost]
-        public async Task<IActionResult> UploadVideo([FromForm] CreateVideoDTO dto)
+        public async Task<IActionResult> UploadVideo([FromForm] CreateVideoDto dto)
         {
             await _mediator.Send(new UploadVideoCommand(dto));
             return Ok(ApiResponse<string>.Success("Відео успішно відправлено на обробку."));
@@ -63,7 +63,7 @@ namespace Api.Controllers.Video
         {
             var videos = await _mediator.Send(new GetForYouPageVideosQuery(
                 new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-            return Ok(ApiResponse<PagedResult<VideoDTO>>.Success(videos));
+            return Ok(ApiResponse<PagedResult<VideoDto>>.Success(videos));
         }
 
         [HttpGet("search/{query}")]
@@ -71,7 +71,7 @@ namespace Api.Controllers.Video
         {
             var videos = await _mediator.Send(new GetVideosBySomeStringQuery(query,
                 new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-            return Ok(ApiResponse<PagedResult<SimpleVideoDTO>>.Success(videos));
+            return Ok(ApiResponse<PagedResult<SimpleVideoDto>>.Success(videos));
         }
 
         [HttpGet("user/{id}")]
@@ -79,7 +79,7 @@ namespace Api.Controllers.Video
         {
             var videos = await _mediator.Send(new GetUserVideosQuery(id,
                 new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-            return Ok(ApiResponse<PagedResult<VideoDTO>>.Success(videos));
+            return Ok(ApiResponse<PagedResult<VideoDto>>.Success(videos));
         }
 
         [HttpGet("user/my")]
@@ -88,7 +88,7 @@ namespace Api.Controllers.Video
         {
             var videos = await _mediator.Send(new GetMyVideosQuery(
                 new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-            return Ok(ApiResponse<PagedResult<MyVideoDTO>>.Success(videos));
+            return Ok(ApiResponse<PagedResult<MyVideoDto>>.Success(videos));
         }
         
     }
