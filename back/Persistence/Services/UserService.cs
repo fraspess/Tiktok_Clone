@@ -1,8 +1,9 @@
 ﻿using Application.Constants;
 using Application.Dtos.Token;
 using Application.Dtos.User;
+using Application.Extensions;
 using Application.Interfaces;
-using AutoMapper;
+using Application.Mapper;
 using Domain.Entities.Identity;
 using Domain.Exceptions;
 using Google.Apis.Auth;
@@ -12,83 +13,70 @@ using Microsoft.Extensions.Configuration;
 
 namespace Persistence.Services
 {
-    internal class UserService : IUserService
+    internal class UserService(
+        UserManager<UserEntity> userManager,
+        IJWTTokenService tokenService,
+        IImageService imageService,
+        IConfiguration configuration,
+        IEmailService emailService,
+        IUnitOfWork uow,
+        UserMapper mapper,
+        ICurrentUser currentUser)
+        : IUserService
     {
-        private readonly UserManager<UserEntity> _userManager;
-        private readonly IMapper _userMapper;
-        private readonly IJWTTokenService _jwtTokenService;
-        private readonly IImageService _imageService;
-        private readonly IConfiguration _configuration;
-        private readonly IEmailService _emailService;
-        private readonly IUnitOfWork _uow;
-
-        public UserService(UserManager<UserEntity> userManager,
-            IMapper userMapper, IJWTTokenService tokenService,
-            IImageService imageService,
-            IConfiguration configuration,
-            IEmailService emailService,
-            IUnitOfWork uow)
-        {
-            _userManager = userManager;
-            _userMapper = userMapper;
-            _jwtTokenService = tokenService;
-            _imageService = imageService;
-            _configuration = configuration;
-            _emailService = emailService;
-            _uow = uow;
-        }
-
-
         private string GetHtmlTemplate(string templateName)
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates", templateName);
             return File.ReadAllText(path);
         }
 
-        public async Task<TokenResponseDTO> Login(LoginUserDTO dto)
+        public async Task<TokenResponseDTO> Login(LoginUserDto dto)
         {
             var user =
-                await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == dto.Login || u.Email == dto.Login)
+                await userManager.Users.FirstOrDefaultAsync(u => u.UserName == dto.Login || u.Email == dto.Login)
                 ?? throw new BadRequestException("Невірний логін або пароль");
 
-            var checkPassword = await _userManager.CheckPasswordAsync(user, dto.Password);
+            var checkPassword = await userManager.CheckPasswordAsync(user, dto.Password);
             if (!checkPassword)
             {
                 throw new ValidationException("Невірний логін або пароль");
             }
 
-            if (user.EmailConfirmed == false)
+            if (!user.EmailConfirmed)
             {
                 throw new NotAllowedException("Підтвердіть свою електронну пошту, щоб увійти");
             }
 
-            return await _jwtTokenService.GenerateTokensAsync(user);
+            if (user.IsBanned is true)
+            {
+                throw new NotAllowedException("Аккаунт був заблокований");
+            }
+
+            return await tokenService.GenerateTokensAsync(user);
         }
 
-        public async Task Register(RegisterUserDTO dto)
+        public async Task Register(RegisterUserDto dto)
         {
-            var isEmailTaken = await _userManager.FindByEmailAsync(dto.Email)
-                               ?? throw new BadRequestException("Почта вже є занятою");
+            var isEmailTaken = await userManager.Users.AnyAsync(u => u.Email == dto.Email);
+            if (isEmailTaken) throw new BadRequestException("Почта вже занята"); 
+            var isUsernameTaken = await userManager.Users.AnyAsync(u => u.UserName == dto.Username);
+            if (isUsernameTaken) throw new BadRequestException("Ім'я користувача вже заняте");
 
-            var isUsernameTaken = await _userManager.FindByNameAsync(dto.Username)
-                                  ?? throw new BadRequestException("Це ім'я користувача заняте");
+            var user = mapper.ToEntity(dto);
 
-            var user = _userMapper.Map<UserEntity>(dto);
-
-            var result = await _userManager.CreateAsync(user, dto.Password);
+            var result = await userManager.CreateAsync(user, dto.Password);
             if (result.Succeeded)
             {
                 if (dto.Avatar is not null)
                 {
-                    var imageName = await _imageService.SaveImageAsync(dto.Avatar);
-                    user.Avatar = imageName;
+                    await imageService.SaveImageAsync(dto.Avatar, user.Id);
                 }
 
-                await _userManager.AddToRoleAsync(user, RoleNames.USER_ROLE);
+                await userManager.AddToRoleAsync(user, RoleNames.USER_ROLE);
 
                 user.LastConfirmationEmailSentAt = DateTime.UtcNow;
-                await _userManager.UpdateAsync(user);
-                await GenerateTokenAndSendAsync(user);
+                await userManager.UpdateAsync(user);
+                await GenerateTokenAndSendConfirmationEmailAsync(user);
             }
             else
             {
@@ -97,47 +85,36 @@ namespace Persistence.Services
             }
         }
 
-        public async Task<UserMeDTO> GetCurrentUserAsync(Guid userId)
-        {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId)
-                       ?? throw new UnauthorizedException("Користувач не знайдений");
-            var dto = _userMapper.Map<UserMeDTO>(user);
-            dto.IsOwnProfile = true;
-            dto.FollowingCount = await _uow.Follows.GetFollowingCountAsync(userId);
-            dto.FollowersCount = await _uow.Follows.GetFollowersCountAsync(userId);
-            return dto;
-        }
-
         public async Task UpdateTokenVersion(Guid userId)
         {
-            var user = _userManager.Users.FirstOrDefault(u => u.Id == userId)
+            var user = userManager.Users.FirstOrDefault(u => u.Id == userId)
                        ?? throw new UnauthorizedException("Користувач не знайдений");
 
             var currentVersion = user.RefreshTokenVersion;
             user.RefreshTokenVersion = currentVersion + 1;
 
-            await _userManager.UpdateAsync(user);
+            await userManager.UpdateAsync(user);
         }
 
         public async Task ForgotPasswordAsync(string email)
         {
-            var user = await _userManager.FindByEmailAsync(email)
+            var user = await userManager.FindByEmailAsync(email)
                        ?? throw new UnauthorizedException("Користувач не знайдений");
 
-            if (!await _userManager.HasPasswordAsync(user))
+            if (!await userManager.HasPasswordAsync(user))
                 throw new BadRequestException("Аккаунтам створених зовнішними сервісами не можливо сбросити пароль");
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            string resetLink = $"{_configuration["Frontend:Url"]}/reset-password?token={token}&email={email}";
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            string resetLink = $"{configuration["Frontend:Url"]}/reset-password?token={token}&email={email}";
             var body = GetHtmlTemplate("ResetPassword.html");
             body = body.Replace("{resetLink}", resetLink);
 
-            await _emailService.SendEmailAsync(email, "Скидання пароля", body);
+            await emailService.SendEmailAsync(email, "Скидання пароля", body);
         }
 
         public async Task<TokenResponseDTO> ConfirmEmail(string email, string token)
         {
-            var user = _userManager.Users.FirstOrDefault(u => u.Email == email)
+            var user = userManager.Users.FirstOrDefault(u => u.Email == email)
                        ?? throw new UnauthorizedException("Користувач не знайдений");
 
             if (user.EmailConfirmed == true)
@@ -145,10 +122,10 @@ namespace Persistence.Services
                 throw new ValidationException("Пошта вже підтверджена");
             }
 
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+            var result = await userManager.ConfirmEmailAsync(user, token);
             if (result.Succeeded)
             {
-                return await _jwtTokenService.GenerateTokensAsync(user);
+                return await tokenService.GenerateTokensAsync(user);
             }
             else
             {
@@ -157,12 +134,12 @@ namespace Persistence.Services
         }
 
         // Скидає пароль і міняє версію токен на + 1 щоб інші токени стали недійсними
-        public async Task ResetPasswordAsync(ResetPasswordDTO dto)
+        public async Task ResetPasswordAsync(ResetPasswordDto dto)
         {
-            var user = _userManager.Users.FirstOrDefault(u => u.Email == dto.Email)
+            var user = userManager.Users.FirstOrDefault(u => u.Email == dto.Email)
                        ?? throw new UnauthorizedException("Користувач не знайдений");
 
-            var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
+            var result = await userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
 
             if (result.Succeeded)
             {
@@ -176,7 +153,7 @@ namespace Persistence.Services
 
         public async Task ResendConfirmationEmailAsync(string email)
         {
-            var user = await _userManager.FindByEmailAsync(email)
+            var user = await userManager.FindByEmailAsync(email)
                        ?? throw new NotFoundException("Почту не знайдено");
 
             if (user.EmailConfirmed) throw new ValidationException("Почту уже підтвердженно");
@@ -192,38 +169,36 @@ namespace Persistence.Services
             }
 
             user.LastConfirmationEmailSentAt = DateTime.UtcNow;
-            await _userManager.UpdateAsync(user);
-            await GenerateTokenAndSendAsync(user);
+            await userManager.UpdateAsync(user);
+            await GenerateTokenAndSendConfirmationEmailAsync(user);
         }
 
 
-        private async Task GenerateTokenAndSendAsync(UserEntity user)
+        private async Task GenerateTokenAndSendConfirmationEmailAsync(UserEntity user)
         {
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             var body = GetHtmlTemplate("ConfirmEmail.html");
             body = body.Replace("{confirmCode}", token);
-            await _emailService.SendEmailAsync(user.Email!, "Підтвердження реєстрації", body);
+            await emailService.SendEmailAsync(user.Email!, "Підтвердження реєстрації", body);
         }
 
-        public async Task<UserDTO> GetByUsernameAsync(string username, Guid? currentUserId)
+        public async Task<UserDto> GetByUsernameAsync(string username)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == username)
+            var user = await userManager.Users.
+                           Where(u => u.UserName == username)
+                           .ToProjectionDto(currentUser.Id)
+                           .FirstOrDefaultAsync()
                        ?? throw new NotFoundException("Користувача з таким ім'ям не знайдено");
 
-            var dto = _userMapper.Map<UserDTO>(user);
-            dto.IsOwnProfile = currentUserId == dto.Id;
-            dto.IsFollowing = currentUserId.HasValue &&
-                              await _uow.Follows.IsFollowingAsync(currentUserId.Value, dto.Id);
-            dto.FollowersCount = await _uow.Follows.GetFollowersCountAsync(dto.Id);
-            dto.FollowingCount = await _uow.Follows.GetFollowingCountAsync(dto.Id);
+            var dto = mapper.ToDto(user);
             return dto;
         }
 
         public async Task ToggleFollowAsync(Guid follower, Guid following)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == follower)
+            var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == follower)
                        ?? throw new UnauthorizedException("Користувача не знайдено");
-            var isAlreadyFollowing = await _uow.Follows.GetFollowAsync(follower, following);
+            var isAlreadyFollowing = await uow.Follows.GetFollowAsync(follower, following);
 
             if (isAlreadyFollowing is null)
             {
@@ -234,7 +209,7 @@ namespace Persistence.Services
                 user.Following.Remove(isAlreadyFollowing);
             }
 
-            await _userManager.UpdateAsync(user);
+            await userManager.UpdateAsync(user);
         }
 
         public async Task<TokenResponseDTO> GoogleAuth(string idToken)
@@ -244,7 +219,7 @@ namespace Persistence.Services
             {
                 var settings = new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = new[] { _configuration["Google:ClientId"] }
+                    Audience = new[] { configuration["Google:ClientId"] }
                 };
                 payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
             }
@@ -256,27 +231,27 @@ namespace Persistence.Services
             if (!payload.EmailVerified)
                 throw new UnauthorizedException("Помилка при валідації почти. Спробуйте ще раз.");
 
-            var existingUser = await _userManager.FindByLoginAsync("Google", payload.Subject);
+            var existingUser = await userManager.FindByLoginAsync("Google", payload.Subject);
             if (existingUser is not null)
-                return await _jwtTokenService.GenerateTokensAsync(existingUser);
+                return await tokenService.GenerateTokensAsync(existingUser);
 
-            var user = await _userManager.FindByEmailAsync(payload.Email);
+            var user = await userManager.FindByEmailAsync(payload.Email);
             if (user is not null)
             {
-                await _userManager.AddLoginAsync(user, new UserLoginInfo(
+                await userManager.AddLoginAsync(user, new UserLoginInfo(
                     "Google",
                     payload.Subject,
                     "Google"
                 ));
 
-                return await _jwtTokenService.GenerateTokensAsync(user);
+                return await tokenService.GenerateTokensAsync(user);
             }
 
             var baseUsername = payload.Email.Split('@')[0];
             var username = baseUsername;
             var counter = 1;
 
-            while (await _userManager.FindByNameAsync(username) is not null)
+            while (await userManager.FindByNameAsync(username) is not null)
             {
                 username = $"{baseUsername}{counter++}";
             }
@@ -290,26 +265,25 @@ namespace Persistence.Services
                 UserName = username
             };
 
-            await _userManager.CreateAsync(user);
+            await userManager.CreateAsync(user);
             if (!string.IsNullOrEmpty(payload.Picture))
             {
-                user.Avatar = await _imageService.SaveImageAsync(payload.Picture);
-                await _userManager.UpdateAsync(user);
+                await imageService.SaveImageAsync(payload.Picture, user.Id);
             }
 
-            await _userManager.AddToRoleAsync(user, RoleNames.USER_ROLE);
-            await _userManager.AddLoginAsync(user, new UserLoginInfo(
+            await userManager.AddToRoleAsync(user, RoleNames.USER_ROLE);
+            await userManager.AddLoginAsync(user, new UserLoginInfo(
                 "Google",
                 payload.Subject,
                 "Google"
             ));
 
-            return await _jwtTokenService.GenerateTokensAsync(user);
+            return await tokenService.GenerateTokensAsync(user);
         }
 
         public async Task<bool> IsExistsById(Guid id)
         {
-            return await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id) is not null;
+            return await userManager.Users.FirstOrDefaultAsync(u => u.Id == id) is not null;
         }
     }
 }

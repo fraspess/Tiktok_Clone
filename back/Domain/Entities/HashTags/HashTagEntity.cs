@@ -1,10 +1,11 @@
-﻿using Domain.Entities.Video;
+﻿using System.ComponentModel.DataAnnotations;
+using Domain.Entities.Video;
 
 namespace Domain.Entities.HashTags
 {
-    public class HashTagEntity : BaseEntity<Guid>
+    public class HashTagEntity : AuditableEntity
     {
-        public override Guid Id { get; set; } = Guid.NewGuid();
+        [MaxLength(50)]
         public required String Tag { get; set; }
         public ICollection<VideoHashTagEntity> VideoHashTags { get; set; } = new List<VideoHashTagEntity>();
     }

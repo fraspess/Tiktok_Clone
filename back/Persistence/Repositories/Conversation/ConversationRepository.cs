@@ -3,10 +3,7 @@ using Domain.Entities.Conversation;
 
 namespace Persistence.Repositories.Conversation
 {
-    internal class ConversationRepository : GenericRepository<ConversationEntity, Guid>, IConversationRepository
+    internal class ConversationRepository(AppDbContext _context) : GenericRepository<ConversationEntity>(_context), IConversationRepository
     {
-        public ConversationRepository(AppDbContext context) : base(context)
-        {
-        }
     }
 }

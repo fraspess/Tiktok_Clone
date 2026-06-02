@@ -3,9 +3,8 @@ using Domain.Entities.Video;
 
 namespace Domain.Entities.Like
 {
-    public class LikeEntity : BaseEntity<Guid>
+    public class LikeEntity : AuditableEntity
     {
-        public override Guid Id { get; set; } = Guid.NewGuid();
         public required Guid UserId { get; set; }
         public Guid VideoId { get; set; }
 

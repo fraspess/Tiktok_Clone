@@ -2,10 +2,8 @@
 
 namespace Domain.Entities.Conversation
 {
-    public class ConversationEntity : BaseEntity<Guid>
+    public class ConversationEntity : AuditableEntity
     {
-        public override Guid Id { get; set; } = Guid.NewGuid();
-
         public ICollection<ConversationParticipant> Participants { get; set; } = [];
         public ICollection<MessageEntity> Messages { get; set; } = [];
     }

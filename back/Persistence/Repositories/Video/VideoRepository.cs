@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Repositories.Video
 {
-    internal class VideoRepository : GenericRepository<VideoEntity, Guid>, IVideoRepository
+    internal class VideoRepository(AppDbContext _context) : GenericRepository<VideoEntity>(_context), IVideoRepository
     {
-        public VideoRepository(AppDbContext context)
-            : base(context)
-        {
-        }
 
         public async Task<VideoEntity?> FindVideoBySomeString(string someString)
         {

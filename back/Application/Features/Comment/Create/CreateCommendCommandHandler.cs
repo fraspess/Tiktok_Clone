@@ -5,12 +5,15 @@ using MediatR;
 
 namespace Application.Features.Comment.Create
 {
-    public class CreateCommendCommandHandler(IUnitOfWork _uow) : IRequestHandler<CreateCommentCommand, Unit>
+    public class CreateCommendCommandHandler(IUnitOfWork _uow, ICurrentUser currentUser) : IRequestHandler<CreateCommentCommand, Unit>
     {
         public async Task<Unit> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
             var dto = request.Dto;
-            var ownerId = request.OwnerId;
+            var video = await _uow.Videos.GetByIdAsync(dto.VideoId) 
+                        ?? throw new NotFoundException("Відео не знайдено");
+            
+            var ownerId = currentUser.Id!.Value;
             if (dto.ParentCommentId is not null)
             {
                 var comment = await _uow.Comments.GetByIdAsync(dto.ParentCommentId.Value)

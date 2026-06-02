@@ -2,10 +2,10 @@
 {
     public static class RoleNames
     {
-        public static string USER_ROLE = "User";
+        public const string USER_ROLE = "User";
 
-        public static string ADMIN_ROLE = "Admin";
+        public const string ADMIN_ROLE = "Admin";
 
-        public static string SUPER_ADMIN_ROLE = "SuperAdmin";
+        public const string SUPER_ADMIN_ROLE = "SuperAdmin";
     }
 }

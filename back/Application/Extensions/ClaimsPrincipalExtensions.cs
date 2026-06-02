@@ -11,5 +11,12 @@ namespace Application.Extensions
                          ?? throw new UnauthorizedException("Користувача не знайдено. Невалідний токен");
             return Guid.Parse(userId);
         }
+
+        public static string GetEmail(this ClaimsPrincipal user)
+        {
+            var email =  user.FindFirst(ClaimTypes.Email)?.Value 
+                         ?? throw new UnauthorizedException("Невалідний токен");
+            return email;
+        }
     }
 }

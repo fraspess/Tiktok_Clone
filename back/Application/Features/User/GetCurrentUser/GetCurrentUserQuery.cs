@@ -3,5 +3,5 @@ using MediatR;
 
 namespace Application.Features.User.GetCurrentUser
 {
-    public record GetCurrentUserQuery(Guid Id) : IRequest<UserMeDTO>;
+    public record GetCurrentUserQuery() : IRequest<UserMeDto>;
 }

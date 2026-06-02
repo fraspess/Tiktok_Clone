@@ -1,19 +1,18 @@
 ﻿using Application.Dtos.Message;
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Mapper;
 using Application.Pagination;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Message.Get
 {
-    public class GetMessagesQueryHandler(IUnitOfWork _uow, IMapper _mapper)
-        : IRequestHandler<GetMessagesQuery, PagedResult<MessageDTO>>
+    public class GetMessagesQueryHandler(IUnitOfWork _uow, MessageMapper _mapper)
+        : IRequestHandler<GetMessagesQuery, PagedResult<MessageDto>>
     {
-        public async Task<PagedResult<MessageDTO>> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<MessageDto>> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
         {
             var conversationExists = await _uow.Conversations.GetAll().AnyAsync(u => u.Id == request.ConversationId);
             if (!conversationExists) throw new NotFoundException("Чат не знайдено");
@@ -22,10 +21,10 @@ namespace Application.Features.Message.Get
                 .GetAll()
                 .Where(m => m.ConversationId == request.ConversationId)
                 .OrderByDescending(m => m.CreatedAt)
-                .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider)
                 .ToPagedResultAsync(request.Settings);
-
-            return messages;
+            
+            var result = messages.MapItems(_mapper.ToDto);
+            return result;
         }
     }
 }

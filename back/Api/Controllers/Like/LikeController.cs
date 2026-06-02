@@ -15,7 +15,7 @@ namespace Api.Controllers.Like
         [Authorize]
         public async Task<IActionResult> ToogleLike(Guid videoId)
         {
-            await _mediator.Send(new ToogleLikeCommand(videoId, User.GetUserId()));
+            await _mediator.Send(new ToogleLikeCommand(videoId));
             return Ok(ApiResponse<object>.Success(null!, null));
         }
     }

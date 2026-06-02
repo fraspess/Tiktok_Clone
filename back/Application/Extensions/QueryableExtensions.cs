@@ -33,5 +33,18 @@ namespace Application.Extensions
 
             return pagedResult;
         }
+        
+        public static PagedResult<TDestination> MapItems<TSource, TDestination>(
+            this PagedResult<TSource> source,
+            Func<TSource, TDestination> mapper)
+        {
+            return new PagedResult<TDestination>
+            {
+                Items = source.Items.Select(mapper).ToList(),
+                Metadata = source.Metadata
+            };
+        }
     }
+    
+    
 }

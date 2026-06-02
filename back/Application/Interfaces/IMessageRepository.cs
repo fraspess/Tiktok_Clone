@@ -2,7 +2,7 @@
 
 namespace Application.Interfaces
 {
-    public interface IMessageRepository : IGenericRepository<MessageEntity, Guid>
+    public interface IMessageRepository : IGenericRepository<MessageEntity>
     {
     }
 }

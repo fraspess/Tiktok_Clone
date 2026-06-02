@@ -2,9 +2,8 @@
 
 namespace Domain.Entities.Conversation
 {
-    public class ConversationParticipant : BaseEntity<Guid>
+    public class ConversationParticipant
     {
-        public override Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserId { get; set; }
 
         public DateTime? LastReadAt { get; set; }

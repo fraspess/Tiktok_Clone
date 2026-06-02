@@ -1,6 +1,6 @@
 ﻿using Application.Dtos.Conversation;
 using Application.Interfaces;
-using AutoMapper;
+using Application.Mapper;
 using Domain.Entities.Conversation;
 using Domain.Exceptions;
 using MediatR;
@@ -8,14 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.Create
 {
-    public class CreateConversationCommandHandler(IUnitOfWork _uow, IMapper _mapper, IUserService _userManager)
-        : IRequestHandler<CreateConversationCommand, ConversationDTO>
+    public class CreateConversationCommandHandler(IUnitOfWork _uow, ConversationMapper mapper, IUserService _userManager, ICurrentUser currentUser)
+        : IRequestHandler<CreateConversationCommand, ConversationDto>
     {
-        public async Task<ConversationDTO> Handle(CreateConversationCommand request,
+        public async Task<ConversationDto> Handle(CreateConversationCommand request,
             CancellationToken cancellationToken)
         {
             var participants = request.UsersIds;
-            var currentUserId = request.CurrentUserId;
+            var currentUserId = currentUser.Id!.Value;
 
             if (!participants.Contains(currentUserId))
             {
@@ -31,7 +31,7 @@ namespace Application.Features.Conversation.Create
 
             if (existingConversation is not null)
             {
-                return _mapper.Map<ConversationDTO>(existingConversation);
+                return mapper.ToDto(existingConversation);
             }
 
             foreach (var participant in participants)
@@ -51,7 +51,7 @@ namespace Application.Features.Conversation.Create
             await _uow.Conversations.CreateAsync(conversation);
             await _uow.SaveChangesAsync();
 
-            return _mapper.Map<ConversationDTO>(conversation);
+            return mapper.ToDto(conversation);
         }
     }
 }

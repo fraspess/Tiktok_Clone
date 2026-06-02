@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain;
 using Domain.Exceptions;
 using MediatR;
 
@@ -12,8 +13,8 @@ namespace Application.Features.Video.ProcessFailed
             var video = await _uow.Videos.GetByIdAsyncIgnoreQueryFilters(request.VideoId)
                         ?? throw new NotFoundException("Відео не знайдено");
 
-            video.Status = "Failed to process";
-            video.ProccessedInProcents = 0;
+            video.Status = VideoStatus.Failed;
+            video.ProccessedInPercents = 0;
 
             await _uow.Videos.UpdateAsync(video);
             await _uow.SaveChangesAsync();

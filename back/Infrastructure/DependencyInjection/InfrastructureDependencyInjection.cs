@@ -2,6 +2,7 @@
 using Contracts;
 using Infrastructure.RabbitMQ;
 using Infrastructure.RabbitMQ.Consumers;
+using Infrastructure.Services;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.Images;
 using Infrastructure.Services.TempVideoStorage;
@@ -32,7 +33,9 @@ namespace Infrastructure.DependencyInjection
             services.AddScoped<IVideoProcessingNotifier, VideoProcessingNotifier>();
             services.AddScoped<ITempVideoStorage, TempVideoStorage>();
             services.AddScoped(typeof(IEventBus<>), typeof(EventBus<>));
-
+            services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IStorageService, StorageService>();
+            services.AddScoped<HttpClient>();
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<VideoProcessedConsumer>();
@@ -50,6 +53,8 @@ namespace Infrastructure.DependencyInjection
                         cfg.ConfigureEndpoints(ctx);
                     });
             });
+            
+            services.AddHttpContextAccessor();
             return services;
         }
     }

@@ -16,7 +16,7 @@ namespace Api.Controllers.Favorite
         [Authorize]
         public async Task<IActionResult> Favorite(Guid videoId)
         {
-            await mediator.Send(new ToggleFavoriteCommand(videoId, User.GetUserId()));
+            await mediator.Send(new ToggleFavoriteCommand(videoId));
             return Ok(ApiResponse<object>.Success(null!, null));
         }
     }

@@ -8,7 +8,7 @@ namespace Application.Features.User.ResetPassword
     {
         public async Task<Unit> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
-            await userService.ResetPasswordAsync(new ResetPasswordDTO
+            await userService.ResetPasswordAsync(new ResetPasswordDto
             {
                 Email = request.Email,
                 NewPassword = request.NewPassword,

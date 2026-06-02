@@ -2,7 +2,7 @@
 
 namespace Application.Interfaces
 {
-    public interface IConversationRepository : IGenericRepository<ConversationEntity, Guid>
+    public interface IConversationRepository : IGenericRepository<ConversationEntity>
     {
     }
 }

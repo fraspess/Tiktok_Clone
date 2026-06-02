@@ -1,6 +1,7 @@
 ﻿using Application.Features.Video.Shared;
 using Application.Interfaces;
 using Application.Services.HashTag;
+using Domain;
 using Domain.Entities.Video;
 using MediatR;
 using Newtonsoft.Json;
@@ -54,7 +55,7 @@ namespace Application.Features.Video.Upload.Dev
                         newVideo.HashTags.Add(new VideoHashTagEntity { HashTagId = tag.Id, VideoId = newVideo.Id });
                     }
 
-                    newVideo.Status = "Processed";
+                    newVideo.Status = VideoStatus.Processed;
                     await _uow.Videos.CreateAsync(newVideo);
                 }
             }

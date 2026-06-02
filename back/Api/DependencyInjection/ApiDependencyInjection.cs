@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using System.Text.Json.Serialization;
 using Api.Filters;
 
 namespace Api.DependencyInjection
@@ -12,7 +13,10 @@ namespace Api.DependencyInjection
             IWebHostEnvironment env)
         {
             services.AddControllers(opt => opt.Filters.Add<NullActionFilter>())
-                .ConfigureApiBehaviorOptions(opt => { opt.SuppressModelStateInvalidFilter = true; });
+                .ConfigureApiBehaviorOptions(opt => { opt.SuppressModelStateInvalidFilter = true; })
+                .AddJsonOptions(opts => {
+                    opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());});
+            
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -92,6 +96,8 @@ namespace Api.DependencyInjection
                 {
                     [new OpenApiSecuritySchemeReference("bearer", document)] = []
                 });
+                
+                opt.UseInlineDefinitionsForEnums();
             });
 
             

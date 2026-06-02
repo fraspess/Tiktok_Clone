@@ -1,23 +1,24 @@
 ﻿using Application.Dtos.Video;
+using Application.Extensions;
 using Application.Interfaces;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Application.Mapper;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Video.GetById
 {
-    public class GetVideoByIdQueryHandler(IUnitOfWork _uow, IMapper _mapper, IConfiguration config)
-        : IRequestHandler<GetVideoByIdQuery, VideoDTO>
+    public class GetVideoByIdQueryHandler(IUnitOfWork _uow, ICurrentUser currentUser, VideoMapper videoMapper)
+        : IRequestHandler<GetVideoByIdQuery, VideoDto>
     {
-        public async Task<VideoDTO> Handle(GetVideoByIdQuery request, CancellationToken cancellationToken)
+        public async Task<VideoDto> Handle(GetVideoByIdQuery request, CancellationToken cancellationToken)
         {
-            return await _uow.Videos
+            var video = await _uow.Videos
                 .GetAll()
-                .ProjectTo<VideoDTO>(_mapper.ConfigurationProvider, new { currentUserId = request.UserId, backendUrl = config["Backend:Url"] })
-                .FirstOrDefaultAsync(v => v.Id == request.Id) ?? throw new NotFoundException("Відео не знайдено");
+                .ToProjectionDto(currentUser.Id)
+                .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken: cancellationToken) ?? throw new NotFoundException("Відео не знайдено");
+
+            return videoMapper.ToDto(video);
         }
     }
 }

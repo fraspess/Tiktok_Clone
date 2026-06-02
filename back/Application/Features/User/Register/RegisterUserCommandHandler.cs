@@ -9,7 +9,7 @@ namespace Application.Features.User.Register
         async Task<Unit> IRequestHandler<RegisterUserCommand, Unit>.Handle(RegisterUserCommand request,
             CancellationToken cancellationToken)
         {
-            await userService.Register(new RegisterUserDTO
+            await userService.Register(new RegisterUserDto
             {
                 Username = request.Username,
                 Email = request.Email,

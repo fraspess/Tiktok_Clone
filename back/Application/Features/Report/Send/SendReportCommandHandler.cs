@@ -6,13 +6,15 @@ using MediatR;
 
 namespace Application.Features.Report.Send;
 
-public class SendReportCommandHandler(IUnitOfWork _uow) : IRequestHandler<SendReportCommand, Unit>
+public class SendReportCommandHandler(IUnitOfWork _uow, ICurrentUser user) : IRequestHandler<SendReportCommand, Unit>
 {
     public async Task<Unit> Handle(SendReportCommand request, CancellationToken cancellationToken)
     {
         var contentId = request.Dto.ContentId;
-        var userId = request.UserId;
-        var reason = request.Dto.Reason;
+        var userId = user.Id!.Value;
+        var videoReportReason = request.Dto.VideoReportReason;
+        var userReportReason = request.Dto.UserReportReason;
+        var commentReportReason = request.Dto.CommentReportReason;
         var otherReason = request.Dto.CustomReason;
 
         if (await _uow.Reports.ExistsAsync(userId, contentId, request.Dto.ContentType))
@@ -23,19 +25,19 @@ public class SendReportCommandHandler(IUnitOfWork _uow) : IRequestHandler<SendRe
         {
             case ContentTypes.Video:
             {
-                var videoReport = new VideoReportEntity() { VideoId = contentId, SenderId = userId, Reason = reason, OtherReason = otherReason};
+                var videoReport = new VideoReportEntity() { VideoId = contentId, SenderId = userId, Reason = videoReportReason, OtherReason = otherReason};
                 await _uow.Reports.CreateAsync(videoReport);
                 break;
             }
             case ContentTypes.Comment:
             {
-                var commentReport = new CommentReportEntity(){CommentId = contentId, SenderId = userId, Reason = reason, OtherReason = otherReason};
+                var commentReport = new CommentReportEntity(){CommentId = contentId, SenderId = userId, Reason = commentReportReason, OtherReason = otherReason};
                 await _uow.Reports.CreateAsync(commentReport);
                 break;
             }
             case ContentTypes.User:
             {
-                var userReport = new UserReportEntity(){UserId = contentId, SenderId = userId, Reason = reason, OtherReason = otherReason};
+                var userReport = new UserReportEntity(){UserId = contentId, SenderId = userId, Reason = userReportReason, OtherReason = otherReason};
                 await _uow.Reports.CreateAsync(userReport);
                 break;
             }

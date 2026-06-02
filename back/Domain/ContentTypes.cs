@@ -6,7 +6,7 @@ namespace Domain;
 public enum ContentTypes
 {
     FallBack = 0,
-    Video,
-    Comment,
-    User
+    Video = 1,
+    Comment = 2,
+    User = 3
 }

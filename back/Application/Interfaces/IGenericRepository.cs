@@ -2,19 +2,15 @@
 
 namespace Application.Interfaces;
 
-public interface IGenericRepository<TEntity, TId>
-    where TEntity : class, IBaseEntity<TId>
-    where TId : notnull
+public interface IGenericRepository<TEntity>
+    where TEntity : AuditableEntity
 {
     Task CreateAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);
     Task DeleteAsync(TEntity entity);
-    Task<TEntity?> GetByIdAsync(TId id);
+    Task<TEntity?> GetByIdAsync(Guid id);
     IQueryable<TEntity> GetAll();
-    Task SaveChangesAsync();
-    TEntity? GetTracked(Func<TEntity, bool> predicate);
-
-    Task<TEntity?> GetByIdAsyncIgnoreQueryFilters(TId id);
-
-    IQueryable<TEntity> GetAllIgnoreQueryFilters();
+    public Task<TEntity?> GetByIdAsyncIgnoreQueryFilters(Guid id);
+    public TEntity? GetTracked(Func<TEntity, bool> predicate);
+    public IQueryable<TEntity> GetAllIgnoreQueryFilters();
 }

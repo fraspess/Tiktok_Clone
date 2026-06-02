@@ -12,7 +12,7 @@ using Persistence.Repositories.Video;
 
 namespace Persistence
 {
-    public class UnitOfWork(AppDbContext context) : IUnitOfWork
+    public class UnitOfWork(AppDbContext context, IStorageService storageService) : IUnitOfWork
     {
         // Changed to concrete type to match the concrete implementation being instantiated.
         public ICommentRepository Comments { get; } = new CommentRepository(context);
@@ -24,7 +24,7 @@ namespace Persistence
         public IConversationRepository Conversations { get; } = new ConversationRepository(context);
         public IMessageRepository Messages { get; } = new MessageRepository(context);
 
-        public IReportRepository Reports { get; } = new ReportRepository(context);
+        public IReportRepository Reports { get; } = new ReportRepository(context, storageService);
 
         public Task<int> SaveChangesAsync() => context.SaveChangesAsync();
 

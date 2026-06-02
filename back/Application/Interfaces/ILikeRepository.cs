@@ -2,7 +2,7 @@
 
 namespace Application.Interfaces
 {
-    public interface ILikeRepository : IGenericRepository<LikeEntity, Guid>
+    public interface ILikeRepository : IGenericRepository<LikeEntity>
     {
         public Task<LikeEntity?> GetLikeByUserAndVideoIdAsync(Guid userId, Guid videoId);
     }

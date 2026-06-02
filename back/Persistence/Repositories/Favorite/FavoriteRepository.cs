@@ -3,11 +3,8 @@ using Domain.Entities.Favorite;
 
 namespace Persistence.Repositories.Favorite
 {
-    internal class FavoriteRepository : GenericRepository<FavoriteEntity, Guid>, IFavoriteRepository
+    internal class FavoriteRepository(AppDbContext _context) : GenericRepository<FavoriteEntity>(_context), IFavoriteRepository
     {
-        public FavoriteRepository(AppDbContext context) : base(context)
-        {
-        }
 
         public FavoriteEntity GetByVideoAndUserIds(Guid videoId, Guid userId)
         {

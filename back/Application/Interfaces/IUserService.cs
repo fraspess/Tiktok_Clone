@@ -5,23 +5,21 @@ namespace Application.Interfaces;
 
 public interface IUserService
 {
-    Task<TokenResponseDTO> Login(LoginUserDTO dto);
+    Task<TokenResponseDTO> Login(LoginUserDto dto);
 
-    Task Register(RegisterUserDTO dto);
+    Task Register(RegisterUserDto dto);
 
     Task<TokenResponseDTO> ConfirmEmail(string email, string token);
-
-    Task<UserMeDTO> GetCurrentUserAsync(Guid userId);
 
     Task UpdateTokenVersion(Guid userId);
 
     Task ForgotPasswordAsync(string email);
 
-    Task ResetPasswordAsync(ResetPasswordDTO dto);
+    Task ResetPasswordAsync(ResetPasswordDto dto);
 
     Task ResendConfirmationEmailAsync(string email);
 
-    Task<UserDTO> GetByUsernameAsync(string username, Guid? currentUserId);
+    Task<UserDto> GetByUsernameAsync(string username);
 
     Task ToggleFollowAsync(Guid follower, Guid following);
 

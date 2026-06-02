@@ -1,12 +1,12 @@
-﻿using Domain.Entities.Identity;
+﻿using System.ComponentModel.DataAnnotations;
+using Domain.Entities.Identity;
 using Domain.Entities.Video;
 
 namespace Domain.Entities.Comment
 {
-    public class CommentEntity : BaseEntity<Guid>
+    public class CommentEntity : BannableSoftDeletableEntity
     {
-        public override Guid Id { get; set; } = Guid.NewGuid();
-
+        [MaxLength()]
         public required String Text { get; set; }
 
         public required Guid UserId { get; set; }

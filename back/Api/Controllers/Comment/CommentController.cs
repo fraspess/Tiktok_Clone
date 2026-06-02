@@ -19,9 +19,9 @@ namespace Api.Controllers.Comment
     {
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateComment([FromBody] CreateCommentDTO dto)
+        public async Task<IActionResult> CreateComment([FromBody] CreateCommentDto dto)
         {
-            await _mediator.Send(new CreateCommentCommand(dto, User.GetUserId()));
+            await _mediator.Send(new CreateCommentCommand(dto));
             return Ok(ApiResponse<object>.Success(null!, "Успішно створено коментар"));
         }
 
@@ -30,7 +30,7 @@ namespace Api.Controllers.Comment
         {
             var comments = await _mediator.Send(new GetCommentsQuery(videoId,
                 new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-            return Ok(ApiResponse<PagedResult<CommentDTO>>.Success(comments, null));
+            return Ok(ApiResponse<PagedResult<CommentDto>>.Success(comments, null));
         }
 
         [HttpGet("replies")]
@@ -38,14 +38,14 @@ namespace Api.Controllers.Comment
         {
             var replies = await _mediator.Send(new GetRepliesQuery(commentId,
                 new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-            return Ok(ApiResponse<PagedResult<CommentDTO>>.Success(replies, null));
+            return Ok(ApiResponse<PagedResult<CommentDto>>.Success(replies, null));
         }
 
         [HttpDelete]
         [Authorize]
         public async Task<IActionResult> DeleteComment(Guid commentId)
         {
-            await _mediator.Send(new DeleteCommentCommand(commentId, User.GetUserId()));
+            await _mediator.Send(new DeleteCommentCommand(commentId));
             return Ok(ApiResponse<object>.Success(null!, "Успішно видалено коментар"));
         }
 
@@ -54,7 +54,7 @@ namespace Api.Controllers.Comment
         [Authorize]
         public async Task<IActionResult> ToggleLikeComment([FromQuery] Guid commentId)
         {
-            await _mediator.Send(new LikeCommentCommand(commentId, User.GetUserId()));
+            await _mediator.Send(new LikeCommentCommand(commentId));
             return Ok(ApiResponse<object>.Success(null!));
         }
     }

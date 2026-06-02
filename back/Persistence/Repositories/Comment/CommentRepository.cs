@@ -3,11 +3,8 @@ using Domain.Entities.Comment;
 
 namespace Persistence.Repositories.Comment
 {
-    internal class CommentRepository : GenericRepository<CommentEntity, Guid>, ICommentRepository
+    internal class CommentRepository(AppDbContext _context) : GenericRepository<CommentEntity>(_context), ICommentRepository
     {
-        public CommentRepository(AppDbContext context) : base(context)
-        {
-        }
 
         public IQueryable<CommentEntity> GetCommentsByVideoId(Guid videoId)
         {

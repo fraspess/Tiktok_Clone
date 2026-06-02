@@ -5,5 +5,5 @@ using MediatR;
 namespace Application.Features.Comment.GetReplies
 {
     public record GetRepliesQuery(Guid ParentCommentId, PaginationSettings PaginationSettings)
-        : IRequest<PagedResult<CommentDTO>>;
+        : IRequest<PagedResult<CommentDto>>;
 }

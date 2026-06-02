@@ -21,9 +21,10 @@ namespace Persistence.DependencyInjection
         public static IServiceCollection AddPersistence(
             this IServiceCollection services, IConfiguration config)
         {
-            services.AddDbContext<AppDbContext>(options =>
+            services.AddScoped<AuditingSaveChanges>();
+            services.AddDbContext<AppDbContext>((serviceProvider,options) =>
             {
-                options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(config.GetConnectionString("DefaultConnection")).AddInterceptors(serviceProvider.GetRequiredService<AuditingSaveChanges>());
             });
 
             services.AddIdentityCore<UserEntity>(options =>

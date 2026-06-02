@@ -4,11 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Repositories.Like;
 
-internal class LikeRepository : GenericRepository<LikeEntity, Guid>, ILikeRepository
+internal class LikeRepository(AppDbContext _context) : GenericRepository<LikeEntity>(_context), ILikeRepository
 {
-    public LikeRepository(AppDbContext context) : base(context)
-    {
-    }
 
     public async Task<LikeEntity?> GetLikeByUserAndVideoIdAsync(Guid userId, Guid videoId)
     {

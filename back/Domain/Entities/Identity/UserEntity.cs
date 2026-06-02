@@ -2,6 +2,7 @@
 using Domain.Entities.Comment;
 using Domain.Entities.Conversation;
 using Domain.Entities.Favorite;
+using Domain.Entities.Interfaces;
 using Domain.Entities.Like;
 using Domain.Entities.Message;
 using Domain.Entities.Video;
@@ -16,13 +17,12 @@ public class UserEntity : IdentityUser<Guid>
     [MaxLength(50)] public string? LastName { get; set; }
     [MaxLength(50)] public string? FirstName { get; set; }
 
-    [MaxLength(160)] public string? Description { get; set; }
-
-    [MaxLength(255)] public string? Avatar { get; set; }
-
+    [MaxLength(160)] public string? Description { get; set; } = String.Empty;
+    
     public int RefreshTokenVersion { get; set; }
     
     public DateTime? LastUsernameChangedAt { get; set; }
+    public bool IsDeleted { get; set; }
 
     public DateTime? LastConfirmationEmailSentAt { get; set; }
 
@@ -48,5 +48,6 @@ public class UserEntity : IdentityUser<Guid>
 
     public Guid? BannedBy { get; set; }
     public DateTime? BannedAt { get; set; }
-    public bool IsBanned => BannedBy.HasValue;
+    public UserReportReasons? BanReason { get; set; }
+    public bool IsBanned { get; set; }
 }

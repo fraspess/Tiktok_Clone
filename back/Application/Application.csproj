@@ -12,7 +12,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoMapper"/>
         <PackageReference Include="FluentValidation"/>
         <PackageReference Include="Google.Apis.Auth"/>
         <PackageReference Include="MailKit"/>
@@ -25,6 +24,11 @@
         <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
         <PackageReference Include="System.Security.Cryptography.Xml"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
+        <PackageReference Include="Riok.Mapperly"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Settings\" />
     </ItemGroup>
 
 </Project>

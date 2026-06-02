@@ -4,34 +4,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Repositories;
 
-internal class GenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId>
-    where TEntity : class, IBaseEntity<TId>
-    where TId : notnull
+internal class GenericRepository<TEntity>(AppDbContext _context) : IGenericRepository<TEntity>
+    where TEntity : AuditableEntity
 {
-    protected readonly AppDbContext _context;
-
-    public GenericRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-
-
     public async Task CreateAsync(TEntity entity)
     {
         await _context.Set<TEntity>().AddAsync(entity);
     }
 
-    public async Task UpdateAsync(TEntity entity)
+    public Task UpdateAsync(TEntity entity)
     {
         _context.Set<TEntity>().Update(entity);
+        return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(TEntity entity)
+    public Task DeleteAsync(TEntity entity)
     {
         _context.Set<TEntity>().Remove(entity);
+        return Task.CompletedTask;
     }
 
-    public async Task<TEntity?> GetByIdAsync(TId id)
+    public async Task<TEntity?> GetByIdAsync(Guid id)
     {
         var entity = await _context.Set<TEntity>()
             .FirstOrDefaultAsync(e => e.Id.Equals(id));
@@ -42,11 +35,7 @@ internal class GenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId
     {
         return _context.Set<TEntity>();
     }
-
-    public async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
+    
 
     public TEntity? GetTracked(Func<TEntity, bool> predicate)
     {
@@ -55,7 +44,7 @@ internal class GenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId
             .FirstOrDefault(e => predicate(e.Entity))?.Entity;
     }
 
-    public async Task<TEntity?> GetByIdAsyncIgnoreQueryFilters(TId id)
+    public async Task<TEntity?> GetByIdAsyncIgnoreQueryFilters(Guid id)
     {
         return await _context.Set<TEntity>().IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id.Equals(id));
     }

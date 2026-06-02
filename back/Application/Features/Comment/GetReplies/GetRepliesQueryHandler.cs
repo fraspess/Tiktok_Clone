@@ -1,22 +1,25 @@
 ﻿using Application.Dtos.Comment;
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Mapper;
 using Application.Pagination;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 
 namespace Application.Features.Comment.GetReplies
 {
-    public class GetRepliesQueryHandler(IUnitOfWork _uow, IMapper _mapper)
-        : IRequestHandler<GetRepliesQuery, PagedResult<CommentDTO>>
+    public class GetRepliesQueryHandler(IUnitOfWork _uow, CommentMapper _mapper, ICurrentUser currentUser)
+        : IRequestHandler<GetRepliesQuery, PagedResult<CommentDto>>
     {
-        public async Task<PagedResult<CommentDTO>> Handle(GetRepliesQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<CommentDto>> Handle(GetRepliesQuery request, CancellationToken cancellationToken)
         {
-            return await _uow.Comments
+            var replies = await _uow.Comments
                 .GetRepliesAsync(request.ParentCommentId)
-                .ProjectTo<CommentDTO>(_mapper.ConfigurationProvider)
+                .ToProjectionDto(currentUser.Id)
                 .ToPagedResultAsync(request.PaginationSettings);
+
+
+            var result = replies.MapItems(_mapper.ToDto);
+            return result;
         }
     }
 }

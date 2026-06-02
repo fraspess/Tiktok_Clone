@@ -8,14 +8,14 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.Settings;
+using Application.Options;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.Token
 {
-    internal class JWTTokenService(IOptions<JwtSettings> settings, UserManager<UserEntity> userManager) : IJWTTokenService
+    internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEntity> userManager) : IJWTTokenService
     {
-        private readonly JwtSettings _settings = settings.Value;
+        private readonly JwtOptions _options = settings.Value;
 
 
         public async Task<TokenResponseDTO> GenerateTokensAsync(UserEntity user)
@@ -36,10 +36,10 @@ namespace Infrastructure.Services.Token
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = _settings.Issuer,
-                ValidAudience = _settings.Audience,
+                ValidIssuer = _options.Issuer,
+                ValidAudience = _options.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(_settings.Key
+                    Encoding.UTF8.GetBytes(_options.Key
                     )),
             };
 
@@ -67,6 +67,11 @@ namespace Infrastructure.Services.Token
                 throw new UnauthorizedException("Не валідний refresh токен");
             }
 
+            if (user.IsBanned is true)
+            {
+                throw new NotAllowedException("Аккаунт заблокований");
+            }
+
             return await GenerateTokensAsync(user);
         }
 
@@ -76,8 +81,7 @@ namespace Infrastructure.Services.Token
             {
                 new Claim("sub", user.Id.ToString()),
                 new Claim("email", user.Email ?? ""),
-                new Claim("username", user.UserName ?? ""),
-                new Claim("image", user.Avatar ?? ""),
+                new Claim("username", user.UserName ?? "")
             };
 
             foreach (var role in await userManager.GetRolesAsync(user))
@@ -88,10 +92,10 @@ namespace Infrastructure.Services.Token
             var signingCredentials = GetSigningCredentials();
 
             var accessToken = new JwtSecurityToken(
-                issuer: _settings.Issuer,
-                audience: _settings.Audience,
+                issuer: _options.Issuer,
+                audience: _options.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_settings.AccessTokenExpiryMinutes),
+                expires: DateTime.UtcNow.AddMinutes(_options.AccessTokenExpiryMinutes),
                 signingCredentials: signingCredentials
             );
 
@@ -112,10 +116,10 @@ namespace Infrastructure.Services.Token
             var signingCredentials = GetSigningCredentials();
 
             var refreshToken = new JwtSecurityToken(
-                issuer: _settings.Issuer,
-                audience: _settings.Audience,
+                issuer: _options.Issuer,
+                audience: _options.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(Convert.ToInt32(_settings.RefreshTokenExpiryDays)),
+                expires: DateTime.UtcNow.AddDays(Convert.ToInt32(_options.RefreshTokenExpiryDays)),
                 signingCredentials: signingCredentials
             );
 
@@ -126,7 +130,7 @@ namespace Infrastructure.Services.Token
 
         private SigningCredentials GetSigningCredentials()
         {
-            var keyBytes = System.Text.Encoding.UTF8.GetBytes(_settings.Key);
+            var keyBytes = System.Text.Encoding.UTF8.GetBytes(_options.Key);
             var signingInKey = new SymmetricSecurityKey(keyBytes);
             return new SigningCredentials(signingInKey, SecurityAlgorithms.HmacSha256);
         }

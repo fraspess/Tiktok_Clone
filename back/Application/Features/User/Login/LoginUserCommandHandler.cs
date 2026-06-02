@@ -10,7 +10,7 @@ namespace Application.Features.User.Login
     {
         public async Task<TokenResponseDTO> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
-            return await userService.Login(new LoginUserDTO
+            return await userService.Login(new LoginUserDto
             {
                 Login = request.login,
                 Password = request.password

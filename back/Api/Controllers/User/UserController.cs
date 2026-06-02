@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Application;
+﻿using Application;
 using Application.Dtos.User;
 using Application.Extensions;
 using Application.Features.User.ChangeUsername;
@@ -54,7 +53,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("google")]
-    public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthDTO request)
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthDto request)
     {
         var tokens = await _mediator.Send(new GoogleAuthCommand(request.IdToken));
         AppendRefreshTokenCookie(tokens.RefreshToken);
@@ -65,8 +64,8 @@ public class UserController(IMediator _mediator) : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var result = await _mediator.Send(new GetCurrentUserQuery(User.GetUserId()));
-        return Ok(ApiResponse<UserMeDTO>.Success(result));
+        var result = await _mediator.Send(new GetCurrentUserQuery());
+        return Ok(ApiResponse<object>.Success(result));
     }
 
     [HttpPost("refresh")]
@@ -84,21 +83,18 @@ public class UserController(IMediator _mediator) : ControllerBase
 
     [HttpPost("logout")]
     [Authorize]
-    public async Task<IActionResult> Logout()
+    public Task<IActionResult> Logout()
     {
-        var refreshToken = Request.Cookies["refreshToken"]
-                           ?? throw new UnauthorizedException("Refresh token не знайдений");
-
         DeleteRefreshTokenCookie();
 
-        return Ok(ApiResponse<object>.Success(null!, "Успішний вихід"));
+        return Task.FromResult<IActionResult>(Ok(ApiResponse<object>.Success(null!, "Успішний вихід")));
     }
 
     [HttpPost("logout/all")]
     [Authorize]
     public async Task<IActionResult> LogoutAll()
     {
-        await _mediator.Send(new LogOutOnAllDevicesCommand(User.GetUserId()));
+        await _mediator.Send(new LogOutOnAllDevicesCommand());
 
         DeleteRefreshTokenCookie();
         return Ok(ApiResponse<object>.Success(null!, "Успішний вихід з усіх пристроїв"));
@@ -129,32 +125,31 @@ public class UserController(IMediator _mediator) : ControllerBase
     public async Task<IActionResult> GetUserProfile(string username)
     {
         username = username.TrimStart('@');
-        var profile = await _mediator.Send(new GetUserByUsernameQuery(username, GetUserIfExists()));
-        return Ok(ApiResponse<UserDTO>.Success(profile, null));
+        var profile = await _mediator.Send(new GetUserByUsernameQuery(username));
+        return Ok(ApiResponse<UserDto>.Success(profile));
     }
 
     [HttpPost("follow")]
     [Authorize]
     public async Task<IActionResult> Follow(Guid following)
     {
-        var userId = User.GetUserId();
-        await _mediator.Send(new FollowUserCommand(userId, following));
-        return Ok(ApiResponse<object>.Success(null!, null));
+        await _mediator.Send(new FollowUserCommand(following));
+        return Ok(ApiResponse<object>.Success(null!));
     }
 
     [HttpPatch]
     [Authorize]
-    public async Task<IActionResult> Update([FromForm] UpdateUserDTO dto)
+    public async Task<IActionResult> Update([FromForm] UpdateUserDto dto)
     {
-        await _mediator.Send(new UpdateUserCommand(dto, User.GetUserId()));
+        await _mediator.Send(new UpdateUserCommand(dto));
         return Ok(ApiResponse<object>.Success(null!));
     }
 
     [HttpPatch("change-username")]
     [Authorize]
-    public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameUserDTO dto)
+    public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameUserDto dto)
     {
-        await _mediator.Send(new ChangeUsernameCommand(dto.NewUsername, User.GetUserId()));
+        await _mediator.Send(new ChangeUsernameCommand(dto.NewUsername));
         return Ok(ApiResponse<object>.Success(null!));
     }
 
@@ -179,14 +174,5 @@ public class UserController(IMediator _mediator) : ControllerBase
             Expires = DateTime.UtcNow.AddDays(-1)
         });
     }
-
-    private Guid? GetUserIfExists()
-    {
-        Guid? currentUserId = null;
-
-        if (User.Identity?.IsAuthenticated == true)
-            currentUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-        return currentUserId;
-    }
+    
 }

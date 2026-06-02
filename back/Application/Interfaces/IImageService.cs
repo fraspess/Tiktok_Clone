@@ -4,8 +4,8 @@ namespace Application.Interfaces
 {
     public interface IImageService
     {
-        public Task<String> SaveImageAsync(IFormFile imageFile);
-        public Task<String> SaveImageAsync(String url);
-        public void DeleteImage(String imageName);
+        public Task SaveImageAsync(IFormFile imageFile, Guid userId);
+        public Task SaveImageAsync(string url, Guid userId);
+        public void DeleteImage(string imageName);
     }
 }

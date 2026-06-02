@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Repositories.HashTag
 {
-    internal class HashTagRepository : GenericRepository<HashTagEntity, Guid>, IHashTagRepository
+    internal class HashTagRepository(AppDbContext _context) : GenericRepository<HashTagEntity>(_context), IHashTagRepository
     {
-        public HashTagRepository(AppDbContext context)
-            : base(context)
-        {
-        }
 
         public async Task<HashTagEntity?> GetByNameAsync(string name)
         {

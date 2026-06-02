@@ -2,7 +2,7 @@
 
 namespace Application.Interfaces
 {
-    public interface IHashTagRepository : IGenericRepository<HashTagEntity, Guid>
+    public interface IHashTagRepository : IGenericRepository<HashTagEntity>
     {
         public Task<HashTagEntity?> GetByNameAsync(string name);
     }

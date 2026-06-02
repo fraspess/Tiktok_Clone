@@ -1,28 +1,28 @@
 ﻿using Application.Dtos.Video;
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Mapper;
 using Application.Pagination;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Video.MyVideos
 {
-    internal class GetMyVideosQueryHandler(IUnitOfWork _uow, IMapper _mapper, IConfiguration config)
-        : IRequestHandler<GetMyVideosQuery, PagedResult<MyVideoDTO>>
+    internal class GetMyVideosQueryHandler(IUnitOfWork _uow, VideoMapper videoMapper, IConfiguration config, ICurrentUser currentUser)
+        : IRequestHandler<GetMyVideosQuery, PagedResult<MyVideoDto>>
     {
-        public Task<PagedResult<MyVideoDTO>> Handle(GetMyVideosQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<MyVideoDto>> Handle(GetMyVideosQuery request, CancellationToken cancellationToken)
         {
-            var videos = _uow.Videos
-                .GetAllIgnoreQueryFilters()
-                .Where(v => v.UserId == request.UserId)
+            var videos = await _uow.Videos
+                .GetAll()
+                .Where(v => v.UserId == currentUser.Id!.Value)
                 .OrderByDescending(v => v.CreatedAt)
-                .ProjectTo<MyVideoDTO>(_mapper.ConfigurationProvider,
-                    new { userId = request.UserId , backendUrl = config["Backend:Url"]})
+                .ToProjectionDto(currentUser.Id)
                 .ToPagedResultAsync(request.Settings);
-            return videos;
+
+            var result = videos.MapItems(videoMapper.ToMyDto);
+            return result;
         }
     }
 }

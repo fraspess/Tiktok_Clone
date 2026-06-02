@@ -6,10 +6,8 @@ using Domain.Entities.Like;
 
 namespace Domain.Entities.Video
 {
-    public class VideoEntity : BaseEntity<Guid>
+    public class VideoEntity : BannableSoftDeletableEntity
     {
-        public override Guid Id { get; set; } = Guid.NewGuid();
-    
         [MaxLength(500)]
         public required string Description { get; set; }
 
@@ -17,8 +15,10 @@ namespace Domain.Entities.Video
 
         public UserEntity? Author { get; set; }
 
-        public int ProccessedInProcents { get; set; } // returned from microservice
-        public string Status { get; set; } = string.Empty; // processing, processed and etc
+        public int ProccessedInPercents { get; set; } // returned from microservice
+        
+        public VideoStatus Status { get; set; }
+        public VideoReportReasons BanReason { get; set; }
 
         public ICollection<CommentEntity> Comments { get; set; } = new List<CommentEntity>();
 
