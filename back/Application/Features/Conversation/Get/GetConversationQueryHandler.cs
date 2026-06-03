@@ -7,15 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.Get
 {
-    internal class GetConversationQueryHandler(IUnitOfWork _uow, ICurrentUser user, ConversationMapper conversationMapper)
+    internal class GetConversationQueryHandler(IAppDbContext appDbContext, ICurrentUser user, ConversationMapper conversationMapper)
         : IRequestHandler<GetConversationQuery, ConversationDto>
     {
         public async Task<ConversationDto> Handle(GetConversationQuery request, CancellationToken cancellationToken)
         {
-            var conversation = await _uow.Conversations
-                                   .GetAll()
+            var conversation = await appDbContext.Conversations
                                    .Include(c => c.Participants)
-                                   .FirstOrDefaultAsync(c => c.Id == request.ConversationId)
+                                   .FirstOrDefaultAsync(c => c.Id == request.ConversationId, cancellationToken: cancellationToken)
                                ?? throw new NotFoundException("Розмову не знайдено");
 
             if (conversation.Participants.All(p => p.UserId != user.Id!.Value))

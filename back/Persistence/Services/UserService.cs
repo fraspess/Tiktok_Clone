@@ -19,7 +19,6 @@ namespace Persistence.Services
         IImageService imageService,
         IConfiguration configuration,
         IEmailService emailService,
-        IUnitOfWork uow,
         UserMapper mapper,
         ICurrentUser currentUser)
         : IUserService
@@ -182,36 +181,6 @@ namespace Persistence.Services
             await emailService.SendEmailAsync(user.Email!, "Підтвердження реєстрації", body);
         }
 
-        public async Task<UserDto> GetByUsernameAsync(string username)
-        {
-            var user = await userManager.Users.
-                           Where(u => u.UserName == username)
-                           .ToProjectionDto(currentUser.Id)
-                           .FirstOrDefaultAsync()
-                       ?? throw new NotFoundException("Користувача з таким ім'ям не знайдено");
-
-            var dto = mapper.ToDto(user);
-            return dto;
-        }
-
-        public async Task ToggleFollowAsync(Guid follower, Guid following)
-        {
-            var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == follower)
-                       ?? throw new UnauthorizedException("Користувача не знайдено");
-            var isAlreadyFollowing = await uow.Follows.GetFollowAsync(follower, following);
-
-            if (isAlreadyFollowing is null)
-            {
-                user.Following.Add(new UserFollowEntity { FollowerId = follower, FollowingId = following });
-            }
-            else
-            {
-                user.Following.Remove(isAlreadyFollowing);
-            }
-
-            await userManager.UpdateAsync(user);
-        }
-
         public async Task<TokenResponseDTO> GoogleAuth(string idToken)
         {
             GoogleJsonWebSignature.Payload payload;
@@ -280,10 +249,6 @@ namespace Persistence.Services
 
             return await tokenService.GenerateTokensAsync(user);
         }
-
-        public async Task<bool> IsExistsById(Guid id)
-        {
-            return await userManager.Users.FirstOrDefaultAsync(u => u.Id == id) is not null;
-        }
+        
     }
 }

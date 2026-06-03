@@ -3,19 +3,22 @@ using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
 using Application.Pagination;
+using Domain;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.AdminPanel.GetUserVideos;
 
-internal class AdminPanelGetuserVideosCommandHandler(IUnitOfWork _uow, VideoMapper mapper, ICurrentUser currentUser) : IRequestHandler<AdminPanelGetUserVideosCommand, PagedResult<SimpleVideoDto>>
+internal class AdminPanelGetuserVideosCommandHandler(IAppDbContext appDbContext, VideoMapper mapper, ICurrentUser currentUser) : IRequestHandler<AdminPanelGetUserVideosCommand, PagedResult<SimpleVideoDto>>
 {
     public async Task<PagedResult<SimpleVideoDto>> Handle(AdminPanelGetUserVideosCommand request, CancellationToken cancellationToken)
     {
-        var videos = await _uow.Videos
-            .GetAllIgnoreQueryFilters()
-            .Where(v => v.UserId == request.UserId)
+        var videos = await appDbContext
+            .Videos
+            .IgnoreQueryFilters()
+            .Where(v => v.UserId == request.UserId && v.Status == VideoStatus.Processed)
             .ToProjectionDto(currentUser.Id)
-            .ToPagedResultAsync(request.PaginationSettings);
+            .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 
         var result = videos.MapItems(mapper.ToSimpleDto);
         return result;

@@ -1,23 +1,24 @@
 ﻿using Application.Interfaces;
 using Domain.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Video.ProcessInfoInPercent
 {
     internal class VideoProcessInfoInPercentCommandHandler(
-        IUnitOfWork _uow,
+        IAppDbContext appDbContext,
         IVideoProcessingNotifier videoProcessingNotifier) : IRequestHandler<VideoProcessInfoInPercentCommand, Unit>
     {
         public async Task<Unit> Handle(VideoProcessInfoInPercentCommand request, CancellationToken cancellationToken)
         {
-            var video = await _uow.Videos.GetByIdAsyncIgnoreQueryFilters(request.VideoId)
+            var video = await appDbContext.Videos.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken: cancellationToken)
                         ?? throw new NotFoundException("Відео не знайдено");
 
             video.ProccessedInPercents = request.Percentage;
             await videoProcessingNotifier.SendVideoProcessingProgress(request.VideoId, video.UserId,
                 request.Percentage);
-            await _uow.Videos.UpdateAsync(video);
-            await _uow.SaveChangesAsync();
+            appDbContext.Videos.Update(video);
+            await appDbContext.SaveChangesAsync(cancellationToken);
             return Unit.Value;
         }
     }

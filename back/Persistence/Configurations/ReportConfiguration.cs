@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Report;
+﻿using Domain;
+using Domain.Entities.Report;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,12 +14,13 @@ public class ReportConfiguration : IEntityTypeConfiguration<ReportEntity>
             .HasOne(r => r.Sender)
             .WithMany()
             .HasForeignKey(r => r.SenderId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder
+            .HasIndex(r => new { r.SenderId, r.ContentId })
+            .IsUnique();
 
         builder
-            .HasDiscriminator<string>("ReportType")
-            .HasValue<VideoReportEntity>("Video")
-            .HasValue<UserReportEntity>("User")
-            .HasValue<CommentReportEntity>("Comment");
+            .HasQueryFilter(r => r.Status == ReportStatus.Pending);
     }
 }

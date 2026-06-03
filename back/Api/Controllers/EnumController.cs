@@ -21,6 +21,7 @@ public class EnumController : ControllerBase
         where T : struct, Enum
         => Enum.GetValues<T>()
             .Select(e => new { id = Convert.ToInt32(e), name = e.ToString() })
+            .Where(e => e.id != 0)
             .ToList();
 
     private static IEnumerable<object> GetEnumValuesWithDescription<T>()
@@ -29,16 +30,16 @@ public class EnumController : ControllerBase
             .Select(e => new
             {
                 id = Convert.ToInt32(e),
-                name = e.ToString(),
                 description = e.GetDescription() 
             })
+            .Where(e => e.id != 0)
             .ToList();
         
     [HttpGet("content-types")]
     public IActionResult GetContentTypes() => Ok(ApiResponse<object>.Success(_contentTypes));
 
     [HttpGet("report-reasons")]
-    public IActionResult GetReportReasons(ContentTypes contentType)
+    public IActionResult GetReportReasons([FromQuery] ContentTypes contentType)
         => Ok(ApiResponse<object>.Success(contentType switch
         {
             ContentTypes.Comment => _commentReportReasons,

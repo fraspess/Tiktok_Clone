@@ -10,7 +10,7 @@ using MediatR;
 namespace Application.Features.Video.Upload
 {
     internal class UploadVideoCommandHandler(
-        IUnitOfWork _uow,
+        IAppDbContext appDbContext,
         IDescriptionParser _parser,
         IHashTagService _hashtag,
         IEventBus<VideoStartProcessingEvent> eventBus,
@@ -32,8 +32,8 @@ namespace Application.Features.Video.Upload
             foreach (var tag in hashtags)
                 newVideo.HashTags.Add(new VideoHashTagEntity { HashTagId = tag.Id });
 
-            await _uow.Videos.CreateAsync(newVideo);
-            await _uow.SaveChangesAsync();
+            await appDbContext.Videos.AddAsync(newVideo, cancellationToken);
+            await appDbContext.SaveChangesAsync(cancellationToken);
 
             var tempFilePath = await tempVideoStorage.SaveVideoAsync(request.Dto.VideoFile);
             await eventBus.PublishAsync(new VideoStartProcessingEvent

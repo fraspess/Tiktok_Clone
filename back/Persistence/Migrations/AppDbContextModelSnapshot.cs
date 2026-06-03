@@ -478,6 +478,12 @@ namespace Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ContentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ContentType")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -488,13 +494,14 @@ namespace Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("ReportType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
+                    b.Property<int?>("Reason")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -504,13 +511,10 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("SenderId", "ContentId")
+                        .IsUnique();
 
                     b.ToTable("Reports");
-
-                    b.HasDiscriminator<string>("ReportType").HasValue("ReportEntity");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Domain.Entities.Video.VideoEntity", b =>
@@ -674,66 +678,6 @@ namespace Persistence.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.Report.CommentReportEntity", b =>
-                {
-                    b.HasBaseType("Domain.Entities.Report.ReportEntity");
-
-                    b.Property<Guid>("CommentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("Reason")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("CommentId", "SenderId")
-                        .IsUnique();
-
-                    b.HasDiscriminator().HasValue("Comment");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Report.UserReportEntity", b =>
-                {
-                    b.HasBaseType("Domain.Entities.Report.ReportEntity");
-
-                    b.Property<int?>("Reason")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasIndex("UserId", "SenderId")
-                        .IsUnique();
-
-                    b.ToTable("Reports", t =>
-                        {
-                            t.Property("Reason")
-                                .HasColumnName("UserReportEntity_Reason");
-                        });
-
-                    b.HasDiscriminator().HasValue("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Report.VideoReportEntity", b =>
-                {
-                    b.HasBaseType("Domain.Entities.Report.ReportEntity");
-
-                    b.Property<int?>("Reason")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("VideoId")
-                        .HasColumnType("uuid");
-
-                    b.HasIndex("VideoId", "SenderId")
-                        .IsUnique();
-
-                    b.ToTable("Reports", t =>
-                        {
-                            t.Property("Reason")
-                                .HasColumnName("VideoReportEntity_Reason");
-                        });
-
-                    b.HasDiscriminator().HasValue("Video");
                 });
 
             modelBuilder.Entity("Domain.Entities.Comment.CommentEntity", b =>
@@ -900,7 +844,7 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Identity.UserEntity", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Sender");
@@ -970,39 +914,6 @@ namespace Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entities.Report.CommentReportEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Comment.CommentEntity", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Comment");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Report.UserReportEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Identity.UserEntity", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Report.VideoReportEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Video.VideoEntity", "Video")
-                        .WithMany()
-                        .HasForeignKey("VideoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Video");
                 });
 
             modelBuilder.Entity("Domain.Entities.Comment.CommentEntity", b =>

@@ -7,6 +7,7 @@ using Application.Features.User.FollowUser;
 using Application.Features.User.ForgotPassword;
 using Application.Features.User.GetByUsername;
 using Application.Features.User.GetCurrentUser;
+using Application.Features.User.GetFollowers;
 using Application.Features.User.GoogleAuth;
 using Application.Features.User.Login;
 using Application.Features.User.LogOutOnAllDevices;
@@ -15,6 +16,7 @@ using Application.Features.User.Register;
 using Application.Features.User.ResendConfirmationEmail;
 using Application.Features.User.ResetPassword;
 using Application.Features.User.Update;
+using Application.Pagination;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -150,6 +152,21 @@ public class UserController(IMediator _mediator) : ControllerBase
     public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameUserDto dto)
     {
         await _mediator.Send(new ChangeUsernameCommand(dto.NewUsername));
+        return Ok(ApiResponse<object>.Success(null!));
+    }
+
+    [HttpGet("{username}/followers")]
+    public async Task<IActionResult> GetFollowers(string username, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+    {
+        var followers = await _mediator.Send(new GetUserFollowersCommand(username,new PaginationSettings{PageNumber = pageNumber, PageSize = pageSize}));
+        return Ok(ApiResponse<object>.Success(followers));
+    }
+
+    [HttpGet("{username}/following")]
+    public async Task<IActionResult> GetFollowing(string username, [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        
         return Ok(ApiResponse<object>.Success(null!));
     }
 

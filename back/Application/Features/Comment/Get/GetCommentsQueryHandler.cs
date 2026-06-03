@@ -7,13 +7,14 @@ using MediatR;
 
 namespace Application.Features.Comment.Get
 {
-    public class GetCommentsQueryHandler(IUnitOfWork _uow, CommentMapper _mapper, ICurrentUser currentUser)
+    public class GetCommentsQueryHandler(CommentMapper _mapper, ICurrentUser currentUser, IAppDbContext dbContext)
         : IRequestHandler<GetCommentsQuery, PagedResult<CommentDto>>
     {
         public async Task<PagedResult<CommentDto>> Handle(GetCommentsQuery request, CancellationToken cancellationToken)
         {
-            var comments = await _uow.Comments
-                .GetCommentsByVideoId(request.VideoId)
+            var comments = await dbContext
+                .Comments
+                .Where(c => c.VideoId == request.VideoId)
                 .ToProjectionDto(currentUser.Id)
                 .ToPagedResultAsync(request.PaginationSettings);
             

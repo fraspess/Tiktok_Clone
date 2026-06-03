@@ -8,6 +8,6 @@ public class UserDto
     public int FollowersCount { get; set; }
     public int FollowingCount { get; set; }
     public bool IsOwnProfile { get; set; }
-    public string Avatar { get; set; } = string.Empty;
+    public string AvatarUrl { get; set; } = string.Empty;
     public bool IsFollowing { get; set; }
 }

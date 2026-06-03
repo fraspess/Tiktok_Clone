@@ -10,13 +10,13 @@ public static class UserQueryExtensions
         return users.Select(u => new UserProjectionDto()
         {
             Id = u.Id,  
-            Username = "@" + u.UserName,
+            Username = u.UserName,
             Description = u.Description,
             Email =  u.Email,
             FollowersCount = u.Followers.Count,
             FollowingCount = u.Following.Count,
-            IsFollowing = u.Following.Any(f => f.FollowingId == currentUserId),
-            IsOwnProfile = u.Id == currentUserId
+            IsFollowing = currentUserId.HasValue && u.Followers.Any(f => f.FollowerId == currentUserId),
+            IsOwnProfile = currentUserId.HasValue && u.Id == currentUserId
         });
     }
 }

@@ -13,7 +13,7 @@ internal class BanUserCommandHandler(UserManager<UserEntity> userManager, ICurre
     {
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException("Користувача не знайдено");
-
+        
         user.BannedBy = currentUser.Id;
         user.BannedAt = DateTime.UtcNow;
         user.BanReason = request.Reason;

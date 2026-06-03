@@ -8,7 +8,7 @@
         public int FollowersCount { get; set; }
         public int FollowingCount { get; set; }
         
-        public string Avatar { get; set; } = string.Empty;
+        public string AvatarUrl { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string? FirstName { get; set; }
         public string? LastName { get;set; }

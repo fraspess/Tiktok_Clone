@@ -19,11 +19,5 @@ public interface IUserService
 
     Task ResendConfirmationEmailAsync(string email);
 
-    Task<UserDto> GetByUsernameAsync(string username);
-
-    Task ToggleFollowAsync(Guid follower, Guid following);
-
     Task<TokenResponseDTO> GoogleAuth(string idToken);
-
-    Task<bool> IsExistsById(Guid id);
 }
