@@ -8,6 +8,7 @@ using Application.Features.User.ForgotPassword;
 using Application.Features.User.GetByUsername;
 using Application.Features.User.GetCurrentUser;
 using Application.Features.User.GetFollowers;
+using Application.Features.User.GetFollowing;
 using Application.Features.User.GoogleAuth;
 using Application.Features.User.Login;
 using Application.Features.User.LogOutOnAllDevices;
@@ -166,8 +167,8 @@ public class UserController(IMediator _mediator) : ControllerBase
     public async Task<IActionResult> GetFollowing(string username, [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20)
     {
-        
-        return Ok(ApiResponse<object>.Success(null!));
+        var following = await _mediator.Send(new GetUserFollowingCommand(username, new PaginationSettings(){PageNumber = pageNumber, PageSize = pageSize}));
+        return Ok(ApiResponse<object>.Success(following));
     }
 
     private void AppendRefreshTokenCookie(string refreshToken)
