@@ -29,6 +29,7 @@ public class AuditingSaveChanges(ICurrentUser currentUser) : SaveChangesIntercep
             if (entry.State == EntityState.Deleted && entry.Entity is SoftDeletableEntity deletedEntity)
             {
                 entry.State =  EntityState.Modified;
+                deletedEntity.IsDeleted = true;
                 deletedEntity.DeletedAt = DateTime.UtcNow;
                 deletedEntity.DeletedBy = currentUser.Id;
             }

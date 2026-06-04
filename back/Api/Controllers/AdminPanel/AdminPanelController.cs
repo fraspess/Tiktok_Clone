@@ -94,7 +94,7 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<object>.Success(reports));
     }
 
-    [HttpDelete("comments")]
+    [HttpDelete("comments/{id}")]
     public async Task<IActionResult> DeleteComment(Guid id)
     {
         await _mediator.Send(new DeleteCommentCommand(id));

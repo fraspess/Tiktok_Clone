@@ -7,13 +7,14 @@ using MediatR;
 
 namespace Application.Features.Comment.GetReplies
 {
-    public class GetRepliesQueryHandler(IUnitOfWork _uow, CommentMapper _mapper, ICurrentUser currentUser)
+    public class GetRepliesQueryHandler(IAppDbContext appDbContext, CommentMapper _mapper, ICurrentUser currentUser)
         : IRequestHandler<GetRepliesQuery, PagedResult<CommentDto>>
     {
         public async Task<PagedResult<CommentDto>> Handle(GetRepliesQuery request, CancellationToken cancellationToken)
         {
-            var replies = await _uow.Comments
-                .GetRepliesAsync(request.ParentCommentId)
+            var replies = await appDbContext
+                .Comments
+                .Where(c => c.ParentCommentId == request.ParentCommentId)
                 .ToProjectionDto(currentUser.Id)
                 .ToPagedResultAsync(request.PaginationSettings);
 

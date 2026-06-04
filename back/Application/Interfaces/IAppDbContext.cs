@@ -1,5 +1,4 @@
-﻿using Application.Interfaces;
-using Domain.Entities.Comment;
+﻿using Domain.Entities.Comment;
 using Domain.Entities.Conversation;
 using Domain.Entities.Favorite;
 using Domain.Entities.HashTags;
@@ -12,18 +11,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistence;
+namespace Application.Interfaces;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<
-    UserEntity,
-    RoleEntity,
-    Guid,
-    IdentityUserClaim<Guid>,
-    UserRoleEntity,
-    IdentityUserLogin<Guid>,
-    IdentityRoleClaim<Guid>,
-    IdentityUserToken<Guid>
->(options), IAppDbContext
+public interface IAppDbContext
 {
     public DbSet<VideoEntity> Videos { get; set; }
     public DbSet<CommentEntity> Comments { get; set; }
@@ -38,17 +28,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
     public DbSet<LikeEntity> Likes { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
-    }
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     
-    public TEntity? GetTracked<TEntity>(Func<TEntity, bool> predicate) where TEntity : class
-    {
-        return ChangeTracker.Entries<TEntity>()
-            .Select(e => e.Entity)
-            .FirstOrDefault(predicate);
-    }
+    TEntity? GetTracked<TEntity>(Func<TEntity, bool> predicate) where TEntity : class;
+    DbSet<TEntity> Set<TEntity>() where TEntity : class;
 }

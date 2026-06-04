@@ -2,33 +2,34 @@
 using Domain.Entities.Like;
 using Domain.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.LIke.ToogleLike
 {
-    public class ToggleLikeCommandHandler(IUnitOfWork _uow, ICurrentUser user) : IRequestHandler<ToogleLikeCommand, Unit>
+    public class ToggleLikeCommandHandler(ICurrentUser user, IAppDbContext appDbContext) : IRequestHandler<ToogleLikeCommand, Unit>
     {
         // Якщо є лайк забирає, нема - ставить
         public async Task<Unit> Handle(ToogleLikeCommand request, CancellationToken cancellationToken)
         {
-            var video = await _uow.Videos.GetByIdAsync(request.VideoId)
-                        ?? throw new NotFoundException("Відео не знайдено");
+            var video = await appDbContext.Videos.AnyAsync(v => v.Id  == request.VideoId, cancellationToken: cancellationToken);
+            if (!video) throw new NotFoundException("Відео не знайдено");
 
-            var existingLike = await _uow.Likes.GetLikeByUserAndVideoIdAsync(user.Id!.Value, request.VideoId);
+            var existingLike = await appDbContext.Likes.FirstOrDefaultAsync(l => l.UserId == user.Id && l.VideoId == request.VideoId, cancellationToken: cancellationToken);
 
-            if (existingLike == null)
+            if (existingLike is null)
             {
-                await _uow.Likes.CreateAsync(new LikeEntity
+                await appDbContext.Likes.AddAsync(new LikeEntity
                 {
                     UserId = user.Id!.Value,
                     VideoId = request.VideoId
-                });
+                }, cancellationToken);
             }
             else
             {
-                await _uow.Likes.DeleteAsync(existingLike);
+               appDbContext.Likes.Remove(existingLike);
             }
 
-            await _uow.SaveChangesAsync();
+            await appDbContext.SaveChangesAsync(cancellationToken);
             return Unit.Value;
         }
     }

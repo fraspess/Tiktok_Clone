@@ -2,15 +2,16 @@
 using Domain.Entities.Comment;
 using Domain.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Comment.Like
 {
-    public class LikeCommentCommandHandler(IUnitOfWork _uow, ICurrentUser currentUser) : IRequestHandler<LikeCommentCommand, Unit>
+    public class LikeCommentCommandHandler(IAppDbContext appDbContext, ICurrentUser currentUser) : IRequestHandler<LikeCommentCommand, Unit>
     {
         async Task<Unit> IRequestHandler<LikeCommentCommand, Unit>.Handle(LikeCommentCommand request,
             CancellationToken cancellationToken)
         {
-            var comment = await _uow.Comments.GetByIdAsync(request.CommentId)
+            var comment = await appDbContext.Comments.FirstOrDefaultAsync(c => c.Id == request.CommentId, cancellationToken: cancellationToken)
                           ?? throw new NotFoundException("Коментарій не знайдено");
 
             var isExists = comment.CommentLikes.FirstOrDefault(c => c.UserId == currentUser.Id);
@@ -18,13 +19,12 @@ namespace Application.Features.Comment.Like
             {
                 isExists = new CommentLikeEntity() { CommentId = request.CommentId, UserId = currentUser.Id!.Value };
                 comment.CommentLikes.Add(isExists);
-                await _uow.SaveChangesAsync();
             }
             else
             {
                 comment.CommentLikes.Remove(isExists);
-                await _uow.SaveChangesAsync();
             }
+            await appDbContext.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
         }

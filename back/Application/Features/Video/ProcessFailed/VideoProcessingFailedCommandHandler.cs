@@ -2,22 +2,23 @@
 using Domain;
 using Domain.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Video.ProcessFailed
 {
-    internal class VideoProcessingFailedCommandHandler(IUnitOfWork _uow, IVideoProcessingNotifier notifier)
+    internal class VideoProcessingFailedCommandHandler(IAppDbContext appDbContext, IVideoProcessingNotifier notifier)
         : IRequestHandler<VideoProcessingFailedCommand, Unit>
     {
         public async Task<Unit> Handle(VideoProcessingFailedCommand request, CancellationToken cancellationToken)
         {
-            var video = await _uow.Videos.GetByIdAsyncIgnoreQueryFilters(request.VideoId)
+            var video = await appDbContext.Videos.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken: cancellationToken)
                         ?? throw new NotFoundException("Відео не знайдено");
 
             video.Status = VideoStatus.Failed;
             video.ProccessedInPercents = 0;
 
-            await _uow.Videos.UpdateAsync(video);
-            await _uow.SaveChangesAsync();
+            appDbContext.Videos.Update(video);
+            await appDbContext.SaveChangesAsync(cancellationToken);
 
             await notifier.SendVideoProcessFailed(video.Id, video.UserId, request.Message);
             return Unit.Value;

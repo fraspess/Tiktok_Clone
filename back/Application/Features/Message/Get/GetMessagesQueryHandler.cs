@@ -9,16 +9,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Message.Get
 {
-    public class GetMessagesQueryHandler(IUnitOfWork _uow, MessageMapper _mapper)
+    public class GetMessagesQueryHandler(IAppDbContext appDbContext, MessageMapper _mapper)
         : IRequestHandler<GetMessagesQuery, PagedResult<MessageDto>>
     {
         public async Task<PagedResult<MessageDto>> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
         {
-            var conversationExists = await _uow.Conversations.GetAll().AnyAsync(u => u.Id == request.ConversationId);
+            var conversationExists = await appDbContext
+                .Conversations
+                .AnyAsync(u => u.Id == request.ConversationId, cancellationToken: cancellationToken);
             if (!conversationExists) throw new NotFoundException("Чат не знайдено");
 
-            var messages = await _uow.Messages
-                .GetAll()
+            var messages = await appDbContext
+                .Messages
                 .Where(m => m.ConversationId == request.ConversationId)
                 .OrderByDescending(m => m.CreatedAt)
                 .ToPagedResultAsync(request.Settings);

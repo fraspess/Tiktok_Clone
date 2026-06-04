@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Application.Extensions;
+using FluentValidation;
 
 namespace Application.Features.User.Register
 {
@@ -15,10 +16,7 @@ namespace Application.Features.User.Register
                 .NotEmpty().WithMessage("Пароль не може бути пустим")
                 .MinimumLength(6).WithMessage("Пароль повинен містити не менше  ніж 6 символів");
 
-            RuleFor(x => x.Username)
-                .NotEmpty().WithMessage("Ім'я користувача не може бути порожнім")
-                .MinimumLength(3).WithMessage("Ім'я користувача повинно містить не менше ніж 3 символів")
-                .MaximumLength(50).WithMessage("Максимум 50 символів!");
+            RuleFor(x => x.Username).IsValidUsername();
         }
     }
 }

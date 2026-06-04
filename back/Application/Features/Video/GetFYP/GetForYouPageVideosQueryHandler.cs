@@ -8,14 +8,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Video.GetFYP
 {
-    public class GetForYouPageVideosQueryHandler(IUnitOfWork _uow, VideoMapper videoMapper, IConfiguration config, ICurrentUser currentUser)
+    public class GetForYouPageVideosQueryHandler(IAppDbContext appDbContext, VideoMapper videoMapper, IConfiguration config, ICurrentUser currentUser)
         : IRequestHandler<GetForYouPageVideosQuery, PagedResult<VideoDto>>
     {
         public async Task<PagedResult<VideoDto>> Handle(GetForYouPageVideosQuery request,
             CancellationToken cancellationToken)
         {
-            var videos = await _uow.Videos
-                .GetAll()
+            var videos = await appDbContext
+                .Videos
                 .OrderBy(v => Guid.NewGuid())
                 .ToProjectionDto(currentUser.Id)
                 .ToPagedResultAsync(request.PaginationSettings);

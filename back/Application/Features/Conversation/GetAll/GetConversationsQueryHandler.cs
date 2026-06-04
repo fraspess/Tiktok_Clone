@@ -9,14 +9,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.GetAll
 {
-    public class GetConversationsQueryHandler(IUnitOfWork _uow, ICurrentUser user, ConversationMapper conversationMapper)
+    public class GetConversationsQueryHandler(IAppDbContext appDbContext, ICurrentUser user, ConversationMapper conversationMapper)
         : IRequestHandler<GetConversationsQuery, PagedResult<ConversationDto>>
     {
         public async Task<PagedResult<ConversationDto>> Handle(GetConversationsQuery request,
             CancellationToken cancellationToken)
         {
-            var convo = await _uow.Conversations
-                .GetAll()
+            var convo = await appDbContext
+                .Conversations
                 .AsSplitQuery()
                 .Include(c => c.Participants)
                 .ThenInclude(f => f.User)

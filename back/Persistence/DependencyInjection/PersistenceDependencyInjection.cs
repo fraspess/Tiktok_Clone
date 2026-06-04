@@ -4,14 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Persistence.Repositories.Comment;
-using Persistence.Repositories.Conversation;
-using Persistence.Repositories.Favorite;
-using Persistence.Repositories.Follow;
-using Persistence.Repositories.HashTag;
-using Persistence.Repositories.Like;
-using Persistence.Repositories.Message;
-using Persistence.Repositories.Video;
 using Persistence.Services;
 
 namespace Persistence.DependencyInjection
@@ -26,6 +18,7 @@ namespace Persistence.DependencyInjection
             {
                 options.UseNpgsql(config.GetConnectionString("DefaultConnection")).AddInterceptors(serviceProvider.GetRequiredService<AuditingSaveChanges>());
             });
+            services.AddScoped<IAppDbContext, AppDbContext>();
 
             services.AddIdentityCore<UserEntity>(options =>
                 {
@@ -49,16 +42,6 @@ namespace Persistence.DependencyInjection
                 opt.TokenLifespan = TimeSpan.FromMinutes(30);
             });
 
-            services.AddScoped<IVideoRepository, VideoRepository>();
-            services.AddScoped<IHashTagRepository, HashTagRepository>();
-            services.AddScoped<ILikeRepository, LikeRepository>();
-            services.AddScoped<ICommentRepository, CommentRepository>();
-            services.AddScoped<IFavoriteRepository, FavoriteRepository>();
-            services.AddScoped<IFollowRepository, FollowRepository>();
-            services.AddScoped<IConversationRepository, ConversationRepository>();
-            services.AddScoped<IMessageRepository, MessageRepository>();
-
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserService, UserService>();
             return services;
         }

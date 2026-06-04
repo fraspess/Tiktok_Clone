@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Application.Features.Video.Upload.Dev
 {
-    internal class UploadVideoCommandDevHandler(IUnitOfWork _uow, IDescriptionParser _parser, IHashTagService _hashtags)
+    internal class UploadVideoCommandDevHandler(IAppDbContext appDbContext, IDescriptionParser _parser, IHashTagService _hashtags)
         : IRequestHandler<UploadVideoCommandDev, Unit>
     {
         public async Task<Unit> Handle(UploadVideoCommandDev request, CancellationToken cancellationToken)
@@ -18,7 +18,7 @@ namespace Application.Features.Video.Upload.Dev
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Add("Authorization", request.Key);
-                var response = await httpClient.GetStringAsync(request.Url);
+                var response = await httpClient.GetStringAsync(request.Url, cancellationToken);
 
                 var json = JsonConvert.DeserializeObject<dynamic>(response);
 
@@ -39,8 +39,8 @@ namespace Application.Features.Video.Upload.Dev
                     var fileName = $"{Guid.NewGuid()}.mp4";
                     var savePath = Path.Combine(uploadFolder, fileName);
 
-                    var bytes = await httpClient.GetByteArrayAsync(videoUrl);
-                    await File.WriteAllBytesAsync(savePath, bytes);
+                    var bytes = await httpClient.GetByteArrayAsync(videoUrl, cancellationToken);
+                    await File.WriteAllBytesAsync(savePath, bytes, cancellationToken);
                     ;
 
                     var randomUserId = request.RandomUserIds[Random.Shared.Next(request.RandomUserIds.Count())];
@@ -56,11 +56,11 @@ namespace Application.Features.Video.Upload.Dev
                     }
 
                     newVideo.Status = VideoStatus.Processed;
-                    await _uow.Videos.CreateAsync(newVideo);
+                    await appDbContext.Videos.AddAsync(newVideo, cancellationToken);
                 }
             }
 
-            await _uow.SaveChangesAsync();
+            await appDbContext.SaveChangesAsync(cancellationToken);
             return Unit.Value;
         }
     }
