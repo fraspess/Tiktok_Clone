@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.Options;
+namespace Infrastructure.Options;
 
-public class AwsS3Options
+public class FrontendOptions
 {
     [Required]
     public string Url { get; set; }

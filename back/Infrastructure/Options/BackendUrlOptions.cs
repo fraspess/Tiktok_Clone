@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.Options;
+namespace Infrastructure.Options;
 
-public class FrontendOptions
+public class BackendUrlOptions
 {
     [Required]
     public string Url { get; set; }
