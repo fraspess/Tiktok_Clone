@@ -40,11 +40,11 @@ try
     var app = builder.Build();
     app.MapHealthChecks("/health");
     // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
-    {
+    /*if (app.Environment.IsDevelopment())
+    {*/
         app.UseSwagger();
         app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tiktok-Clone"); });
-    }
+    /*}*/
 
     app.UseMiddleware<GlobalExceptionHandler>();
 
