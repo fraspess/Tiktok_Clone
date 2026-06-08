@@ -14,4 +14,6 @@ public class AwsS3Options
     public string AvatarsCdnDomain { get; set; } = default!;
     [Required]
     public string CdnScheme { get; set; } = "https";
+    
+    public string? ServiceUrl { get; set; }
 }

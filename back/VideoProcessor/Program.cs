@@ -6,7 +6,7 @@ using VideoProcessor;
 DotNetEnv.Env.Load("../.env");
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddMassTransit(x =>
+/*builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<VideoStartProcessingConsumer>();
     
@@ -22,7 +22,7 @@ builder.Services.AddMassTransit(x =>
             cfg.ConfigureEndpoints(ctx);
         });
     
-});
+});*/
 
 if (builder.Environment.IsDevelopment())
 {

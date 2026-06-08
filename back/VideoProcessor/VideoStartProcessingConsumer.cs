@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿/*using System.Text;
 using Contracts.Events;
 using FFMpegCore;
 using MassTransit;
@@ -180,4 +180,4 @@ const string filter =
             await FFMpeg.SnapshotAsync(input, thumbPath, captureTime: TimeSpan.FromSeconds(1));
         }
     }
-}
+}*/

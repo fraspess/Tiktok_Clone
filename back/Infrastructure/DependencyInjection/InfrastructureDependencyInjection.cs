@@ -67,17 +67,18 @@ namespace Infrastructure.DependencyInjection
             
             services.AddSingleton<IAmazonS3>(sp =>
             {
-                var config1 = new AmazonS3Config
+                var aws = sp.GetRequiredService<IOptions<AwsS3Options>>().Value;
+                var config1 = new AmazonS3Config();
+                
+                if (!string.IsNullOrEmpty(aws.ServiceUrl))
                 {
-                    RegionEndpoint = RegionEndpoint.GetBySystemName(
-                        config["AWS:Region"] ?? "us-east-1"),
-                };
-
-                var serviceUrl = config["AWS:ServiceURL"];
-                if (!string.IsNullOrEmpty(serviceUrl))
-                {
-                    config1.ServiceURL = serviceUrl;
+                    config1.ServiceURL = aws.ServiceUrl;
                     config1.ForcePathStyle = true;
+                }
+                else
+                {
+                    config1.RegionEndpoint = RegionEndpoint.GetBySystemName(
+                        config["AWS:S3:Region"] ?? "us-east-1");
                 }
 
                 var accessKey = config["AWS:S3:AccessKey"];
