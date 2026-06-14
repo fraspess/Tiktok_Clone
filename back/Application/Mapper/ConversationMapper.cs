@@ -14,11 +14,11 @@ public partial class ConversationMapper(IStorageService storageService)
    public partial ConversationDto ToDto(ConversationEntity source);
    
    [MapProperty(nameof(ConversationParticipant.UserId), nameof(SimpleUserDto.Id))]
-   [MapProperty(nameof(ConversationParticipant.UserId), nameof(SimpleUserDto.AvatarUrl), Use = nameof(AvatarUrl))]
+   [MapProperty(nameof(ConversationParticipant.UserId), nameof(SimpleUserDto.Avatar), Use = nameof(AvatarUrl))]
    private partial SimpleUserDto ParticipantToSimpleUserDto(ConversationParticipant source);
 
 
    
    [UserMapping(Default = false)]
-   private string AvatarUrl(Guid userId) => storageService.GetUserAvatar(userId);
+   private object AvatarUrl(Guid userId) => storageService.GetUserAvatar(userId);
 }

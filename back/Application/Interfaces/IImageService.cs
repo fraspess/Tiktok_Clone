@@ -6,6 +6,5 @@ namespace Application.Interfaces
     {
         public Task SaveImageAsync(IFormFile imageFile, Guid userId);
         public Task SaveImageAsync(string url, Guid userId);
-        public void DeleteImage(string imageName);
     }
 }

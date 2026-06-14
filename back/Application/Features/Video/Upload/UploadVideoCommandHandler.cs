@@ -16,11 +16,11 @@ namespace Application.Features.Video.Upload
         IHashTagService _hashtag,
         IEventBus<VideoStartProcessingEvent> eventBus,
         ICurrentUser currentUser,
-        IStorageService storageService) : IRequestHandler<UploadVideoCommand, string>
+        IStorageService storageService) : IRequestHandler<UploadVideoCommand, object>
     {
-        public async Task<string> Handle(UploadVideoCommand request, CancellationToken cancellationToken)
+        public async Task<object> Handle(UploadVideoCommand request, CancellationToken cancellationToken)
         {
-            var parsedDescription = _parser.ParseDescription(request.Dto.Description);
+            /*var parsedDescription = _parser.ParseDescription(request.Dto.Description);
             var newVideo = new VideoEntity()
             {
                 UserId = currentUser.Id!.Value,
@@ -34,12 +34,11 @@ namespace Application.Features.Video.Upload
                 newVideo.HashTags.Add(new VideoHashTagEntity { HashTagId = tag.Id });
 
             await appDbContext.Videos.AddAsync(newVideo, cancellationToken);
-            await appDbContext.SaveChangesAsync(cancellationToken);
-
-            /*var tempFilePath = await tempVideoStorage.SaveVideoAsync(request.Dto.VideoFile);
-            await eventBus.PublishAsync(new VideoStartProcessingEvent
-                { FilePath = tempFilePath, VideoId = newVideo.Id, UserId = currentUser.Id.Value});*/
-            return await storageService.GetVideoUploadPresignedUrlAsync(newVideo.Id, request.Dto.ContentType);
+            await appDbContext.SaveChangesAsync(cancellationToken);*/
+            
+            var randomGuid = Guid.NewGuid();
+            return new
+                { Url = await storageService.GetVideoUploadPresignedUrlAsync(randomGuid, request.ContentType), VideoId = randomGuid };
         }
     }
 }

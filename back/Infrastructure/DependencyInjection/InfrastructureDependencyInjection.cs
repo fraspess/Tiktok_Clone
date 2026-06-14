@@ -1,4 +1,5 @@
 ﻿using Amazon;
+using Amazon.Runtime;
 using Amazon.S3;
 using Application.Interfaces;
 using Contracts;
@@ -15,7 +16,6 @@ using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.DependencyInjection
@@ -60,10 +60,6 @@ namespace Infrastructure.DependencyInjection
             });
             
             services.AddHttpContextAccessor();
-
-            var awsOptions = config.GetAWSOptions();
-            
-            services.AddDefaultAWSOptions(awsOptions);
             
             services.AddSingleton<IAmazonS3>(sp =>
             {
@@ -78,14 +74,15 @@ namespace Infrastructure.DependencyInjection
                 else
                 {
                     config1.RegionEndpoint = RegionEndpoint.GetBySystemName(
-                        config["AWS:S3:Region"] ?? "us-east-1");
+                        aws.Region ?? "eu-central-1");
                 }
 
-                var accessKey = config["AWS:S3:AccessKey"];
-                var secretKey = config["AWS:S3:SecretKey"];
+                var accessKey = aws.AccessKey;
+                var secretKey = aws.SecretKey;
+                var credentials = new BasicAWSCredentials(accessKey, secretKey);
 
                 return !string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey)
-                    ? new AmazonS3Client(accessKey, secretKey, config1) 
+                    ? new AmazonS3Client(credentials,config1) 
                     : new AmazonS3Client(config1); 
             });
             

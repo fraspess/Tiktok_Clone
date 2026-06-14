@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 using Application.Interfaces;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;
@@ -13,22 +14,28 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
     private readonly AwsS3Options _options = options.Value;
     public string GetVideoThumbnail(Guid videoId)
     {
-        return $"{_options.CdnScheme}://{_options.VideoCdnDomain}/{videoId}/thumbnail.jpg";
+        return $"{_options.CdnScheme}://{_options.CdnDomain}/uploads/processed/{videoId}/thumbnail.jpg";
     }
 
     public string GetVideoEntryFile(Guid videoId)
     {
-        return $"{_options.CdnScheme}://{_options.VideoCdnDomain}/{videoId}/master.m3u8";
+        return $"{_options.CdnScheme}://{_options.CdnDomain}/uploads/processed/{videoId}/master.m3u8";
     }
 
-    public string GetUserAvatar(Guid userId)
+    public object GetUserAvatar(Guid userId)
     {
-        return $"{_options.CdnScheme}://{_options.AvatarsCdnDomain}/{userId}";
+        return new {
+            Small = $"{_options.CdnScheme}://{_options.CdnDomain}/avatars/{userId}/small.webp",
+            Medium = $"{_options.CdnScheme}://{_options.CdnDomain}/avatars/{userId}/medium.webp",
+            Large = $"{_options.CdnScheme}://{_options.CdnDomain}/avatars/{userId}/large.webp"
+        };
     }
 
-    public Task DeleteUserAvatars(Guid userId)
+    public async Task DeleteUserAvatars(Guid userId)
     {
-        throw new NotImplementedException();
+        await s3Client.DeleteObjectAsync(_options.BucketName, $"avatars/{userId}/small.webp");
+        await s3Client.DeleteObjectAsync(_options.BucketName, $"avatars/{userId}/medium.webp");
+        await s3Client.DeleteObjectAsync(_options.BucketName, $"avatars/{userId}/large.webp");
     }
 
     public Task<string> GetVideoUploadPresignedUrlAsync(Guid videoId, string contentType)
@@ -39,8 +46,8 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
 
         var url = s3Client.GetPreSignedURL(new GetPreSignedUrlRequest()
         {
-            BucketName = _options.UploadsBucketName,
-            Key = $"unprocessed/{videoId}/original",
+            BucketName = _options.BucketName,
+            Key = $"uploads/unprocessed/{videoId}/original",
             Verb = HttpVerb.PUT,
             Expires = DateTime.Now.AddMinutes(15),
             ContentType = contentType

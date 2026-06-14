@@ -1,4 +1,6 @@
-﻿/*using System.Text;
+﻿using System.Text;
+using Amazon.S3;
+using Amazon.S3.Transfer;
 using Contracts.Events;
 using FFMpegCore;
 using MassTransit;
@@ -10,28 +12,33 @@ namespace VideoProcessor
         ILogger<VideoStartProcessingConsumer> _logger,
         IOptions<FFmpegOptions> _fFmpegOptions,
         IPublishEndpoint publishEndpoint,
-        IConfiguration config) : IConsumer<VideoStartProcessingEvent>
+        IConfiguration config,
+        IAmazonS3 amazonS3,
+        IOptions<AwsS3Options> options) : IConsumer<VideoStartProcessingEvent>
     {
         private readonly FFmpegOptions _opts = _fFmpegOptions.Value;
-
+        private readonly AwsS3Options  _awsS3Options = options.Value;
+        
         public async Task Consume(ConsumeContext<VideoStartProcessingEvent> context)
         {
-            var inputPath = context.Message.FilePath;
-            var outputPath = Path.GetFullPath(
-                Path.Combine(Path.GetDirectoryName(inputPath)!, "..", config["OutputVideoPath"]!,
-                    context.Message.VideoId.ToString(),
-                    $"{Guid.NewGuid().ToString()}.mp4")
-            );
-
-            var outputDir = Path.GetDirectoryName(outputPath)!;
+            var videoId = context.Message.VideoId;
+            var tempPath = Path.Combine(Path.GetTempPath(), "unprocessed", videoId.ToString());
+            var outputPath = Path.Combine(Path.GetTempPath(), "processed", videoId.ToString());
+            var inputPath = Path.Combine(tempPath, "original");
+            var outputDir = outputPath;
             var normalizedPath = Path.Combine(outputDir, "normalized.mp4");
             try
             {
-                if (!File.Exists(inputPath))
-                {
-                    _logger.LogError("Файл {ErrorInput} не був знайдений ", inputPath);
-                    throw new Exception("Файл не знайдений");
-                }
+                Directory.CreateDirectory(tempPath); 
+                using var transferUtility = new TransferUtility(amazonS3);
+                await transferUtility.DownloadAsync(inputPath, _awsS3Options.BucketName,
+                $"uploads/unprocessed/{context.Message.VideoId}/original");
+
+                // if (!File.Exists(inputPath))
+                // {
+                //     _logger.LogError("Файл {ErrorInput} не був знайдений ", inputPath);
+                //     throw new Exception("Файл не знайдений");
+                // }
                 
                 _logger.LogInformation("Started processing video {inputPath}", inputPath);
 
@@ -42,35 +49,40 @@ namespace VideoProcessor
                 var videoInfo = await FFProbe.AnalyseAsync(inputPath);
                 var duration = videoInfo.Duration;
 
-                await NormalizeVideoAsync(inputPath, normalizedPath, duration, context.Message.VideoId,
-                    context.Message.UserId);
-                await GenerateHlsAsync(normalizedPath, outputDir, duration, context.Message.VideoId,
-                    context.Message.UserId);
+                await NormalizeVideoAsync(inputPath, normalizedPath, duration, context.Message.VideoId);
+                await GenerateHlsAsync(normalizedPath, outputDir, duration, context.Message.VideoId);
                 await GenerateThumbnailAsync(normalizedPath, outputDir);
-
+                
+                if (File.Exists(normalizedPath))
+                    File.Delete(normalizedPath);
+                
+                await transferUtility.UploadDirectoryAsync(new TransferUtilityUploadDirectoryRequest()
+                {
+                    BucketName = _awsS3Options.BucketName,
+                    Directory = outputDir,
+                    KeyPrefix = $"uploads/processed/{videoId}",
+                    SearchPattern = "*",
+                    SearchOption = SearchOption.AllDirectories
+                });
+                
                 await publishEndpoint.Publish(new VideoProcessedEvent
-                    { VideoId = context.Message.VideoId, UserId = context.Message.UserId });
+                    { VideoId = context.Message.VideoId });
 
-                _logger.LogInformation("Video successfully processed");
+                _logger.LogInformation("Video successfully processed {outputPath}", outputPath);
             }
             catch (Exception ex)
             {
                 _logger.LogError("Failed to convert file: {Error} ", ex.Message);
-                await publishEndpoint.Publish(new VideoProcessingFailedEvent(context.Message.VideoId,
-                    context.Message.UserId, ex.Message));
+                await publishEndpoint.Publish(new VideoProcessingFailedEvent(context.Message.VideoId, ex.Message));
                 throw;
             }
             finally
             {
-                if(File.Exists(inputPath))
-                {
-                    File.Delete(inputPath);
-                }
+                if (Directory.Exists(tempPath))
+                    Directory.Delete(tempPath, recursive: true);
 
-                if (File.Exists(normalizedPath))
-                {
-                    File.Delete(normalizedPath);
-                }
+                if (Directory.Exists(outputPath))
+                    Directory.Delete(outputPath, recursive: true);
             }
         }
 
@@ -79,7 +91,6 @@ namespace VideoProcessor
             IMediaAnalysis mediaInfo;
             try
             {
-                // 2. Probe actual file contents
                 mediaInfo = await FFProbe.AnalyseAsync(filePath);
             }
             catch
@@ -97,15 +108,14 @@ namespace VideoProcessor
                 throw new Exception("Відео не може бути довше ніж 3 години");
         }
 
-        private async Task NormalizeVideoAsync(string input, string output, TimeSpan duration, Guid videoid,
-            Guid userId)
+        private async Task NormalizeVideoAsync(string input, string output, TimeSpan duration, Guid videoid)
         {
-const string filter =
-    "split[orig][copy];" +
-    "[copy]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20[bg];" +
-    "[orig]scale=1080:1920:force_original_aspect_ratio=decrease[fg];" +
-    "[bg][fg]overlay=(W-w)/2:(H-h)/2[v];" +
-    "[0:a]loudnorm=I=-16:TP=-1.5:LRA=11[a]";
+            const string filter =
+                "split[orig][copy];" +
+                "[copy]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20[bg];" +
+                "[orig]scale=1080:1920:force_original_aspect_ratio=decrease[fg];" +
+                "[bg][fg]overlay=(W-w)/2:(H-h)/2[v];" +
+                "[0:a]loudnorm=I=-14:TP=-1:LRA=11[a]";
 
             await FFMpegArguments
                 .FromFileInput(input)
@@ -118,13 +128,13 @@ const string filter =
                     .WithFastStart())
                 .NotifyOnProgress(async void (progress) =>
                 {
-                    var percent = (int)Math.Floor((progress / duration));
-                    await publishEndpoint.Publish(new VideoProcessingProgressEvent(videoid, userId, percent / 2));
+                    var percent = (int)Math.Floor((progress.TotalSeconds / duration.TotalSeconds) * 100);
+                    await publishEndpoint.Publish(new VideoProcessingProgressEvent(videoid,percent / 2));
                 })
                 .ProcessAsynchronously();
         }
 
-        private async Task GenerateHlsAsync(string input, string output, TimeSpan duration, Guid videoid, Guid userId)
+        private async Task GenerateHlsAsync(string input, string output, TimeSpan duration, Guid videoid)
         {
             var qualities = _opts.Qualities;
 
@@ -153,7 +163,7 @@ const string filter =
                         var percent = (int)Math.Floor((progress / duration) * 100);
                         var offset = 50 + (i1 * (50 / qualities.Count));
                         var total = offset + (percent / 2 / qualities.Count);
-                        await publishEndpoint.Publish(new VideoProcessingProgressEvent(videoid, userId, total));
+                        await publishEndpoint.Publish(new VideoProcessingProgressEvent(videoid, total));    
                     })
                     .ProcessAsynchronously();
             }
@@ -180,4 +190,4 @@ const string filter =
             await FFMpeg.SnapshotAsync(input, thumbPath, captureTime: TimeSpan.FromSeconds(1));
         }
     }
-}*/
+}

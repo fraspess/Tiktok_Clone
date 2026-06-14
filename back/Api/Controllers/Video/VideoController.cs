@@ -50,16 +50,17 @@ namespace Api.Controllers.Video
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> UploadVideo([FromBody] CreateVideoDto dto)
+        public async Task<IActionResult> UploadVideo([FromBody] UploadVideoCommand command)
         {
-            var url = await _mediator.Send(new UploadVideoCommand(dto));
-            return Ok(ApiResponse<string>.Success(url));
+            var url = await _mediator.Send(command);
+            // {Url = url, VideoId = videoId}
+            return Ok(ApiResponse<object>.Success(url));
         }
         
         [HttpPost("{videoId}/upload-complete")]
-        public async Task<IActionResult> UploadComplete(Guid videoId)
+        public async Task<IActionResult> UploadComplete(Guid videoId, string description)
         {
-            await _mediator.Send(new CompleteUploadVideoCommand(videoId));
+            await _mediator.Send(new CompleteUploadVideoCommand(videoId, description));
             return Ok(ApiResponse<object>.Success(null!));
         }
 

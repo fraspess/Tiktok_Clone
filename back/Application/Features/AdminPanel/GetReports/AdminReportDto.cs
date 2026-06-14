@@ -17,13 +17,13 @@ public class ReportUserDto
 {
     public Guid Id { get; set; }
     public string Username { get; set; }
-    public string? Avatar { get; set; }
+    public object? Avatar { get; set; }
 }
 
 public class ReportedContentDto
 {
     public Guid Id { get; set; }
     public string? Title { get; set; }
-    public string? Thumbnail { get; set; }
+    public object? Thumbnail { get; set; }
     public string? ContentUrl { get; set; }
 }

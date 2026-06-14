@@ -10,19 +10,20 @@ namespace Application.Mapper;
 public partial class UserMapper(IStorageService storageService, ICurrentUser currentUser)
 {
     
-    [MapProperty(nameof(UserProjectionDto.Id), nameof(UserMeDto.AvatarUrl), Use = nameof(AvatarUrl))]
+    [MapProperty(nameof(UserProjectionDto.Id), nameof(UserMeDto.Avatar), Use = nameof(AvatarUrl))]
     [MapProperty(nameof(UserProjectionDto.Id), nameof(UserMeDto.IsOwnProfile), Use = nameof(IsOwnProfile))]
     public partial UserMeDto ToMeDto(UserProjectionDto user);
     
-    [MapProperty(nameof(UserProjectionDto.Id), nameof(UserDto.AvatarUrl), Use = nameof(AvatarUrl))]
+    [MapProperty(nameof(UserProjectionDto.Id), nameof(UserDto.Avatar), Use = nameof(AvatarUrl))]
     [MapProperty(nameof(UserProjectionDto.Id), nameof(UserDto.IsOwnProfile), Use = nameof(IsOwnProfile))]
     public partial UserDto ToDto(UserProjectionDto user);
     
+    [MapProperty(nameof(RegisterUserDto.Username), nameof(UserEntity.UserName))]
     public partial UserEntity ToEntity(RegisterUserDto dto);
 
     public partial GetUserAdminDto ToGetUserAdminDto(UserEntity source);
     
-    [MapProperty(nameof(UserProjectionDto.Id), nameof(SimpleUserDto.AvatarUrl),Use = nameof(AvatarUrl))]
+    [MapProperty(nameof(UserProjectionDto.Id), nameof(SimpleUserDto.Avatar),Use = nameof(AvatarUrl))]
     public partial SimpleUserDto ToSimpleDto(UserProjectionDto source);
     
     
@@ -36,7 +37,7 @@ public partial class UserMapper(IStorageService storageService, ICurrentUser cur
 
         
     [UserMapping(Default = false)]
-    private string AvatarUrl(Guid userId) =>
+    private object AvatarUrl(Guid userId) =>
         storageService.GetUserAvatar(userId);
     
 }

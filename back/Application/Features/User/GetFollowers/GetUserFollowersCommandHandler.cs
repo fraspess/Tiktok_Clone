@@ -26,7 +26,7 @@ internal class GetUserFollowersCommandHandler(UserManager<UserEntity> userManage
         {
             Id = f.FollowerId,
             Username = f.UserName!,
-            AvatarUrl = storageService.GetUserAvatar(f.FollowerId),
+            Avatar = storageService.GetUserAvatar(f.FollowerId),
         });
     }
 }

@@ -19,7 +19,7 @@ namespace Application.Features.Video.Processed
             appDbContext.Videos.Update(video);
             await appDbContext.SaveChangesAsync(cancellationToken);
 
-            await _notifier.SendVideoProcessSucceded(request.VideoId, request.UserId);
+            await _notifier.SendVideoProcessSucceded(request.VideoId, video.UserId);
             return Unit.Value;
         }
     }

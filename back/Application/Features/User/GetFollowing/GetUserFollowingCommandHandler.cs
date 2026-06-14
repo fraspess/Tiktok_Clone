@@ -29,7 +29,7 @@ public class GetUserFollowingCommandHandler(UserManager<UserEntity> userManager,
         {
             Id = f.FollowingId,
             Username = f.UserName!,
-            AvatarUrl = storageService.GetUserAvatar(f.FollowingId),
+            Avatar = storageService.GetUserAvatar(f.FollowingId),
         });
     }
 }

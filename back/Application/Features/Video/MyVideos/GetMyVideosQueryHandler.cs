@@ -5,6 +5,7 @@ using Application.Mapper;
 using Application.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Video.MyVideos
@@ -16,10 +17,11 @@ namespace Application.Features.Video.MyVideos
         {
             var videos = await appDbContext
                 .Videos
+                .IgnoreQueryFilters()
                 .Where(v => v.UserId == currentUser.Id!.Value)
                 .OrderByDescending(v => v.CreatedAt)
                 .ToProjectionDto(currentUser.Id)
-                .ToPagedResultAsync(request.Settings);
+                .ToPagedResultAsync(request.Settings, cancellationToken: cancellationToken);
 
             var result = videos.MapItems(videoMapper.ToMyDto);
             return result;
