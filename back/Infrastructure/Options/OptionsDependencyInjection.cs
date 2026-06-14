@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Application.Options;
+namespace Infrastructure.Options;
 
 public static class OptionsDependencyInjection
 {
@@ -32,10 +32,16 @@ public static class OptionsDependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
         
-        services.AddOptions<AwsS3Options>()
-            .BindConfiguration("AwsS3")
+        services.AddOptions<BackendUrlOptions>()
+            .BindConfiguration("Backend")
             .ValidateDataAnnotations()
             .ValidateOnStart();
+        
+        services.AddOptions<AwsS3Options>()
+            .BindConfiguration("AWS:S3")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         
         return services;
     }

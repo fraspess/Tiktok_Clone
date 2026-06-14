@@ -56,7 +56,6 @@ namespace Api.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ну вот як так, непонятна помилка : {error} ", ex.Message);
                 if (webHostEnvironment.IsDevelopment())
                 {
                     context.Response.StatusCode = 500;

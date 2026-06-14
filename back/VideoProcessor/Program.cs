@@ -1,13 +1,23 @@
+using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
 using FFMpegCore;
 using FFMpegCore.Extensions.Downloader;
 using MassTransit;
+using Microsoft.Extensions.Options;
 using VideoProcessor;
 
 DotNetEnv.Env.Load("../.env");
 var builder = Host.CreateApplicationBuilder(args);
+builder.Services.AddOptions<FFmpegOptions>()
+    .BindConfiguration("FFmpeg")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 
 builder.Services.AddMassTransit(x =>
 {
+    
     x.AddConsumer<VideoStartProcessingConsumer>();
     
         x.UsingRabbitMq((ctx, cfg) =>
@@ -24,6 +34,36 @@ builder.Services.AddMassTransit(x =>
     
 });
 
+builder.Services.AddOptions<AwsS3Options>()
+    .BindConfiguration("AWS:S3")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var aws = sp.GetRequiredService<IOptions<AwsS3Options>>().Value;
+    var config1 = new AmazonS3Config();
+                
+    if (!string.IsNullOrEmpty(aws.ServiceUrl))
+    {
+        config1.ServiceURL = aws.ServiceUrl;
+        config1.ForcePathStyle = true;
+    }
+    else
+    {
+        config1.RegionEndpoint = RegionEndpoint.GetBySystemName(
+            aws.Region ?? "eu-central-1");
+    }
+
+    var accessKey = aws.AccessKey;
+    var secretKey = aws.SecretKey;
+    var credentials = new BasicAWSCredentials(accessKey, secretKey);
+
+    return !string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey)
+        ? new AmazonS3Client(credentials,config1) 
+        : new AmazonS3Client(config1); 
+});
+
 if (builder.Environment.IsDevelopment())
 {
     var ffmpegPath = Path.Combine(Path.GetTempPath(), "ffmpeg.exe");
@@ -34,10 +74,6 @@ if (builder.Environment.IsDevelopment())
     }
 }
 
-builder.Services.AddOptions<FFmpegOptions>()
-    .BindConfiguration("FFmpeg")
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
 var host = builder.Build();
 
 host.Run();

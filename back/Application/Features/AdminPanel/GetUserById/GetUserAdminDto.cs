@@ -9,7 +9,7 @@ public class GetUserAdminDto
     public string Description { get; set; }
     public int FollowersCount { get; set; }
     public int FollowingCount { get; set; }
-    public string Avatar { get; set; } = string.Empty;
+    public object Avatar { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsBanned { get; set; }
     public UserReportReasons? BanReason { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ namespace Application.Features.Video.ProcessInfoInPercent
                         ?? throw new NotFoundException("Відео не знайдено");
 
             video.ProccessedInPercents = request.Percentage;
+            if(video.Status != VideoStatus.Processing) video.Status = VideoStatus.Processing;
             await videoProcessingNotifier.SendVideoProcessingProgress(request.VideoId, video.UserId,
                 request.Percentage);
             appDbContext.Videos.Update(video);

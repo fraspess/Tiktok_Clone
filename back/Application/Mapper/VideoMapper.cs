@@ -35,7 +35,7 @@ public partial class VideoMapper(IStorageService storageService)
     private string GetVideoUrl(Guid videoId) => storageService.GetVideoEntryFile(videoId);
 
     [UserMapping(Default = false)]
-    private string GetAvatarUrl(Guid userId) => storageService.GetUserAvatar(userId);
+    private object GetAvatarUrl(Guid userId) => storageService.GetUserAvatar(userId);
 
     [UserMapping(Default = false)]
     private string GetThumbnailUrl(Guid videoId) => storageService.GetVideoThumbnail(videoId);

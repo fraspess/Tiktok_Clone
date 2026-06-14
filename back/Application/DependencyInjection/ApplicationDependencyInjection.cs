@@ -1,7 +1,6 @@
 ﻿using Application.Behaviors;
 using Application.Features.Video.Shared;
 using Application.Mapper;
-using Application.Options;
 using Application.Services.HashTag;
 using Application.Services.Message;
 using FluentValidation;
@@ -36,7 +35,6 @@ namespace Application.DependencyInjection
             services.AddScoped<MessageMapper>();
             services.AddScoped<CommentMapper>();
 
-            services.AddConfigOptions(config);
             return services;
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.Options;
+namespace Infrastructure.Options;
 
 public class GoogleOptions
 {

@@ -1,10 +1,13 @@
 using Api.DependencyInjection;
 using Api.Middleware;
 using Application.DependencyInjection;
+using Application.Interfaces;
 using Infrastructure.DependencyInjection;
+using Infrastructure.Options;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Persistence.DependencyInjection;
 using Persistence.Seeder;
 using Serilog;
@@ -32,7 +35,8 @@ try
     builder.Services.AddPersistence(builder.Configuration);
     builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
     builder.Services.AddApi(builder.Configuration, builder.Environment);
-
+    
+    
     var app = builder.Build();
     app.MapHealthChecks("/health");
     // Configure the HTTP request pipeline.

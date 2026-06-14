@@ -7,6 +7,7 @@ using Application.Features.Video.GetFYP;
 using Application.Features.Video.GetUserVideos;
 using Application.Features.Video.MyVideos;
 using Application.Features.Video.Upload;
+using Application.Features.Video.Upload.CompleteUpload;
 using Application.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -48,13 +49,19 @@ namespace Api.Controllers.Video
         }
 
         [Authorize]
-        [RequestSizeLimit(500_000_000)]
-        [RequestFormLimits(MultipartBodyLengthLimit = 500_000_000)]
         [HttpPost]
-        public async Task<IActionResult> UploadVideo([FromForm] CreateVideoDto dto)
+        public async Task<IActionResult> UploadVideo([FromBody] UploadVideoCommand command)
         {
-            await _mediator.Send(new UploadVideoCommand(dto));
-            return Ok(ApiResponse<string>.Success("Відео успішно відправлено на обробку."));
+            var url = await _mediator.Send(command);
+            // {Url = url, VideoId = videoId}
+            return Ok(ApiResponse<object>.Success(url));
+        }
+        
+        [HttpPost("{videoId}/upload-complete")]
+        public async Task<IActionResult> UploadComplete(Guid videoId, string description)
+        {
+            await _mediator.Send(new CompleteUploadVideoCommand(videoId, description));
+            return Ok(ApiResponse<object>.Success(null!));
         }
 
 

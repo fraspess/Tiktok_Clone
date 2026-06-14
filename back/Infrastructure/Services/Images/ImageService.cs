@@ -1,19 +1,21 @@
-﻿using Application.Interfaces;
+﻿using Amazon.S3;
+using Amazon.S3.Transfer;
+using Application.Interfaces;
+using Infrastructure.Options;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
 
 namespace Infrastructure.Services.Images;
 
-public class ImageService : IImageService
+public class ImageService(ILogger<ImageService> logger, HttpClient httpClient, IAmazonS3 amazonS3, IOptions<AwsS3Options> options)
+    : IImageService
 {
-    private readonly IWebHostEnvironment _environment;
-    private readonly ILogger<ImageService> _logger;
-    private readonly HttpClient _httpClient;
-
+    private readonly AwsS3Options _options = options.Value;
     private readonly Dictionary<int, string> _qualities = new Dictionary<int, string>
     {
         {48,"small.webp"},
@@ -21,33 +23,11 @@ public class ImageService : IImageService
         {256, "large.webp"}
     };
 
-    public ImageService(IWebHostEnvironment environment, ILogger<ImageService> logger, HttpClient httpClient)
-    {
-        _environment = environment;
-        _logger = logger;
-        _httpClient = httpClient;
-    }
-
-
-    public void DeleteImage(string imageName)
-    {
-        var imageFolder = Path.Combine(_environment.ContentRootPath, "images");
-        var path = Path.Combine(imageFolder, imageName);
-        try
-        {
-            File.Delete(path);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Got an exception while deleting the image");
-        }
-    }
-
     private async Task SaveImagePrivate(Stream stream, Guid userId)
     {
         try
         {
-            var imageFolder = Path.Combine(_environment.ContentRootPath, "images", userId.ToString());
+            var imageFolder = Path.Combine(Path.GetTempPath(), "images", userId.ToString());
             if (!Directory.Exists(imageFolder))
             {
                 Directory.CreateDirectory(imageFolder);
@@ -61,10 +41,26 @@ public class ImageService : IImageService
                     .SaveAsWebpAsync(Path.Combine(imageFolder, name ));
             }
 
+            using var transferUtility = new TransferUtility(amazonS3);
+
+            var request = new TransferUtilityUploadDirectoryRequest()
+            {
+                BucketName = _options.BucketName,
+                Directory = imageFolder,
+                KeyPrefix = $"avatars/{userId}",
+                SearchPattern = "*",
+                SearchOption = SearchOption.AllDirectories
+            };
+            request.UploadDirectoryFileRequestEvent += (_, args) =>
+            {
+                args.UploadRequest.ContentType = "image/webp";
+            };
+            await transferUtility.UploadDirectoryAsync(request);
+            Directory.Delete(imageFolder, recursive: true);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error while saving image. Error : {error} ", ex.Message);
+            logger.LogError("Error while saving image. Error : {error} ", ex.Message);
         }
     }
 
@@ -77,7 +73,7 @@ public class ImageService : IImageService
 
     public async Task SaveImageAsync(string url, Guid userId)
     {
-        var httpStream = await _httpClient.GetStreamAsync(new Uri(url));
+        var httpStream = await httpClient.GetStreamAsync(new Uri(url));
         var stream = new MemoryStream();
 
         await httpStream.CopyToAsync(stream);

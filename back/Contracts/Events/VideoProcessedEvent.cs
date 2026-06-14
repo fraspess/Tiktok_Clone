@@ -3,6 +3,5 @@
     public class VideoProcessedEvent
     {
         public Guid VideoId { get; set; }
-        public Guid UserId { get; set; }
     }
 }
