@@ -36,7 +36,6 @@ try
     builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
     builder.Services.AddApi(builder.Configuration, builder.Environment);
     
-    
     var app = builder.Build();
     app.MapHealthChecks("/health");
     // Configure the HTTP request pipeline.

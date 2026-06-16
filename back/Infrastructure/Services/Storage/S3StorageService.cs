@@ -14,20 +14,20 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
     private readonly AwsS3Options _options = options.Value;
     public string GetVideoThumbnail(Guid videoId)
     {
-        return $"{_options.CdnScheme}://{_options.CdnDomain}/uploads/processed/{videoId}/thumbnail.jpg";
+        return $"{_options.CdnBaseUrl}/uploads/processed/{videoId}/thumbnail.jpg";
     }
 
     public string GetVideoEntryFile(Guid videoId)
     {
-        return $"{_options.CdnScheme}://{_options.CdnDomain}/uploads/processed/{videoId}/master.m3u8";
+        return $"{_options.CdnBaseUrl}/uploads/processed/{videoId}/master.m3u8";
     }
 
     public object GetUserAvatar(Guid userId)
     {
         return new {
-            Small = $"{_options.CdnScheme}://{_options.CdnDomain}/avatars/{userId}/small.webp",
-            Medium = $"{_options.CdnScheme}://{_options.CdnDomain}/avatars/{userId}/medium.webp",
-            Large = $"{_options.CdnScheme}://{_options.CdnDomain}/avatars/{userId}/large.webp"
+            Small = $"{_options.CdnBaseUrl}/avatars/{userId}/small.webp",
+            Medium = $"{_options.CdnBaseUrl}/avatars/{userId}/medium.webp",
+            Large = $"{_options.CdnBaseUrl}/avatars/{userId}/large.webp"
         };
     }
 
@@ -52,7 +52,16 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
             Expires = DateTime.Now.AddMinutes(15),
             ContentType = contentType
         });
+        
+        var uri = new Uri(url);
+        var publicUrl = new Uri(_options.CdnBaseUrl);
+        var result = new UriBuilder(uri)
+        {
+            Scheme = publicUrl.Scheme,
+            Host = publicUrl.Host,
+            Port = publicUrl.IsDefaultPort ? -1 : publicUrl.Port
+        }.Uri.ToString();
 
-        return Task.FromResult(url);
+        return Task.FromResult(result);
     }
 }

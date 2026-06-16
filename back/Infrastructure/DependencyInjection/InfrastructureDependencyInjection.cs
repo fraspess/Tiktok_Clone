@@ -49,10 +49,11 @@ namespace Infrastructure.DependencyInjection
                 
                     x.UsingRabbitMq((ctx, cfg) =>
                     {
-                        cfg.Host(config["RabbitMQ:HostName"], h =>
+                        var options = ctx.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
+                        cfg.Host(options.HostName, h =>
                         {
-                            h.Username(config["RabbitMQ:UserName"]!);
-                            h.Password(config["RabbitMQ:Password"]!);
+                            h.Username(options.UserName);
+                            h.Password(options.Password);
                         });
 
                         cfg.ConfigureEndpoints(ctx);
@@ -81,9 +82,7 @@ namespace Infrastructure.DependencyInjection
                 var secretKey = aws.SecretKey;
                 var credentials = new BasicAWSCredentials(accessKey, secretKey);
 
-                return !string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey)
-                    ? new AmazonS3Client(credentials,config1) 
-                    : new AmazonS3Client(config1); 
+                return new AmazonS3Client(credentials,config1); 
             });
             
             services.AddConfigOptions(config);

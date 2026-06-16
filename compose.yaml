@@ -17,7 +17,7 @@ services:
         environment:
             POSTGRES_USER: frasp
             POSTGRES_PASSWORD: ${DBPassword}
-            POSTGRES_DB: Tiktok_Clone
+            POSTGRES_DB: tiktok_clone
         ports:
             - "5432:5432"
         volumes:

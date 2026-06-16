@@ -13,7 +13,7 @@ builder.Services.AddOptions<FFmpegOptions>()
     .BindConfiguration("FFmpeg")
     .ValidateDataAnnotations()
     .ValidateOnStart();
-
+;
 
 builder.Services.AddMassTransit(x =>
 {
@@ -59,9 +59,7 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     var secretKey = aws.SecretKey;
     var credentials = new BasicAWSCredentials(accessKey, secretKey);
 
-    return !string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey)
-        ? new AmazonS3Client(credentials,config1) 
-        : new AmazonS3Client(config1); 
+    return new AmazonS3Client(credentials,config1); 
 });
 
 if (builder.Environment.IsDevelopment())
@@ -73,6 +71,8 @@ if (builder.Environment.IsDevelopment())
         await FFMpegDownloader.DownloadBinaries();
     }
 }
+
+Console.WriteLine("ENVIRONMENT :: ", builder.Environment);
 
 var host = builder.Build();
 

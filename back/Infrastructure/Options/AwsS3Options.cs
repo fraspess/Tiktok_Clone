@@ -6,9 +6,8 @@ public class AwsS3Options
 {
     [Required]
     public string BucketName { get; set; }
-    [Required]
-    public string CdnDomain { get; set; } = default!;
-    public string CdnScheme { get; set; } = "https";
+
+    [Required] public string CdnBaseUrl { get; set; } = "http://localhost:4566";
     public string? ServiceUrl { get; set; }
     public string? AccessKey { get; set; }
     public string? SecretKey { get; set; }
