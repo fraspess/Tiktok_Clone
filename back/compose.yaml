@@ -30,6 +30,7 @@ services:
       - AWS__S3__ServiceUrl=http://localstack:4566
       - AWS__S3__CdnScheme=http
       - AWS__S3__CdnDomain=localhost:4566
+      - SMTP__Password=${SMTP__Password}
     volumes:
       - api_logs:/app/logs
     networks:
