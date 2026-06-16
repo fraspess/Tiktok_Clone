@@ -15,7 +15,10 @@ public class CompleteUploadVideoCommandHandler(IAppDbContext appDbContext, IEven
 {
     public async Task<Unit> Handle(CompleteUploadVideoCommand request, CancellationToken cancellationToken)
     {
-        var exists = await appDbContext.Videos.AnyAsync(v => v.Id == request.VideoId, cancellationToken);
+        var exists = await appDbContext
+            .Videos
+            .IgnoreQueryFilters()
+            .AnyAsync(v => v.Id == request.VideoId, cancellationToken);
         if (exists is true) throw new BadRequestException("Відео уже існує");
         var parsedDescription = _parser.ParseDescription(request.Description);
         var newVideo = new VideoEntity()
