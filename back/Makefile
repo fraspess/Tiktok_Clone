@@ -8,3 +8,11 @@ deps-clean:
 	-docker volume rm pgdata rabbitmqdata
 deps-down:
 	-docker rm -f my-postgres my-rabbitmq
+create-bucket:
+	docker exec back-localstack-1 sh -c "\
+		export AWS_ACCESS_KEY_ID=test; \
+		export AWS_SECRET_ACCESS_KEY=test; \
+		aws --endpoint-url=http://localhost:4566 s3 mb s3://tiktok-clone-academy2026 && \
+		aws --endpoint-url=http://localhost:4566 s3api put-bucket-cors \
+			--bucket tiktok-clone-academy2026 \
+			--cors-configuration '{\"CORSRules\": [{\"AllowedOrigins\": [\"*\"], \"AllowedMethods\": [\"GET\", \"PUT\", \"HEAD\"], \"AllowedHeaders\": [\"*\"], \"ExposeHeaders\": [\"ETag\"], \"MaxAgeSeconds\": 3000}]}'"

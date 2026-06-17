@@ -90,10 +90,13 @@ services:
     environment:
       - SERVICES=s3
       - AWS_DEFAULT_REGION=eu-central-1
+      - DOCKER_FLAGS=--user root
+    entrypoint: >
+      bash -c "chmod +x /etc/localstack/init/ready.d/*.sh && docker-entrypoint.sh"
     networks:
       - tiktok_network
     healthcheck:
-      test: ["CMD","awslocal","s3","ls"]
+      test: ["CMD", "awslocal", "s3", "ls"]
       interval: 5s
       timeout: 10s
       retries: 10
