@@ -4,6 +4,7 @@ namespace Infrastructure.Options;
 
 public class AwsS3Options
 {
+    public const string SectionName = "AWS:S3";
     [Required]
     public string BucketName { get; set; }
 

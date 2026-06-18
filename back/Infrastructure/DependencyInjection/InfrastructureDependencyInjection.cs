@@ -6,6 +6,7 @@ using Contracts;
 using Infrastructure.Options;
 using Infrastructure.RabbitMQ;
 using Infrastructure.RabbitMQ.Consumers;
+using Infrastructure.Services;
 using Infrastructure.Services.Storage;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.Images;
@@ -85,7 +86,16 @@ namespace Infrastructure.DependencyInjection
                 return new AmazonS3Client(credentials,config1); 
             });
             
-            services.AddConfigOptions(config);
+            var redisOptions = config.GetSection(RedisOptions.SectionName).Get<RedisOptions>()!;
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisOptions.ConnectionString;
+                options.InstanceName = redisOptions.InstanceName;
+            });
+            services.AddScoped<ICacheService, CacheService>();
+            services.AddConfigOptions(config);  
+            
+            
             return services;
         }
     }

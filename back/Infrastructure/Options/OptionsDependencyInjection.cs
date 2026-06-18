@@ -8,40 +8,44 @@ public static class OptionsDependencyInjection
     public static IServiceCollection AddConfigOptions(this IServiceCollection services, IConfiguration config)
     {
         services.AddOptions<EmailOptions>()
-            .BindConfiguration("SMTP")
+            .BindConfiguration(EmailOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
             
         services.AddOptions<JwtOptions>()
-            .BindConfiguration("Jwt")
+            .BindConfiguration(JwtOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
         
         services.AddOptions<FrontendOptions>()
-            .BindConfiguration("Frontend")
+            .BindConfiguration(FrontendOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
         
         services.AddOptions<GoogleOptions>()
-            .BindConfiguration("Google")
+            .BindConfiguration(GoogleOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
         
         services.AddOptions<RabbitMQOptions>()
-            .BindConfiguration("RabbitMQ")
+            .BindConfiguration(RabbitMQOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
         
-        services.AddOptions<BackendUrlOptions>()
+        /*services.AddOptions<BackendUrlOptions>()
             .BindConfiguration("Backend")
             .ValidateDataAnnotations()
-            .ValidateOnStart();
+            .ValidateOnStart(); */
         
         services.AddOptions<AwsS3Options>()
-            .BindConfiguration("AWS:S3")
+            .BindConfiguration(AwsS3Options.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
-
+        
+        services.AddOptions<RedisOptions>()
+            .BindConfiguration(RedisOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart(); 
         
         return services;
     }

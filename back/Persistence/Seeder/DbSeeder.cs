@@ -1,16 +1,13 @@
-﻿using Application.Constants;
+﻿using System.Text.Json;
+using Application.Constants;
 using Application.Dtos.User;
-using Application.Features.Video.Upload.Dev;
 using Application.Interfaces;
 using Domain.Entities.Identity;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace Persistence.Seeder
@@ -76,7 +73,7 @@ namespace Persistence.Seeder
             {
                 var json = await File.ReadAllTextAsync(Path.Combine(environment.ContentRootPath, "Helpers",
                     "Users.json"));
-                var users = JsonConvert.DeserializeObject<List<SeedUserDto>>(json);
+                var users = JsonSerializer.Deserialize<List<SeedUserDto>>(json);
 
                 if (users == null)
                 {

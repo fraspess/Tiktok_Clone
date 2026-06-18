@@ -18,8 +18,8 @@ namespace Application.Features.Video.GetById
                 .ToProjectionDto(currentUser.Id)
                 .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken: cancellationToken) 
                         ?? throw new NotFoundException("Відео не знайдено");
-
-            return videoMapper.ToDto(video);
+            var dto = videoMapper.ToDto(video);
+            return dto;
         }
     }
 }

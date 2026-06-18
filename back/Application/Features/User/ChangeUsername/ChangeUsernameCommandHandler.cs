@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.User.ChangeUsername;
 
-internal class ChangeUsernameCommandHandler(UserManager<UserEntity> userManager, ICurrentUser currentUser) : IRequestHandler<ChangeUsernameCommand, Unit>
+internal class ChangeUsernameCommandHandler(UserManager<UserEntity> userManager, ICurrentUser currentUser, ICacheService cache) : IRequestHandler<ChangeUsernameCommand, Unit>
 {
     public async Task<Unit> Handle(ChangeUsernameCommand request, CancellationToken cancellationToken)
     {
@@ -16,6 +16,8 @@ internal class ChangeUsernameCommandHandler(UserManager<UserEntity> userManager,
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken: cancellationToken) 
                    ?? throw new NotFoundException("Користувача не знайдено");
         
+        var cacheKey = $"user:username:{user.UserName}";
+        await cache.RemoveAsync(cacheKey);
         if (user.LastUsernameChangedAt.HasValue && (DateTime.Now <=  user.LastUsernameChangedAt.Value.AddDays(7)))
         {
             throw new BadRequestException("Ви можете змінювати ім'я користувача лише 1 раз в 7 днів");

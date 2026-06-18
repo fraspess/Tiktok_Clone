@@ -4,6 +4,7 @@ namespace Infrastructure.Options;
 
 public class RabbitMQOptions
 {
+    public const string SectionName = "RabbitMQ";
     [Required]
     public string HostName { get; set; }
     [Required]

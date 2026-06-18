@@ -532,6 +532,9 @@ namespace Persistence.Migrations
                     b.Property<Guid?>("BannedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("CommentCount")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -549,11 +552,17 @@ namespace Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int>("FavoriteCount")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsBanned")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProccessedInPercents")
                         .HasColumnType("integer");

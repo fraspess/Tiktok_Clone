@@ -21,11 +21,13 @@ namespace Domain.Entities.Video
         public VideoReportReasons BanReason { get; set; }
 
         public ICollection<CommentEntity> Comments { get; set; } = new List<CommentEntity>();
-
+        public int CommentCount { get; set; }
         public ICollection<VideoHashTagEntity> HashTags { get; set; } = new List<VideoHashTagEntity>();
 
         public ICollection<LikeEntity> Likes { get; set; } = new List<LikeEntity>();
+        public int LikeCount { get; set; }
 
         public ICollection<FavoriteEntity> Favorites { get; set; } = new List<FavoriteEntity>();
+        public int FavoriteCount { get; set; }
     }
 }
