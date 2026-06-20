@@ -7,13 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.AdminPanel.BanUser;
 
-internal class BanUserCommandHandler(UserManager<UserEntity> userManager, ICurrentUser currentUser) : IRequestHandler<BanUserCommand, Unit>
+internal class BanUserCommandHandler(UserManager<UserEntity> userManager, ICurrentUser currentUser)
+    : IRequestHandler<BanUserCommand, Unit>
 {
     public async Task<Unit> Handle(BanUserCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken)
-            ?? throw new NotFoundException("Користувача не знайдено");
-        
+                   ?? throw new NotFoundException("Користувача не знайдено");
+
         user.BannedBy = currentUser.Id;
         user.BannedAt = DateTime.UtcNow;
         user.BanReason = request.Reason;

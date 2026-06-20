@@ -5,5 +5,5 @@
         <Nullable>enable</Nullable>
         <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
     </PropertyGroup>
-    
+
 </Project>

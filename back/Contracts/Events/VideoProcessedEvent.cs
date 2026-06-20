@@ -1,7 +1,6 @@
-﻿namespace Contracts.Events
+﻿namespace Contracts.Events;
+
+public class VideoProcessedEvent
 {
-    public class VideoProcessedEvent
-    {
-        public Guid VideoId { get; set; }
-    }
+    public Guid VideoId { get; set; }
 }

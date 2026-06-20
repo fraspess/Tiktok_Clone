@@ -2,8 +2,6 @@
 using Domain.Entities.Comment;
 using Domain.Entities.Conversation;
 using Domain.Entities.Favorite;
-using Domain.Entities.Interfaces;
-using Domain.Entities.Like;
 using Domain.Entities.Message;
 using Domain.Entities.Video;
 using Microsoft.AspNetCore.Identity;
@@ -17,10 +15,10 @@ public class UserEntity : IdentityUser<Guid>
     [MaxLength(50)] public string? LastName { get; set; }
     [MaxLength(50)] public string? FirstName { get; set; }
 
-    [MaxLength(160)] public string? Description { get; set; } = String.Empty;
-    
+    [MaxLength(160)] public string? Description { get; set; } = string.Empty;
+
     public int RefreshTokenVersion { get; set; }
-    
+
     public DateTime? LastUsernameChangedAt { get; set; }
     public bool IsDeleted { get; set; }
 
@@ -34,7 +32,7 @@ public class UserEntity : IdentityUser<Guid>
 
     public ICollection<CommentEntity> Comments { get; set; } = new List<CommentEntity>();
 
-    public ICollection<LikeEntity> Likes { get; set; } = new List<LikeEntity>();
+    public ICollection<VideoLikeEntity> Likes { get; set; } = new List<VideoLikeEntity>();
 
     public virtual ICollection<UserRoleEntity>? UserRoles { get; set; }
 

@@ -17,9 +17,9 @@ public class VideoConfiguration : IEntityTypeConfiguration<VideoEntity>
 
 
         builder
-            .HasQueryFilter(v => 
-                v.Status == VideoStatus.Processed && 
-                !v.IsBanned && 
+            .HasQueryFilter(v =>
+                v.Status == VideoStatus.Processed &&
+                !v.IsBanned &&
                 !v.IsDeleted);
     }
 }

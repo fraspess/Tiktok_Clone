@@ -17,21 +17,19 @@ builder.Services.AddOptions<FFmpegOptions>()
 
 builder.Services.AddMassTransit(x =>
 {
-    
     x.AddConsumer<VideoStartProcessingConsumer>();
-    
-        x.UsingRabbitMq((ctx, cfg) =>
-        {
-            cfg.Host(builder.Configuration["RabbitMQ:HostName"], h =>
-            {
-                h.Username(builder.Configuration["RabbitMQ:UserName"]!);
-                h.Password(builder.Configuration["RabbitMQ:Password"]!);
-            });
 
-            cfg.UseConcurrencyLimit(1);
-            cfg.ConfigureEndpoints(ctx);
+    x.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:HostName"], h =>
+        {
+            h.Username(builder.Configuration["RabbitMQ:UserName"]!);
+            h.Password(builder.Configuration["RabbitMQ:Password"]!);
         });
-    
+
+        cfg.UseConcurrencyLimit(1);
+        cfg.ConfigureEndpoints(ctx);
+    });
 });
 
 builder.Services.AddOptions<AwsS3Options>()
@@ -43,7 +41,7 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
 {
     var aws = sp.GetRequiredService<IOptions<AwsS3Options>>().Value;
     var config1 = new AmazonS3Config();
-                
+
     if (!string.IsNullOrEmpty(aws.ServiceUrl))
     {
         config1.ServiceURL = aws.ServiceUrl;
@@ -59,17 +57,14 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     var secretKey = aws.SecretKey;
     var credentials = new BasicAWSCredentials(accessKey, secretKey);
 
-    return new AmazonS3Client(credentials,config1); 
+    return new AmazonS3Client(credentials, config1);
 });
 
 if (builder.Environment.IsDevelopment())
 {
     var ffmpegPath = Path.Combine(Path.GetTempPath(), "ffmpeg.exe");
     GlobalFFOptions.Configure(new FFOptions { BinaryFolder = Path.GetTempPath() });
-    if (!File.Exists(ffmpegPath))
-    {
-        await FFMpegDownloader.DownloadBinaries();
-    }
+    if (!File.Exists(ffmpegPath)) await FFMpegDownloader.DownloadBinaries();
 }
 
 Console.WriteLine("ENVIRONMENT :: ", builder.Environment);

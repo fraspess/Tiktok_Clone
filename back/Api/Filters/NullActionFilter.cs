@@ -13,7 +13,6 @@ public class NullActionFilter : IActionFilter
             .Where(p => p.BindingInfo?.BindingSource == BindingSource.Body);
 
         foreach (var parameter in bodyParameters)
-        {
             if (!context.ActionArguments.TryGetValue(parameter.Name, out var value) || value is null)
             {
                 context.Result = new BadRequestObjectResult(new
@@ -23,8 +22,9 @@ public class NullActionFilter : IActionFilter
                 });
                 return;
             }
-        }
     }
 
-    public void OnActionExecuted(ActionExecutedContext context) { }
+    public void OnActionExecuted(ActionExecutedContext context)
+    {
+    }
 }

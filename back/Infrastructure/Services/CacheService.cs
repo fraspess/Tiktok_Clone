@@ -8,8 +8,9 @@ internal class CacheService(IDistributedCache cache) : ICacheService
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
-        PropertyNameCaseInsensitive = true,
+        PropertyNameCaseInsensitive = true
     };
+
     public async Task<T?> GetAsync<T>(string key)
     {
         var data = await cache.GetStringAsync(key);
@@ -18,7 +19,7 @@ internal class CacheService(IDistributedCache cache) : ICacheService
 
     public async Task SetAsync<T>(string key, T? value, TimeSpan? expiry = null)
     {
-        var options = new DistributedCacheEntryOptions()
+        var options = new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = expiry ?? TimeSpan.FromMinutes(10)
         };
@@ -29,5 +30,5 @@ internal class CacheService(IDistributedCache cache) : ICacheService
     public async Task RemoveAsync(string key)
     {
         await cache.RemoveAsync(key);
-    }   
+    }
 }

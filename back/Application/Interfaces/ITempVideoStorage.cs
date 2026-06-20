@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface ITempVideoStorage
 {
-    public interface ITempVideoStorage
-    {
-        public Task<string> SaveVideoAsync(IFormFile file);
-    }
+    public Task<string> SaveVideoAsync(IFormFile file);
 }

@@ -1,13 +1,12 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Video.GetBySomeQuery
+namespace Application.Features.Video.GetBySomeQuery;
+
+public class GetVideosBySomeStringValidator : AbstractValidator<GetVideosBySomeStringQuery>
 {
-    public class GetVideosBySomeStringValidator : AbstractValidator<GetVideosBySomeStringQuery>
+    public GetVideosBySomeStringValidator()
     {
-        public GetVideosBySomeStringValidator()
-        {
-            RuleFor(v => v.SomeString)
-                .NotEmpty().WithMessage("Query не може бути порожній");
-        }
+        RuleFor(v => v.SomeString)
+            .NotEmpty().WithMessage("Query не може бути порожній");
     }
 }

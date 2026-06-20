@@ -10,117 +10,111 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace Persistence.Seeder
+namespace Persistence.Seeder;
+
+public static class DbSeeder
 {
-    public static class DbSeeder
+    // All json seed files should be located in Tiktok_Clone/Helpers and have Copy To Output Directory
+    public static async Task SeedDataAsync(this WebApplication webApplication)
     {
-        // All json seed files should be located in Tiktok_Clone/Helpers and have Copy To Output Directory
-        public static async Task SeedDataAsync(this WebApplication webApplication)
-        {
-            using var scope = webApplication.Services.CreateScope();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<RoleEntity>>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<UserEntity>>();
-            var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-            var imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await context.Database.MigrateAsync();
-            await SeedRolesAsync(roleManager);
-            await SeedUsersAsync(userManager, imageService, environment);
-            //await SeedVideosAsync(configuration, mediator, userManager, context);
-        }
+        using var scope = webApplication.Services.CreateScope();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<RoleEntity>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<UserEntity>>();
+        var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+        var imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await context.Database.MigrateAsync();
+        await SeedRolesAsync(roleManager);
+        await SeedUsersAsync(userManager, imageService, environment);
+        //await SeedVideosAsync(configuration, mediator, userManager, context);
+    }
 
-        public static async Task SeedRolesAsync(RoleManager<RoleEntity> roleManager)
+    private static async Task SeedRolesAsync(RoleManager<RoleEntity> roleManager)
+    {
+        if (!roleManager.Roles.Any())
         {
-            if (!roleManager.Roles.Any())
+            var roles = new List<string>
             {
-                var roles = new List<string>()
+                RoleNames.USER_ROLE,
+                RoleNames.ADMIN_ROLE,
+                RoleNames.SUPER_ADMIN_ROLE
+            };
+            foreach (var role in roles)
+            {
+                var newRole = new RoleEntity
                 {
-                    RoleNames.USER_ROLE,
-                    RoleNames.ADMIN_ROLE,
-                    RoleNames.SUPER_ADMIN_ROLE
+                    Name = role
                 };
-                foreach (var role in roles)
-                {
-                    var newRole = new RoleEntity()
-                    {
-                        Name = role
-                    };
 
-                    var result = await roleManager.CreateAsync(newRole);
+                var result = await roleManager.CreateAsync(newRole);
 
-                    if (result.Succeeded)
-                    {
-                        Log.Information("Role {RoleName} seeded successfully", role);
-                    }
-                    else
-                    {
-                        Log.Error("Failed to seed role {RoleName}. Errors : {Errors}",
-                            role,
-                            string.Join(", ", result.Errors.Select(e => e.Description)));
-                    }
-                }
-            }
-            else
-            {
-                Log.Information("Roles already exists in database, skipping seeding");
+                if (result.Succeeded)
+                    Log.Information("Role {RoleName} seeded successfully", role);
+                else
+                    Log.Error("Failed to seed role {RoleName}. Errors : {Errors}",
+                        role,
+                        string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
-
-        public static async Task SeedUsersAsync(UserManager<UserEntity> userManager, IImageService imageService,
-            IWebHostEnvironment environment)
+        else
         {
-            if (!userManager.Users.Any())
+            Log.Information("Roles already exists in database, skipping seeding");
+        }
+    }
+
+    private static async Task SeedUsersAsync(UserManager<UserEntity> userManager, IImageService imageService,
+        IWebHostEnvironment environment)
+    {
+        if (!userManager.Users.Any())
+        {
+            var json = await File.ReadAllTextAsync(Path.Combine(environment.ContentRootPath, "Helpers",
+                "Users.json"));
+            var users = JsonSerializer.Deserialize<List<SeedUserDto>>(json);
+
+            if (users == null)
             {
-                var json = await File.ReadAllTextAsync(Path.Combine(environment.ContentRootPath, "Helpers",
-                    "Users.json"));
-                var users = JsonSerializer.Deserialize<List<SeedUserDto>>(json);
+                Log.Error("Failed to get users from json file to seed databse");
+                return;
+            }
 
-                if (users == null)
+            foreach (var user in users)
+            {
+                var newUser = new UserEntity
                 {
-                    Log.Error("Failed to get users from json file to seed databse");
-                    return;
-                }
+                    UserName = user.Username,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                };
 
-                foreach (var user in users)
+                var result = await userManager.CreateAsync(newUser, user.Password!);
+                if (result.Succeeded)
                 {
-                    var newUser = new UserEntity()
+                    var resultR = await userManager.AddToRolesAsync(newUser, user.Roles!);
+                    if (resultR.Succeeded)
                     {
-                        UserName = user.Username,
-                        Email = user.Email,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                    };
-
-                    var result = await userManager.CreateAsync(newUser, user.Password!);
-                    if (result.Succeeded)
-                    {
-                        var resultR = await userManager.AddToRolesAsync(newUser, user.Roles!);
-                        if (resultR.Succeeded)
-                        {
-                            newUser.EmailConfirmed = true;
-                            await imageService.SaveImageAsync(user.Image!, newUser.Id);
-                            await userManager.UpdateAsync(newUser);
-                            Log.Information("User {UserName} seeded successfully", user.Username);
-                        }
-                        else
-                        {
-                            Log.Error("Failed to assign roles. Error: {Errors}",
-                                string.Join(", ", resultR.Errors.Select(e => e.Description)));
-                        }
+                        newUser.EmailConfirmed = true;
+                        await imageService.SaveImageAsync(user.Image!, newUser.Id);
+                        await userManager.UpdateAsync(newUser);
+                        Log.Information("User {UserName} seeded successfully", user.Username);
                     }
                     else
                     {
-                        Log.Error("Failed to seed user {UserName}. Errors : {Errors}",
-                            user.Username,
-                            string.Join(", ", result.Errors.Select(e => e.Description)));
+                        Log.Error("Failed to assign roles. Error: {Errors}",
+                            string.Join(", ", resultR.Errors.Select(e => e.Description)));
                     }
                 }
-            }
-            else
-            {
-                Log.Information("Users already exists in database, skipping seeding");
+                else
+                {
+                    Log.Error("Failed to seed user {UserName}. Errors : {Errors}",
+                        user.Username,
+                        string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
             }
         }
-        
+        else
+        {
+            Log.Information("Users already exists in database, skipping seeding");
+        }
     }
 }

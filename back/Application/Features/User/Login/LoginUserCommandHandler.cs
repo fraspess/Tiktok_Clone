@@ -3,18 +3,17 @@ using Application.Dtos.User;
 using Application.Interfaces;
 using MediatR;
 
-namespace Application.Features.User.Login
+namespace Application.Features.User.Login;
+
+public class LoginUserCommandHandler(IUserService userService)
+    : IRequestHandler<LoginUserCommand, TokenResponseDTO>
 {
-    public class LoginUserCommandHandler(IUserService userService)
-        : IRequestHandler<LoginUserCommand, TokenResponseDTO>
+    public async Task<TokenResponseDTO> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
-        public async Task<TokenResponseDTO> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+        return await userService.Login(new LoginUserDto
         {
-            return await userService.Login(new LoginUserDto
-            {
-                Login = request.login,
-                Password = request.password
-            });
-        }
+            Login = request.login,
+            Password = request.password
+        });
     }
 }

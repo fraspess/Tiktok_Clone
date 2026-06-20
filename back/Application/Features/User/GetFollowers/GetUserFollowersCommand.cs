@@ -4,4 +4,5 @@ using MediatR;
 
 namespace Application.Features.User.GetFollowers;
 
-public record GetUserFollowersCommand(string Username, PaginationSettings PaginationSettings) : IRequest<PagedResult<SimpleUserDto>>;
+public record GetUserFollowersCommand(string Username, PaginationSettings PaginationSettings)
+    : IRequest<PagedResult<SimpleUserDto>>;

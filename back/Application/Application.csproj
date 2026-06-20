@@ -24,9 +24,9 @@
         <PackageReference Include="System.Security.Cryptography.Xml"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
         <PackageReference Include="Riok.Mapperly"/>
-        <PackageReference Include="AWSSDK.S3" />
+        <PackageReference Include="AWSSDK.S3"/>
 
-        
+
     </ItemGroup>
 
 </Project>

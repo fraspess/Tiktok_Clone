@@ -9,7 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.AdminPanel.GetUserById;
 
-internal class GetUserByIdCommandHandler(UserManager<UserEntity> userManager, UserMapper mapper, IStorageService storageService) : IRequestHandler<GetUserByIdCommand, GetUserAdminDto>
+internal class GetUserByIdCommandHandler(
+    UserManager<UserEntity> userManager,
+    UserMapper mapper,
+    IStorageService storageService) : IRequestHandler<GetUserByIdCommand, GetUserAdminDto>
 {
     public async Task<GetUserAdminDto> Handle(GetUserByIdCommand request, CancellationToken cancellationToken)
     {

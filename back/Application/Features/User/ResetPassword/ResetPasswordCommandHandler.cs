@@ -2,19 +2,18 @@
 using Application.Interfaces;
 using MediatR;
 
-namespace Application.Features.User.ResetPassword
+namespace Application.Features.User.ResetPassword;
+
+public class ResetPasswordCommandHandler(IUserService userService) : IRequestHandler<ResetPasswordCommand, Unit>
 {
-    public class ResetPasswordCommandHandler(IUserService userService) : IRequestHandler<ResetPasswordCommand, Unit>
+    public async Task<Unit> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
-        public async Task<Unit> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+        await userService.ResetPasswordAsync(new ResetPasswordDto
         {
-            await userService.ResetPasswordAsync(new ResetPasswordDto
-            {
-                Email = request.Email,
-                NewPassword = request.NewPassword,
-                Token = request.Token,
-            });
-            return Unit.Value;
-        }
+            Email = request.Email,
+            NewPassword = request.NewPassword,
+            Token = request.Token
+        });
+        return Unit.Value;
     }
 }

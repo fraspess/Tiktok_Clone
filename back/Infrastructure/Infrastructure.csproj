@@ -8,12 +8,12 @@
 
     <ItemGroup>
         <PackageReference Include="RabbitMQ.Client"/>
-    
+
         <PackageReference Include="MassTransit"/>
         <PackageReference Include="MassTransit.RabbitMQ"/>
-        <PackageReference Include="AWSSDK.S3" />
-        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
-        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+        <PackageReference Include="AWSSDK.S3"/>
+        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup"/>
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis"/>
     </ItemGroup>
 
     <ItemGroup>

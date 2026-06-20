@@ -4,4 +4,5 @@ using MediatR;
 
 namespace Application.Features.AdminPanel.GetUserVideos;
 
-public record AdminPanelGetUserVideosCommand (Guid UserId, PaginationSettings PaginationSettings): IRequest<PagedResult<SimpleVideoDto>>;
+public record AdminPanelGetUserVideosCommand(Guid UserId, PaginationSettings PaginationSettings)
+    : IRequest<PagedResult<SimpleVideoDto>>;

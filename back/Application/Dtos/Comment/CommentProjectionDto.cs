@@ -8,9 +8,10 @@ public class CommentProjectionDto
     public int RepliesCount { get; set; }
 
     public string OwnerUsername { get; set; } = string.Empty;
-    
+
     public bool IsLiked { get; set; }
 
     public int LikesCount { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsOwn { get; set; }
 }

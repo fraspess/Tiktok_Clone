@@ -1,6 +1,4 @@
-﻿using Domain.Entities.Identity;
-
-namespace Application.Dtos.User;
+﻿namespace Application.Dtos.User;
 
 public class UserProjectionDto
 {

@@ -1,17 +1,16 @@
-﻿namespace Application.Dtos.User
+﻿namespace Application.Dtos.User;
+
+public class SeedUserDto
 {
-    public class SeedUserDto
-    {
-        public String? Email { get; set; }
-        public String? Username { get; set; }
-        public String? LastName { get; set; }
+    public string? Email { get; set; }
+    public string? Username { get; set; }
+    public string? LastName { get; set; }
 
-        public String? FirstName { get; set; }
+    public string? FirstName { get; set; }
 
-        public String? Image { get; set; }
+    public string? Image { get; set; }
 
-        public String? Password { get; set; }
+    public string? Password { get; set; }
 
-        public String[]? Roles { get; set; }
-    }
+    public string[]? Roles { get; set; }
 }

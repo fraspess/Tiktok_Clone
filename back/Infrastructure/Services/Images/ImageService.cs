@@ -12,15 +12,20 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Infrastructure.Services.Images;
 
-public class ImageService(ILogger<ImageService> logger, HttpClient httpClient, IAmazonS3 amazonS3, IOptions<AwsS3Options> options)
+public class ImageService(
+    ILogger<ImageService> logger,
+    HttpClient httpClient,
+    IAmazonS3 amazonS3,
+    IOptions<AwsS3Options> options)
     : IImageService
 {
     private readonly AwsS3Options _options = options.Value;
-    private readonly Dictionary<int, string> _qualities = new Dictionary<int, string>
+
+    private readonly Dictionary<int, string> _qualities = new()
     {
-        {48,"small.webp"},
-        {128,"medium.webp"},
-        {256, "large.webp"}
+        { 48, "small.webp" },
+        { 128, "medium.webp" },
+        { 256, "large.webp" }
     };
 
     private async Task SaveImagePrivate(Stream stream, Guid userId)
@@ -28,22 +33,17 @@ public class ImageService(ILogger<ImageService> logger, HttpClient httpClient, I
         try
         {
             var imageFolder = Path.Combine(Path.GetTempPath(), "images", userId.ToString());
-            if (!Directory.Exists(imageFolder))
-            {
-                Directory.CreateDirectory(imageFolder);
-            }
+            if (!Directory.Exists(imageFolder)) Directory.CreateDirectory(imageFolder);
 
-            using Image image = Image.Load(stream);
-            
+            using var image = Image.Load(stream);
+
             foreach (var (quality, name) in _qualities)
-            {
                 await image.Clone(x => x.Resize(quality, quality))
-                    .SaveAsWebpAsync(Path.Combine(imageFolder, name ));
-            }
+                    .SaveAsWebpAsync(Path.Combine(imageFolder, name));
 
             using var transferUtility = new TransferUtility(amazonS3);
 
-            var request = new TransferUtilityUploadDirectoryRequest()
+            var request = new TransferUtilityUploadDirectoryRequest
             {
                 BucketName = _options.BucketName,
                 Directory = imageFolder,
@@ -51,12 +51,9 @@ public class ImageService(ILogger<ImageService> logger, HttpClient httpClient, I
                 SearchPattern = "*",
                 SearchOption = SearchOption.AllDirectories
             };
-            request.UploadDirectoryFileRequestEvent += (_, args) =>
-            {
-                args.UploadRequest.ContentType = "image/webp";
-            };
+            request.UploadDirectoryFileRequestEvent += (_, args) => { args.UploadRequest.ContentType = "image/webp"; };
             await transferUtility.UploadDirectoryAsync(request);
-            Directory.Delete(imageFolder, recursive: true);
+            Directory.Delete(imageFolder, true);
         }
         catch (Exception ex)
         {

@@ -3,13 +3,12 @@ using Contracts.Events;
 using MassTransit;
 using MediatR;
 
-namespace Infrastructure.RabbitMQ.Consumers
+namespace Infrastructure.RabbitMQ.Consumers;
+
+internal class VideoProcessingFailedConsumer(IMediator _mediator) : IConsumer<VideoProcessingFailedEvent>
 {
-    internal class VideoProcessingFailedConsumer(IMediator _mediator) : IConsumer<VideoProcessingFailedEvent>
+    public async Task Consume(ConsumeContext<VideoProcessingFailedEvent> context)
     {
-        public async Task Consume(ConsumeContext<VideoProcessingFailedEvent> context)
-        {
-            await _mediator.Send(new VideoProcessingFailedCommand(context.Message.Id, context.Message.Error));
-        }
+        await _mediator.Send(new VideoProcessingFailedCommand(context.Message.Id, context.Message.Error));
     }
 }

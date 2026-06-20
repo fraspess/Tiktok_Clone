@@ -1,10 +1,9 @@
 ﻿using Application.Dtos.User;
 
-namespace Application.Dtos.Conversation
+namespace Application.Dtos.Conversation;
+
+public class ConversationDto
 {
-    public class ConversationDto
-    {
-        public Guid Id { get; set; }
-        public List<SimpleUserDto> Participants { get; set; } = [];
-    }
+    public Guid Id { get; set; }
+    public List<SimpleUserDto> Participants { get; set; } = [];
 }

@@ -1,7 +1,6 @@
-﻿namespace Application.Dtos.User
+﻿namespace Application.Dtos.User;
+
+public class GoogleAuthDto
 {
-    public class GoogleAuthDto
-    {
-        public string IdToken { get; set; } = string.Empty;
-    }
+    public string IdToken { get; set; } = string.Empty;
 }

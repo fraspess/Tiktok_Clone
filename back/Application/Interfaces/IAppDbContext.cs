@@ -3,7 +3,6 @@ using Domain.Entities.Conversation;
 using Domain.Entities.Favorite;
 using Domain.Entities.HashTags;
 using Domain.Entities.Identity;
-using Domain.Entities.Like;
 using Domain.Entities.Message;
 using Domain.Entities.Report;
 using Domain.Entities.Video;
@@ -16,7 +15,9 @@ namespace Application.Interfaces;
 public interface IAppDbContext
 {
     public DbSet<VideoEntity> Videos { get; set; }
+    public DbSet<VideoLikeEntity> VideoLikes { get; set; }
     public DbSet<CommentEntity> Comments { get; set; }
+    public DbSet<CommentLikeEntity> CommentLikes { get; set; }
     public DbSet<MessageEntity> Messages { get; set; }
     public DbSet<ReportEntity> Reports { get; set; }
     public DbSet<UserFollowEntity> UserFollows { get; set; }
@@ -26,10 +27,9 @@ public interface IAppDbContext
 
     public DbSet<FavoriteEntity> Favorites { get; set; }
 
-    public DbSet<LikeEntity> Likes { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-    
+
     TEntity? GetTracked<TEntity>(Func<TEntity, bool> predicate) where TEntity : class;
     DbSet<TEntity> Set<TEntity>() where TEntity : class;
 }

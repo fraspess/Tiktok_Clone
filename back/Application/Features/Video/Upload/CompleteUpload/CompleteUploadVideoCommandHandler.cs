@@ -11,7 +11,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Video.Upload.CompleteUpload;
 
-public class CompleteUploadVideoCommandHandler(IAppDbContext appDbContext, IEventBus<VideoStartProcessingEvent> eventBus, IDescriptionParser _parser, ICurrentUser currentUser, IHashTagService _hashtag) : IRequestHandler<CompleteUploadVideoCommand, Unit>
+public class CompleteUploadVideoCommandHandler(
+    IAppDbContext appDbContext,
+    IEventBus<VideoStartProcessingEvent> eventBus,
+    IDescriptionParser _parser,
+    ICurrentUser currentUser,
+    IHashTagService _hashtag) : IRequestHandler<CompleteUploadVideoCommand, Unit>
 {
     public async Task<Unit> Handle(CompleteUploadVideoCommand request, CancellationToken cancellationToken)
     {
@@ -21,7 +26,7 @@ public class CompleteUploadVideoCommandHandler(IAppDbContext appDbContext, IEven
             .AnyAsync(v => v.Id == request.VideoId, cancellationToken);
         if (exists is true) throw new BadRequestException("Відео уже існує");
         var parsedDescription = _parser.ParseDescription(request.Description);
-        var newVideo = new VideoEntity()
+        var newVideo = new VideoEntity
         {
             Id = request.VideoId,
             UserId = currentUser.Id!.Value,
@@ -36,7 +41,7 @@ public class CompleteUploadVideoCommandHandler(IAppDbContext appDbContext, IEven
 
         await appDbContext.Videos.AddAsync(newVideo, cancellationToken);
         await appDbContext.SaveChangesAsync(cancellationToken);
-        await eventBus.PublishAsync(new VideoStartProcessingEvent{ VideoId = request.VideoId });
+        await eventBus.PublishAsync(new VideoStartProcessingEvent { VideoId = request.VideoId });
         return Unit.Value;
     }
 }

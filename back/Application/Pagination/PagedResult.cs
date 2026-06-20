@@ -1,9 +1,8 @@
-﻿namespace Application.Pagination
-{
-    public class PagedResult<T>
-    {
-        public IEnumerable<T> Items { get; set; } = [];
+﻿namespace Application.Pagination;
 
-        public PaginationMetadata Metadata { get; set; } = new();
-    }
+public class PagedResult<T>
+{
+    public IEnumerable<T> Items { get; set; } = [];
+
+    public PaginationMetadata Metadata { get; set; } = new();
 }

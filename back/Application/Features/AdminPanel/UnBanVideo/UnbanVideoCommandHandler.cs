@@ -11,11 +11,11 @@ internal class UnbanVideoCommandHandler(IAppDbContext appDbContext) : IRequestHa
     {
         var video = await appDbContext
                         .Videos
-                        .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken: cancellationToken)
+                        .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
                     ?? throw new NotFoundException("Відео не знайдено");
-        
+
         video.Unban();
-        
+
         appDbContext.Videos.Update(video);
         await appDbContext.SaveChangesAsync(cancellationToken);
         return Unit.Value;
