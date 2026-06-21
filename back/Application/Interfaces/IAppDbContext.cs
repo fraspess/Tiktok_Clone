@@ -16,6 +16,7 @@ public interface IAppDbContext
 {
     public DbSet<VideoEntity> Videos { get; set; }
     public DbSet<VideoLikeEntity> VideoLikes { get; set; }
+    public DbSet<VideoViewEntity> VideoViews { get; set; }
     public DbSet<CommentEntity> Comments { get; set; }
     public DbSet<CommentLikeEntity> CommentLikes { get; set; }
     public DbSet<MessageEntity> Messages { get; set; }

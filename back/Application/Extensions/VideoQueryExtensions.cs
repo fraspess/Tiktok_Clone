@@ -13,6 +13,7 @@ public static class VideoQueryExtensions
         return query.Select(v => new VideoProjectionDto
         {
             Id = v.Id,
+            ShortId = v.ShortId,
             Description = v.Description,
             HashTags = v.HashTags.Select(h => h.HashTag.Tag).ToList(),
             LikeCount = v.LikeCount,
@@ -27,7 +28,13 @@ public static class VideoQueryExtensions
             },
             IsFavorited = v.Favorites.Any(f => f.UserId == currentUserId),
             IsLiked = v.Likes.Any(l => l.UserId == currentUserId),
-            CreatedAt = v.CreatedAt
+            CreatedAt = v.CreatedAt,
+            ViewCount = v.ViewCount
         });
+    }
+
+    public static async Task<Guid> GetIdFromShortIdAsync(this IQueryable<VideoEntity> query, string shortId, CancellationToken ct = default)
+    {
+        return await query.Where(v => v.ShortId == shortId).Select(v => v.Id).FirstOrDefaultAsync(ct);
     }
 }

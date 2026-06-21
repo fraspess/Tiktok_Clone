@@ -2,4 +2,4 @@
 
 namespace Application.Features.Video.ToggleFavorite;
 
-public record ToggleFavoriteCommand(Guid VideoId) : IRequest<Unit>;
+public record ToggleFavoriteCommand(string VideoId) : IRequest<Unit>;

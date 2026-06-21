@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.Features.Video.GetById;
 
-public record GetVideoByIdQuery(Guid Id) : IRequest<VideoDto>;
+public record GetVideoByIdQuery(string Id) : IRequest<VideoDto>;

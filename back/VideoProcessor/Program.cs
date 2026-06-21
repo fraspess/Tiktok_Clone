@@ -67,8 +67,6 @@ if (builder.Environment.IsDevelopment())
     if (!File.Exists(ffmpegPath)) await FFMpegDownloader.DownloadBinaries();
 }
 
-Console.WriteLine("ENVIRONMENT :: ", builder.Environment);
-
 var host = builder.Build();
 
 host.Run();

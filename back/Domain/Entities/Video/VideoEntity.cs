@@ -7,6 +7,7 @@ namespace Domain.Entities.Video;
 
 public class VideoEntity : BannableSoftDeletableEntity
 {
+    public string ShortId { get; set; } = string.Empty;
     [MaxLength(500)] public string? Description { get; set; }
 
     public required Guid UserId { get; set; }
@@ -14,7 +15,8 @@ public class VideoEntity : BannableSoftDeletableEntity
     public UserEntity? Author { get; set; }
 
     public int ProccessedInPercents { get; set; } // returned from microservice
-
+    
+    
     public VideoStatus Status { get; set; }
     public VideoReportReasons BanReason { get; set; }
 
@@ -27,4 +29,6 @@ public class VideoEntity : BannableSoftDeletableEntity
 
     public ICollection<FavoriteEntity> Favorites { get; set; } = new List<FavoriteEntity>();
     public int FavoriteCount { get; set; }
+    
+    public int ViewCount { get; set; }
 }

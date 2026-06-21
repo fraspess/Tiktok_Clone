@@ -28,8 +28,8 @@ public class CommentController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<object>.Success(null!, "Успішно створено коментар"));
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetComments(Guid videoId, int pageNumber = 1, int pageSize = 20)
+    [HttpGet("{videoId}")]
+    public async Task<IActionResult> GetComments(string videoId, int pageNumber = 1, int pageSize = 20)
     {
         var comments = await _mediator.Send(new GetCommentsQuery(videoId,
             new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));

@@ -6,6 +6,7 @@ namespace Application.Dtos.Video;
 public class VideoProjectionDto
 {
     public Guid Id { get; set; }
+    public string ShortId { get; set; }
 
     public string Description { get; set; } = string.Empty;
 
@@ -16,6 +17,7 @@ public class VideoProjectionDto
     public int CommentsCount { get; set; }
 
     public int FavoriteCount { get; set; }
+    public int ViewCount { get; set; }
 
     public UserAuthorDto Author { get; set; }
     public bool IsFavorited { get; set; }

@@ -22,7 +22,7 @@ public class GetForYouPageVideosQueryHandler(
             .Videos
             .OrderBy(v => Guid.NewGuid())
             .ToProjectionDto(currentUser.Id)
-            .ToPagedResultAsync(request.PaginationSettings);
+            .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 
         var result = videos.MapItems(videoMapper.ToDto);
         return result;

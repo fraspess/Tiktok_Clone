@@ -10,8 +10,4 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore"/>
         <PackageReference Include="System.Security.Cryptography.Xml"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Entities\Like\"/>
-    </ItemGroup>
 </Project>

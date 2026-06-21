@@ -9,8 +9,11 @@ using Application.Features.Video.GetFYP;
 using Application.Features.Video.GetUserVideos;
 using Application.Features.Video.Like;
 using Application.Features.Video.MyVideos;
+using Application.Features.Video.ToggleFavorite;
+using Application.Features.Video.UnLike;
 using Application.Features.Video.Upload;
 using Application.Features.Video.Upload.CompleteUpload;
+using Application.Features.Video.View;
 using Application.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +40,7 @@ public class VideoController(IMediator _mediator) : ControllerBase
     }*/
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetVideoById(Guid id)
+    public async Task<IActionResult> GetVideoById(string id)
     {
         var video = await _mediator.Send(new GetVideoByIdQuery(id));
 
@@ -47,7 +50,7 @@ public class VideoController(IMediator _mediator) : ControllerBase
     [Authorize]
     [HttpDelete("{id}")]
     [RateLimit(10, 60_000)]
-    public async Task<IActionResult> DeleteVideo(Guid id)
+    public async Task<IActionResult> DeleteVideo(string id)
     {
         await _mediator.Send(new DeleteVideoCommand(id));
         return Ok(ApiResponse<string>.Success("Відео успішно видалено"));
@@ -105,7 +108,7 @@ public class VideoController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<PagedResult<VideoDto>>.Success(videos));
     }
 
-    [HttpGet("user/my")]
+    [HttpGet("my")]
     [Authorize]
     public async Task<IActionResult> GetMyVideos(int pageNumber = 1, int pageSize = 10)
     {
@@ -114,10 +117,33 @@ public class VideoController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<PagedResult<MyVideoDto>>.Success(videos));
     }
 
-    [HttpPost("like/{videoId}")]
-    public async Task<IActionResult> ToggleLike(Guid videoId)
+    [HttpPost("{videoId}/like")]
+    public async Task<IActionResult> ToggleLike(string videoId)
     {
-        await _mediator.Send(new ToggleLikeCommand(videoId));
+        await _mediator.Send(new LikeVideoCommand(videoId));
+        return Ok(ApiResponse<object>.Success(null!, null));
+    }
+
+    [HttpDelete("{videoId}/like")]
+    public async Task<IActionResult> Unlike(string videoId)
+    {
+        await _mediator.Send(new UnlikeVideoCommand(videoId));
+        return Ok(ApiResponse<object>.Success(null!));
+    }
+
+    [HttpPost("{videoId}/view")]
+    public async Task<IActionResult> ViewVideo(string videoId)
+    {   
+        await _mediator.Send(new ViewVideoCommand(videoId));
+        return Ok(ApiResponse<object>.Success(null!));
+    }
+    
+    [HttpPost("{videoId}/favorite")]
+    [Authorize]
+    [RateLimit(20, 60_000)]
+    public async Task<IActionResult> Favorite(string videoId)
+    {
+        await _mediator.Send(new ToggleFavoriteCommand(videoId));
         return Ok(ApiResponse<object>.Success(null!, null));
     }
 }

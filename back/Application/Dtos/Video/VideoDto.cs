@@ -4,7 +4,7 @@ namespace Application.Dtos.Video;
 
 public class VideoDto
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string VideoUrl { get; set; }
 
     public string Description { get; set; } = string.Empty;
@@ -18,6 +18,7 @@ public class VideoDto
     public int CommentsCount { get; set; }
 
     public int FavoriteCount { get; set; }
+    public int ViewCount { get; set; }
 
     public bool IsFavorited { get; set; }
     public bool IsLiked { get; set; }

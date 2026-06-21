@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Application.Features.Comment.Get;
 
-public record GetCommentsQuery(Guid VideoId, PaginationSettings PaginationSettings)
+public record GetCommentsQuery(string VideoId, PaginationSettings PaginationSettings)
     : IRequest<PagedResult<CommentDto>>;

@@ -10,7 +10,7 @@ public class DeleteVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser 
 {
     public async Task<Unit> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
     {
-        var video = await appDbContext.Videos.FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
+        var video = await appDbContext.Videos.FirstOrDefaultAsync(v => v.ShortId == request.VideoId, cancellationToken)
                     ?? throw new NotFoundException("Відео не знайдено");
 
         if (video.UserId != user.Id) throw new NotAllowedException("Ви не маєте прав на цю дію");

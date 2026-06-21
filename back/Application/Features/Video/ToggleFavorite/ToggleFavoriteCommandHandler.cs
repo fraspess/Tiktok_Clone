@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Extensions;
+using Application.Interfaces;
 using Domain.Entities.Favorite;
 using Domain.Exceptions;
 using MediatR;
@@ -14,10 +15,10 @@ public class ToggleFavoriteCommandHandler(IAppDbContext appDbContext, ICurrentUs
         var videoId = request.VideoId;
         var userId = user.Id!.Value;
 
-        var existingVideo = await appDbContext.Videos.AnyAsync(v => v.Id == videoId, cancellationToken);
-        if (!existingVideo) throw new NotFoundException("Відео не знайдено");
+        var existingVideo = await appDbContext.Videos.GetIdFromShortIdAsync(videoId);
+        if (existingVideo == Guid.Empty) throw new NotFoundException("Відео не знайдено");
 
-        var favoriteEntity = await appDbContext.Favorites.Where(f => f.UserId == userId && f.VideoId == videoId)
+        var favoriteEntity = await appDbContext.Favorites.Where(f => f.UserId == userId && f.VideoId == existingVideo)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (favoriteEntity is null)
@@ -25,11 +26,11 @@ public class ToggleFavoriteCommandHandler(IAppDbContext appDbContext, ICurrentUs
             favoriteEntity = new FavoriteEntity
             {
                 UserId = userId,
-                VideoId = videoId
+                VideoId = existingVideo
             };
             await appDbContext.Favorites.AddAsync(favoriteEntity, cancellationToken);
             await appDbContext.Videos
-                .Where(v => v.Id == videoId)
+                .Where(v => v.Id == existingVideo)
                 .ExecuteUpdateAsync(v => v.SetProperty(x => x.FavoriteCount, x => x.FavoriteCount + 1),
                     cancellationToken);
         }
@@ -37,7 +38,7 @@ public class ToggleFavoriteCommandHandler(IAppDbContext appDbContext, ICurrentUs
         {
             appDbContext.Favorites.Remove(favoriteEntity);
             await appDbContext.Videos
-                .Where(v => v.Id == videoId)
+                .Where(v => v.Id == existingVideo)
                 .ExecuteUpdateAsync(v => v.SetProperty(x => x.FavoriteCount, x => x.FavoriteCount - 1),
                     cancellationToken);
         }

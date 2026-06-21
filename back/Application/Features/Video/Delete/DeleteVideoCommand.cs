@@ -2,4 +2,4 @@
 
 namespace Application.Features.Video.Delete;
 
-public record DeleteVideoCommand(Guid VideoId) : IRequest<Unit>;
+public record DeleteVideoCommand(string VideoId) : IRequest<Unit>;

@@ -14,7 +14,10 @@ public class VideoConfiguration : IEntityTypeConfiguration<VideoEntity>
             .WithMany(u => u.Videos)
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-
+        
+        builder
+            .HasIndex(v => v.ShortId)
+            .IsUnique();
 
         builder
             .HasQueryFilter(v =>

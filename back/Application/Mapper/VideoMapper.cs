@@ -13,6 +13,7 @@ public partial class VideoMapper(IStorageService storageService)
     [MapProperty(nameof(VideoProjectionDto.Id), nameof(VideoDto.VideoUrl), Use = nameof(GetVideoUrl))]
     [MapProperty(nameof(VideoProjectionDto.Author.Id), nameof(VideoDto.Author.Avatar), Use = nameof(GetAvatarUrl))]
     [MapProperty(nameof(VideoProjectionDto.Id), nameof(VideoDto.ThumbnailUrl), Use = nameof(GetThumbnailUrl))]
+    [MapProperty(nameof(VideoProjectionDto.ShortId), nameof(VideoDto.Id))]
     public partial VideoDto ToDto(VideoProjectionDto source);
 
     [MapProperty(nameof(VideoProjectionDto.Author.Id), nameof(VideoDto.Author.Id))]

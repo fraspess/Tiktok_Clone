@@ -6,6 +6,7 @@ using Contracts;
 using Contracts.Events;
 using Domain;
 using MediatR;
+using NanoidDotNet;
 
 namespace Application.Features.Video.Upload;
 
@@ -38,7 +39,7 @@ internal class UploadVideoCommandHandler(
         var randomGuid = Guid.NewGuid();
         return new
         {
-            Url = await storageService.GetVideoUploadPresignedUrlAsync(randomGuid, request.ContentType),
+            Url = await storageService.GetVideoUploadPresignedUrlAsync( randomGuid, request.ContentType),
             VideoId = randomGuid
         };
     }

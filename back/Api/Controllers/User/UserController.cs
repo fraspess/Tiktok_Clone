@@ -31,7 +31,7 @@ namespace Api.Controllers.User;
 public class UserController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("login")]
-    [RateLimit(7, 60_000)]
+    [RateLimit(5, 60_000)]
     public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
     {
         var tokens = await _mediator.Send(command);

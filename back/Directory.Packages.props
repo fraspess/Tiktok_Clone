@@ -51,5 +51,6 @@
 
 		<PackageVersion Include="StackExchange.Redis" Version="3.0.0" />
 		<PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.9" />
+		<PackageVersion Include="Nanoid" Version="3.1.0" />
 	</ItemGroup>
 </Project>
