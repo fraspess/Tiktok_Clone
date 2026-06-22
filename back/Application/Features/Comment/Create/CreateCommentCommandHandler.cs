@@ -28,22 +28,18 @@ internal class CreateCommentCommandHandler(IAppDbContext appDbContext, ICurrentU
                 VideoId = videoId
             };
             await appDbContext.Comments.AddAsync(newComment, cancellationToken);
-            await appDbContext.Videos
-                .Where(v => v.Id == videoId)
-                .ExecuteUpdateAsync(v => v.SetProperty(x => x.CommentCount, x => x.CommentCount + 1),
-                    cancellationToken);
         }
         else
         {
             var comment = new CommentEntity { Text = dto.Text, UserId = ownerId, VideoId = videoId };
             await appDbContext.Comments.AddAsync(comment, cancellationToken);
+        }
+
+        await appDbContext.SaveChangesAsync(cancellationToken);
             await appDbContext.Videos
                 .Where(v => v.Id == videoId)
                 .ExecuteUpdateAsync(v => v.SetProperty(x => x.CommentCount, x => x.CommentCount + 1),
                     cancellationToken);
-        }
-
-        await appDbContext.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }

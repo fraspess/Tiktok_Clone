@@ -7,9 +7,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Application.Features.Video.Upload.CompleteUpload;
 using Domain.Entities.Identity;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Infrastructure.Services.Token;
 
@@ -40,7 +42,8 @@ internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
             ValidAudience = _options.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_options.Key
-                ))
+                )),
+            ClockSkew = TimeSpan.Zero
         };
 
         ClaimsPrincipal principal;
@@ -65,9 +68,56 @@ internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
         if (user.RefreshTokenVersion != int.Parse(tokenVersion))
             throw new UnauthorizedException("Не валідний refresh токен");
 
-        if (user.IsBanned is true) throw new NotAllowedException("Аккаунт заблокований");
+        if (user.IsBanned) throw new NotAllowedException("Аккаунт заблокований");
 
         return await GenerateTokensAsync(user);
+    }
+
+    public string GenerateUploadToken(Guid videoId, Guid userId)
+    {
+        var claims = new[] { new Claim("videoId", videoId.ToString()), new Claim("userId", userId.ToString()) };
+        
+        var creds = GetSigningCredentials();
+
+        var token = new JwtSecurityToken(
+            _options.Issuer,
+            _options.Audience,
+            claims,
+            expires: DateTime.UtcNow.AddMinutes(15),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public UploadTokenPayload ValidateUpdateToken(string token)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var key = _options.Key;
+
+            handler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,    
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _options.Issuer,
+                ValidAudience = _options.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(_options.Key
+                    )),
+                ClockSkew = TimeSpan.Zero
+            }, out var validatedToken);
+            
+            var jwt = (JwtSecurityToken)validatedToken;
+            return new UploadTokenPayload(Guid.Parse(jwt.Claims.First(c => c.Type == "videoId").Value), Guid.Parse(jwt.Claims.First(c => c.Type == "userId").Value));
+        }
+        catch(Exception ex)
+        {
+            return null;
+        }
     }
 
     private async Task<string> CreateAccessTokenAsync(UserEntity user)

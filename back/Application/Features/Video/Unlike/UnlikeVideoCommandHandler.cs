@@ -18,11 +18,11 @@ public class UnlikeVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser 
         if (existingLike is null) return Unit.Value;
         
         appDbContext.VideoLikes.Remove(existingLike);
+        await appDbContext.SaveChangesAsync(cancellationToken);
         await appDbContext
             .Videos
             .Where(v => v.Id == videoId)
             .ExecuteUpdateAsync(v => v.SetProperty(x => x.LikeCount, x => x.LikeCount - 1), cancellationToken);
-        await appDbContext.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }

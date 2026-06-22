@@ -25,12 +25,11 @@ internal class LikeVideoCommandHandler(ICurrentUser user, IAppDbContext appDbCon
             UserId = user.Id!.Value,
             VideoId = videoId
         }, cancellationToken);
-
+        
+        await appDbContext.SaveChangesAsync(cancellationToken);
         await appDbContext.Videos
             .Where(v => v.Id == videoId)
             .ExecuteUpdateAsync(v => v.SetProperty(x => x.LikeCount, x => x.LikeCount + 1), cancellationToken);
-
-        await appDbContext.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }

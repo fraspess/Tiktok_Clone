@@ -18,20 +18,24 @@ public class CompleteUploadVideoCommandHandler(
     IEventBus<VideoStartProcessingEvent> eventBus,
     IDescriptionParser _parser,
     ICurrentUser currentUser,
-    IHashTagService _hashtag) : IRequestHandler<CompleteUploadVideoCommand, Unit>
+    IHashTagService _hashtag,
+    IJWTTokenService jwtTokenService) : IRequestHandler<CompleteUploadVideoCommand, Unit>
 {
     public async Task<Unit> Handle(CompleteUploadVideoCommand request, CancellationToken cancellationToken)
     {
+        var payload = jwtTokenService.ValidateUpdateToken(request.Token);
+        if(payload is null || payload.UserId != currentUser.Id) throw new BadRequestException("Невалідний токен!");
+
         var video = await appDbContext
             .Videos
-            .Where(v => v.Id == request.VideoId)
+            .Where(v => v.Id == payload.VideoId)
             .FirstOrDefaultAsync(cancellationToken);
         if (video != null) throw new BadRequestException("Відео вже існує");
         
         var parsedDescription = _parser.ParseDescription(request.Description);
         var newVideo = new VideoEntity
         {
-            Id = request.VideoId,
+            Id = payload.VideoId,
             ShortId = await Nanoid.GenerateAsync("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 9),
             UserId = currentUser.Id!.Value,
             Description = parsedDescription.CleanText,
@@ -45,7 +49,7 @@ public class CompleteUploadVideoCommandHandler(
 
         await appDbContext.Videos.AddAsync(newVideo, cancellationToken);
         await appDbContext.SaveChangesAsync(cancellationToken);
-        await eventBus.PublishAsync(new VideoStartProcessingEvent { VideoId = request.VideoId});
+        await eventBus.PublishAsync(new VideoStartProcessingEvent { VideoId = payload.VideoId});
         return Unit.Value;
     }
 }

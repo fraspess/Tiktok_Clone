@@ -2,6 +2,7 @@
 using Application;
 using Application.Dtos.Video;
 using Application.Features.Video.Delete;
+using Application.Features.Video.Favorite;
 using Application.Features.Video.GetById;
 using Application.Features.Video.GetBySomeQuery;
 using Application.Features.Video.GetFollowingFYP;
@@ -9,7 +10,7 @@ using Application.Features.Video.GetFYP;
 using Application.Features.Video.GetUserVideos;
 using Application.Features.Video.Like;
 using Application.Features.Video.MyVideos;
-using Application.Features.Video.ToggleFavorite;
+using Application.Features.Video.Unfavorite;
 using Application.Features.Video.UnLike;
 using Application.Features.Video.Upload;
 using Application.Features.Video.Upload.CompleteUpload;
@@ -66,12 +67,12 @@ public class VideoController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<object>.Success(url));
     }
 
-    [HttpPost("{videoId}/upload-complete")]
+    [HttpPost("upload-complete")]
     [Authorize]
     [RateLimit(5, 60_000)]
-    public async Task<IActionResult> UploadComplete(Guid videoId, string description)
-    {
-        await _mediator.Send(new CompleteUploadVideoCommand(videoId, description));
+    public async Task<IActionResult> UploadComplete([FromBody] CompleteUploadVideoCommand command)
+    {       
+        await _mediator.Send(command);
         return Ok(ApiResponse<object>.Success(null!));
     }
 
@@ -143,7 +144,16 @@ public class VideoController(IMediator _mediator) : ControllerBase
     [RateLimit(20, 60_000)]
     public async Task<IActionResult> Favorite(string videoId)
     {
-        await _mediator.Send(new ToggleFavoriteCommand(videoId));
+        await _mediator.Send(new FavoriteVideoCommand(videoId));
         return Ok(ApiResponse<object>.Success(null!, null));
+    }
+
+    [HttpDelete("{videoId}/favorite")]
+    [Authorize]
+    [RateLimit(20, 60_000)]
+    public async Task<IActionResult> Unfavorite(string videoId)
+    {
+        await _mediator.Send(new UnfavoriteCommand(videoId));
+        return Ok(ApiResponse<object>.Success(null!));
     }
 }

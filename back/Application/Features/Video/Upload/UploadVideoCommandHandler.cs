@@ -11,12 +11,9 @@ using NanoidDotNet;
 namespace Application.Features.Video.Upload;
 
 internal class UploadVideoCommandHandler(
-    IAppDbContext appDbContext,
-    IDescriptionParser _parser,
-    IHashTagService _hashtag,
-    IEventBus<VideoStartProcessingEvent> eventBus,
-    ICurrentUser currentUser,
-    IStorageService storageService) : IRequestHandler<UploadVideoCommand, object>
+    IStorageService storageService,
+    IJWTTokenService jwtTokenService,
+    ICurrentUser currentUser) : IRequestHandler<UploadVideoCommand, object>
 {
     public async Task<object> Handle(UploadVideoCommand request, CancellationToken cancellationToken)
     {
@@ -37,10 +34,11 @@ internal class UploadVideoCommandHandler(
         await appDbContext.SaveChangesAsync(cancellationToken);*/
 
         var randomGuid = Guid.NewGuid();
+        var token = jwtTokenService.GenerateUploadToken(randomGuid, currentUser.Id!.Value);
         return new
         {
-            Url = await storageService.GetVideoUploadPresignedUrlAsync( randomGuid, request.ContentType),
-            VideoId = randomGuid
+            Url = await storageService.GetVideoUploadPresignedUrlAsync(randomGuid, request.ContentType),
+            UploadToken = token
         };
     }
 }
