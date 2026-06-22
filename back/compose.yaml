@@ -30,6 +30,7 @@ services:
       - AWS__S3__ServiceUrl=http://localstack:4566
       - AWS__S3__CdnScheme=http
       - AWS__S3__CdnDomain=localhost:4566
+      - SMTP__Password=${SMTP__Password}
     volumes:
       - api_logs:/app/logs
     networks:
@@ -89,10 +90,13 @@ services:
     environment:
       - SERVICES=s3
       - AWS_DEFAULT_REGION=eu-central-1
+      - DOCKER_FLAGS=--user root
+    entrypoint: >
+      bash -c "chmod +x /etc/localstack/init/ready.d/*.sh && docker-entrypoint.sh"
     networks:
       - tiktok_network
     healthcheck:
-      test: ["CMD","awslocal","s3","ls"]
+      test: ["CMD", "awslocal", "s3", "ls"]
       interval: 5s
       timeout: 10s
       retries: 10
