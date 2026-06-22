@@ -1,44 +1,22 @@
+import {Route, Routes} from "react-router-dom";
+import MainLayout from "@/components/layout/MainLayout.tsx";
+import HomePage from "@/pages/HomePage.tsx";
+import LoginPage from "@/pages/LoginPage.tsx";
+import RegisterPage from "@/pages/RegisterPage.tsx";
 
-
-import './App.css'
-import {type ILogin, useLoginMutation, useRefreshMutation} from "../store/apis/testApi.ts";
 
 function App() {
-  const [login] = useLoginMutation();
-  const [refresh] = useRefreshMutation();
 
-  const handleLogin = async () => {
-    const testData : ILogin = {
-      login: "admin@example.com",
-      password:"Admin123!"
-    };
-    try{
-      const response = await login(testData).unwrap();
-      console.log(response);
-    }
-    catch (e) {
-      console.error(e);
-    }
-  }
-    const handleRefresh = async () => {
-        try{
-          const response = await refresh().unwrap();
-          console.log(response);
-        }
-        catch (e) {
-          console.error(e);
-        }
-    }
   return (
     <>
-        <div style={{textAlign:"center"}}>
-          <button style={{width: "50%", height: "30px"}} onClick={handleLogin}>Login</button>
+        <Routes>
+            <Route path="/" element={<MainLayout />} >
+                <Route index element={<HomePage/>} />
+            </Route>
 
-        </div>
-        <div style={{textAlign:"center"}}>
-          <button style={{width: "50%", height: "30px", marginTop:"10px"}} onClick={handleRefresh}>Refresh</button>
-        </div>
-
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+        </Routes>
     </>
   )
 }
