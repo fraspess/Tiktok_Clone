@@ -31,6 +31,7 @@ services:
       - AWS__S3__CdnScheme=http
       - AWS__S3__CdnDomain=localhost:4566
       - SMTP__Password=${SMTP__Password}
+      - Redis__ConnectionString=redis:6379
     volumes:
       - api_logs:/app/logs
     networks:
@@ -102,11 +103,30 @@ services:
       retries: 10
       start_period: 10s
 
+  redis:
+    image: redis:latest
+    container_name: "redis"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis_data:/data
+    networks:
+      - tiktok_network
+    restart: unless-stopped
+
+
+
 networks:
   tiktok_network:
     name: "tiktok_network"
 
 volumes:
+  redis_data:
+    driver: local
+    name: "redis_data"
   db:
     driver: local
     name: "db"
