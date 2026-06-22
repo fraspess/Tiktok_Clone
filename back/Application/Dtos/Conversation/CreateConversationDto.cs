@@ -1,7 +1,6 @@
-﻿namespace Application.Dtos.Conversation
+﻿namespace Application.Dtos.Conversation;
+
+public class CreateConversationDto
 {
-    public class CreateConversationDto
-    {
-        public List<Guid> UserIds { get; set; } = [];
-    }
+    public List<Guid> UserIds { get; set; } = [];
 }

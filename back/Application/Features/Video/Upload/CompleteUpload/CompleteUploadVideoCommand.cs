@@ -2,4 +2,4 @@
 
 namespace Application.Features.Video.Upload.CompleteUpload;
 
-public record CompleteUploadVideoCommand(Guid VideoId, string Description) : IRequest<Unit>;
+public record CompleteUploadVideoCommand(string Token, string Description) : IRequest<Unit>;

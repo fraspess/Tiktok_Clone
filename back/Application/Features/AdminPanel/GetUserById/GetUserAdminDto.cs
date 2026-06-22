@@ -15,5 +15,5 @@ public class GetUserAdminDto
     public UserReportReasons? BanReason { get; set; }
     public Guid? BannedBy { get; set; }
     public string? FirstName { get; set; }
-    public string? LastName { get;set; }
+    public string? LastName { get; set; }
 }

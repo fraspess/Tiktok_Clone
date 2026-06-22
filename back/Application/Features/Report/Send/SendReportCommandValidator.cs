@@ -25,7 +25,7 @@ public class SendReportCommandValidator : AbstractValidator<SendReportCommand>
                 RuleFor(c => c.Dto)
                     .Must(dto => dto.Reason.HasValue || !string.IsNullOrWhiteSpace(dto.CustomReason))
                     .WithMessage("Необхідно вказати причину скарги");
-                
+
                 RuleFor(c => c.Dto)
                     .Must(dto => !dto.Reason.HasValue || dto.ContentType switch
                     {
@@ -35,10 +35,6 @@ public class SendReportCommandValidator : AbstractValidator<SendReportCommand>
                         _ => false
                     })
                     .WithMessage("Невірна причина скарги");
-                
-                
             });
-        
     }
-
 }

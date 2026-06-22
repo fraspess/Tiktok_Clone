@@ -1,4 +1,5 @@
-﻿using Application.Features.Video.Shared;
+﻿using Application.Extensions;
+using Application.Features.Video.Shared;
 using Application.Interfaces;
 using Application.Services.HashTag;
 using Contracts;
@@ -8,22 +9,34 @@ using Domain.Entities.Video;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NanoidDotNet;
 
 namespace Application.Features.Video.Upload.CompleteUpload;
 
-public class CompleteUploadVideoCommandHandler(IAppDbContext appDbContext, IEventBus<VideoStartProcessingEvent> eventBus, IDescriptionParser _parser, ICurrentUser currentUser, IHashTagService _hashtag) : IRequestHandler<CompleteUploadVideoCommand, Unit>
+public class CompleteUploadVideoCommandHandler(
+    IAppDbContext appDbContext,
+    IEventBus<VideoStartProcessingEvent> eventBus,
+    IDescriptionParser _parser,
+    ICurrentUser currentUser,
+    IHashTagService _hashtag,
+    IJWTTokenService jwtTokenService) : IRequestHandler<CompleteUploadVideoCommand, Unit>
 {
     public async Task<Unit> Handle(CompleteUploadVideoCommand request, CancellationToken cancellationToken)
     {
-        var exists = await appDbContext
+        var payload = jwtTokenService.ValidateUpdateToken(request.Token);
+        if(payload is null || payload.UserId != currentUser.Id) throw new BadRequestException("Невалідний токен!");
+
+        var video = await appDbContext
             .Videos
-            .IgnoreQueryFilters()
-            .AnyAsync(v => v.Id == request.VideoId, cancellationToken);
-        if (exists is true) throw new BadRequestException("Відео уже існує");
+            .Where(v => v.Id == payload.VideoId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (video != null) throw new BadRequestException("Відео вже існує");
+        
         var parsedDescription = _parser.ParseDescription(request.Description);
-        var newVideo = new VideoEntity()
+        var newVideo = new VideoEntity
         {
-            Id = request.VideoId,
+            Id = payload.VideoId,
+            ShortId = await Nanoid.GenerateAsync("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 9),
             UserId = currentUser.Id!.Value,
             Description = parsedDescription.CleanText,
             Status = VideoStatus.Pending,
@@ -36,7 +49,7 @@ public class CompleteUploadVideoCommandHandler(IAppDbContext appDbContext, IEven
 
         await appDbContext.Videos.AddAsync(newVideo, cancellationToken);
         await appDbContext.SaveChangesAsync(cancellationToken);
-        await eventBus.PublishAsync(new VideoStartProcessingEvent{ VideoId = request.VideoId });
+        await eventBus.PublishAsync(new VideoStartProcessingEvent { VideoId = payload.VideoId});
         return Unit.Value;
     }
 }

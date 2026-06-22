@@ -7,26 +7,34 @@ namespace Application.Extensions;
 
 public static class VideoQueryExtensions
 {
-    public static IQueryable<VideoProjectionDto> ToProjectionDto(this IQueryable<VideoEntity> query, Guid? currentUserId)
+    public static IQueryable<VideoProjectionDto> ToProjectionDto(this IQueryable<VideoEntity> query,
+        Guid? currentUserId)
     {
-        return query.Select(v => new VideoProjectionDto()
+        return query.Select(v => new VideoProjectionDto
         {
             Id = v.Id,
+            ShortId = v.ShortId,
             Description = v.Description,
             HashTags = v.HashTags.Select(h => h.HashTag.Tag).ToList(),
-            LikeCount = v.Likes.Count,
-            CommentsCount = v.Comments.Count,
-            FavoriteCount = v.Favorites.Count,
+            LikeCount = v.LikeCount,
+            CommentsCount = v.CommentCount,
+            FavoriteCount = v.FavoriteCount,
             Status = v.Status,
             ProccessedInPercents = v.ProccessedInPercents,
-            Author = new UserAuthorDto()
+            Author = new UserAuthorDto
             {
-                Id =  v.Author.Id,
+                Id = v.Author.Id,
                 Username = v.Author.UserName
             },
             IsFavorited = v.Favorites.Any(f => f.UserId == currentUserId),
-            IsLiked =  v.Likes.Any(l => l.UserId == currentUserId),
-            CreatedAt = v.CreatedAt
+            IsLiked = v.Likes.Any(l => l.UserId == currentUserId),
+            CreatedAt = v.CreatedAt,
+            ViewCount = v.ViewCount
         });
+    }
+
+    public static async Task<Guid> GetIdFromShortIdAsync(this IQueryable<VideoEntity> query, string shortId, CancellationToken ct = default)
+    {
+        return await query.Where(v => v.ShortId == shortId).Select(v => v.Id).FirstOrDefaultAsync(ct);
     }
 }

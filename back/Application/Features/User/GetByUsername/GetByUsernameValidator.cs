@@ -1,12 +1,11 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.User.GetByUsername
+namespace Application.Features.User.GetByUsername;
+
+public class GetByUsernameValidator : AbstractValidator<GetUserByUsernameQuery>
 {
-    public class GetByUsernameValidator : AbstractValidator<GetUserByUsernameQuery>
+    public GetByUsernameValidator()
     {
-        public GetByUsernameValidator()
-        {
-            RuleFor(x => x.Username).NotEmpty().WithMessage("Юзернейм не може бути пустим");
-        }
+        RuleFor(x => x.Username).NotEmpty().WithMessage("Юзернейм не може бути пустим");
     }
 }

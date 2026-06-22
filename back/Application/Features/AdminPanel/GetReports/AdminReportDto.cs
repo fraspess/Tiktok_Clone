@@ -8,22 +8,7 @@ public class AdminReportDto
     public DateTime CreatedAt { get; set; }
     public ReportStatus Status { get; set; }
     public string? Reason { get; set; }
-    
+
     public ReportUserDto ReportedBy { get; set; }
     public ReportedContentDto ReportedContent { get; set; }
-}
-
-public class ReportUserDto
-{
-    public Guid Id { get; set; }
-    public string Username { get; set; }
-    public object? Avatar { get; set; }
-}
-
-public class ReportedContentDto
-{
-    public Guid Id { get; set; }
-    public string? Title { get; set; }
-    public object? Thumbnail { get; set; }
-    public string? ContentUrl { get; set; }
 }

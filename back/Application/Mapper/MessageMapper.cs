@@ -14,5 +14,8 @@ public partial class MessageMapper(IStorageService storageService)
     public partial MessageDto ToDto(MessageEntity source);
 
     [UserMapping(Default = false)]
-    private object GetUserAvatar(Guid id) => storageService.GetUserAvatar(id);
+    private object GetUserAvatar(Guid id)
+    {
+        return storageService.GetUserAvatar(id);
+    }
 }

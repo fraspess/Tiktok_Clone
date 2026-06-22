@@ -6,17 +6,19 @@ namespace Application.Dtos.Video;
 public class VideoProjectionDto
 {
     public Guid Id { get; set; }
+    public string ShortId { get; set; }
 
-    public string Description { get; set; } = String.Empty;
+    public string Description { get; set; } = string.Empty;
 
-    public List<string> HashTags { get; set; } = new List<string>();
+    public List<string> HashTags { get; set; } = new();
 
     public int LikeCount { get; set; }
 
     public int CommentsCount { get; set; }
 
     public int FavoriteCount { get; set; }
-    
+    public int ViewCount { get; set; }
+
     public UserAuthorDto Author { get; set; }
     public bool IsFavorited { get; set; }
     public bool IsLiked { get; set; }

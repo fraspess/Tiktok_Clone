@@ -1,7 +1,6 @@
-﻿namespace Contracts
+﻿namespace Contracts;
+
+public interface IEventBus<T>
 {
-    public interface IEventBus<T>
-    {
-        public Task PublishAsync(T message);
-    }
+    public Task PublishAsync(T message);
 }

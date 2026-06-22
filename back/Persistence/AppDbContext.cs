@@ -4,7 +4,6 @@ using Domain.Entities.Conversation;
 using Domain.Entities.Favorite;
 using Domain.Entities.HashTags;
 using Domain.Entities.Identity;
-using Domain.Entities.Like;
 using Domain.Entities.Message;
 using Domain.Entities.Report;
 using Domain.Entities.Video;
@@ -26,7 +25,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 >(options), IAppDbContext
 {
     public DbSet<VideoEntity> Videos { get; set; }
+    public DbSet<VideoLikeEntity> VideoLikes { get; set; }
+    public DbSet<VideoViewEntity> VideoViews { get; set; }
     public DbSet<CommentEntity> Comments { get; set; }
+    public DbSet<CommentLikeEntity> CommentLikes { get; set; }
     public DbSet<MessageEntity> Messages { get; set; }
     public DbSet<ReportEntity> Reports { get; set; }
     public DbSet<UserFollowEntity> UserFollows { get; set; }
@@ -36,15 +38,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
     public DbSet<FavoriteEntity> Favorites { get; set; }
 
-    public DbSet<LikeEntity> Likes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
     }
-    
+
     public TEntity? GetTracked<TEntity>(Func<TEntity, bool> predicate) where TEntity : class
     {
         return ChangeTracker.Entries<TEntity>()

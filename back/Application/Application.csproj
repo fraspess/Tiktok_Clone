@@ -16,7 +16,6 @@
         <PackageReference Include="Google.Apis.Auth"/>
         <PackageReference Include="MailKit"/>
         <PackageReference Include="MediatR"/>
-        <PackageReference Include="Newtonsoft.Json"/>
         <PackageReference Include="Serilog.AspNetCore"/>
         <PackageReference Include="Serilog.Sinks.Console"/>
         <PackageReference Include="Serilog.Sinks.File"/>
@@ -25,7 +24,10 @@
         <PackageReference Include="System.Security.Cryptography.Xml"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
         <PackageReference Include="Riok.Mapperly"/>
-        <PackageReference Include="AWSSDK.S3" />
+        <PackageReference Include="AWSSDK.S3"/>
+        <PackageReference Include="Nanoid" />
+
+
     </ItemGroup>
 
 </Project>

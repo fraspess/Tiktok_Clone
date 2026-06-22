@@ -9,7 +9,7 @@ public static class EnumExtensions
     {
         return value.GetType()
                    .GetField(value.ToString())!
-                   .GetCustomAttribute<DescriptionAttribute>()?.Description 
+                   .GetCustomAttribute<DescriptionAttribute>()?.Description
                ?? value.ToString();
     }
 }

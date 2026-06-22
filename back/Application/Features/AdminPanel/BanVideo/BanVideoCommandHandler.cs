@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.AdminPanel.BanVideo;
 
-internal class BanVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser user) : IRequestHandler<BanVideoCommand, Unit>
+internal class BanVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser user)
+    : IRequestHandler<BanVideoCommand, Unit>
 {
     public async Task<Unit> Handle(BanVideoCommand request, CancellationToken cancellationToken)
     {
         var video = await appDbContext
                         .Videos
-                        .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken: cancellationToken)
+                        .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
                     ?? throw new NotFoundException("Відео не знайдено");
 
         video.Ban(user.Id!.Value);

@@ -14,6 +14,5 @@ public class MessageConfiguration : IEntityTypeConfiguration<MessageEntity>
             .WithMany(u => u.SentMessages)
             .HasForeignKey(m => m.SenderId)
             .OnDelete(DeleteBehavior.Restrict);
-        
     }
 }

@@ -1,4 +1,5 @@
-﻿using Application;
+﻿using Api.RateLimiting;
+using Application;
 using Application.Dtos.User;
 using Application.Extensions;
 using Application.Features.User.ChangeUsername;
@@ -30,6 +31,7 @@ namespace Api.Controllers.User;
 public class UserController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("login")]
+    [RateLimit(5, 60_000)]
     public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
     {
         var tokens = await _mediator.Send(command);
@@ -38,6 +40,7 @@ public class UserController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<object>.Success(new { accessToken = tokens.AccessToken }, "Успішний вхід"));
     }
 
+    [RateLimit(3, 60_000)]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromForm] RegisterUserCommand command)
     {
@@ -47,6 +50,7 @@ public class UserController(IMediator _mediator) : ControllerBase
             "Код для підтвердження реєстрації був надісланий на вказану почту."));
     }
 
+    [RateLimit(10, 60_000)]
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailCommand command)
     {
@@ -56,6 +60,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("google")]
+    [RateLimit(10, 60_000)]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthDto request)
     {
         var tokens = await _mediator.Send(new GoogleAuthCommand(request.IdToken));
@@ -72,6 +77,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("refresh")]
+    [RateLimit(20, 15 * 60_000)]
     public async Task<IActionResult> Refresh()
     {
         var refreshToken = Request.Cookies["refreshToken"]
@@ -104,6 +110,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("forgot-password")]
+    [RateLimit(3, 15 * 60_000)]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand forgotPasswordCommand)
     {
         await _mediator.Send(forgotPasswordCommand);
@@ -111,6 +118,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("reset-password")]
+    [RateLimit(5, 60_000)]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
     {
         await _mediator.Send(command);
@@ -118,6 +126,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("resend-confirmation-email")]
+    [RateLimit(2, 60_000)]
     public async Task<IActionResult> ResendConfirmationEmail(ResendConfirmationEmailCommand command)
     {
         await _mediator.Send(command);
@@ -125,6 +134,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpGet("{username}")]
+    [RateLimit(60, 60_000)]
     public async Task<IActionResult> GetUserProfile(string username)
     {
         username = username.TrimStart('@');
@@ -133,6 +143,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("follow")]
+    [RateLimit(30, 60_000)]
     [Authorize]
     public async Task<IActionResult> Follow(Guid following)
     {
@@ -142,6 +153,7 @@ public class UserController(IMediator _mediator) : ControllerBase
 
     [HttpPatch]
     [Authorize]
+    [RateLimit(2, 60_000)]
     public async Task<IActionResult> Update([FromForm] UpdateUserDto dto)
     {
         await _mediator.Send(new UpdateUserCommand(dto));
@@ -149,6 +161,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPatch("change-username")]
+    [RateLimit(2, 24 * 60 * 60_000)]
     [Authorize]
     public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameUserDto dto)
     {
@@ -157,17 +170,22 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpGet("{username}/followers")]
-    public async Task<IActionResult> GetFollowers(string username, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+    [RateLimit(30, 60_000)]
+    public async Task<IActionResult> GetFollowers(string username, [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20)
     {
-        var followers = await _mediator.Send(new GetUserFollowersCommand(username,new PaginationSettings{PageNumber = pageNumber, PageSize = pageSize}));
+        var followers = await _mediator.Send(new GetUserFollowersCommand(username,
+            new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
         return Ok(ApiResponse<object>.Success(followers));
     }
 
     [HttpGet("{username}/following")]
+    [RateLimit(30, 60_000)]
     public async Task<IActionResult> GetFollowing(string username, [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20)
     {
-        var following = await _mediator.Send(new GetUserFollowingCommand(username, new PaginationSettings(){PageNumber = pageNumber, PageSize = pageSize}));
+        var following = await _mediator.Send(new GetUserFollowingCommand(username,
+            new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
         return Ok(ApiResponse<object>.Success(following));
     }
 
@@ -192,5 +210,4 @@ public class UserController(IMediator _mediator) : ControllerBase
             Expires = DateTime.UtcNow.AddDays(-1)
         });
     }
-    
 }

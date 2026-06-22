@@ -23,6 +23,6 @@ public class CommentLikeConfiguration : IEntityTypeConfiguration<CommentLikeEnti
 
         builder
             .HasIndex(x => new { x.UserId, x.CommentId })
-            .IsUnique(); 
+            .IsUnique();
     }
 }

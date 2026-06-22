@@ -8,10 +8,9 @@ public class ConversationParticipantConfiguration : IEntityTypeConfiguration<Con
 {
     public void Configure(EntityTypeBuilder<ConversationParticipant> builder)
     {
-        
         builder
             .HasKey(p => new { p.ConversationId, p.UserId });
-        
+
         builder
             .HasOne(p => p.User)
             .WithMany(u => u.ConversationParticipants)

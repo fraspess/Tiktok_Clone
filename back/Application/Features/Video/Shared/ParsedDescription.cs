@@ -1,8 +1,7 @@
-﻿namespace Application.Features.Video.Shared
+﻿namespace Application.Features.Video.Shared;
+
+public class ParsedDescription
 {
-    public class ParsedDescription
-    {
-        public string CleanText { get; set; } = String.Empty;
-        public List<string> Tags { get; set; } = new List<string>();
-    }
+    public string CleanText { get; set; } = string.Empty;
+    public List<string> Tags { get; set; } = new();
 }

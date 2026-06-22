@@ -2,6 +2,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using Application.Dtos.User;
 using Application.Interfaces;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;
@@ -12,6 +13,7 @@ namespace Infrastructure.Services.Storage;
 internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> options) : IStorageService
 {
     private readonly AwsS3Options _options = options.Value;
+
     public string GetVideoThumbnail(Guid videoId)
     {
         return $"{_options.CdnBaseUrl}/uploads/processed/{videoId}/thumbnail.jpg";
@@ -22,12 +24,14 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
         return $"{_options.CdnBaseUrl}/uploads/processed/{videoId}/master.m3u8";
     }
 
-    public object GetUserAvatar(Guid userId)
+    public AvatarDto GetUserAvatar(Guid userId)
     {
-        return new {
-            Small = $"{_options.CdnBaseUrl}/avatars/{userId}/small.webp",
-            Medium = $"{_options.CdnBaseUrl}/avatars/{userId}/medium.webp",
-            Large = $"{_options.CdnBaseUrl}/avatars/{userId}/large.webp"
+        return new AvatarDto
+        {
+            Small = $"{_options.CdnBaseUrl}/avatars/{userId}/small.webp?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
+            Medium =
+                $"{_options.CdnBaseUrl}/avatars/{userId}/medium.webp?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
+            Large = $"{_options.CdnBaseUrl}/avatars/{userId}/large.webp?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
         };
     }
 
@@ -44,7 +48,7 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
         if (!allowed.Contains(contentType))
             throw new ValidationException("Тільки відео файли дозволені");
 
-        var url = s3Client.GetPreSignedURL(new GetPreSignedUrlRequest()
+        var url = s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
         {
             BucketName = _options.BucketName,
             Key = $"uploads/unprocessed/{videoId}/original",
@@ -52,7 +56,7 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
             Expires = DateTime.Now.AddMinutes(15),
             ContentType = contentType
         });
-        
+
         var uri = new Uri(url);
         var publicUrl = new Uri(_options.CdnBaseUrl);
         var result = new UriBuilder(uri)

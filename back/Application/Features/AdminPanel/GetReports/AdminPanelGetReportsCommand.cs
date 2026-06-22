@@ -5,4 +5,5 @@ using MediatR;
 
 namespace Application.Features.AdminPanel.GetReports;
 
-public record AdminPanelGetReportsCommand(ContentTypes ReportType, PaginationSettings PaginationSettings) : IRequest<PagedResult<AdminReportDto>>;
+public record AdminPanelGetReportsCommand(ContentTypes ReportType, PaginationSettings PaginationSettings)
+    : IRequest<PagedResult<AdminReportDto>>;

@@ -11,5 +11,5 @@ public enum CommentReportReasons
     CopyrightViolation = 6,
     PrivacyViolation = 7,
     IllegalContent = 8,
-    AdultContent = 9,
+    AdultContent = 9
 }

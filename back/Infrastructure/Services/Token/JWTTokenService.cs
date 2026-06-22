@@ -1,6 +1,5 @@
 ﻿using Application.Dtos.Token;
 using Application.Interfaces;
-using Domain.Entities.Identity;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -8,32 +7,100 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Application.Features.Video.Upload.CompleteUpload;
+using Domain.Entities.Identity;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
-namespace Infrastructure.Services.Token
+namespace Infrastructure.Services.Token;
+
+internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEntity> userManager) : IJWTTokenService
 {
-    internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEntity> userManager) : IJWTTokenService
+    private readonly JwtOptions _options = settings.Value;
+
+
+    public async Task<TokenResponseDTO> GenerateTokensAsync(UserEntity user)
     {
-        private readonly JwtOptions _options = settings.Value;
-
-
-        public async Task<TokenResponseDTO> GenerateTokensAsync(UserEntity user)
+        return new TokenResponseDTO
         {
-            return new TokenResponseDTO
-            {
-                AccessToken = await CreateAccessTokenAsync(user),
-                RefreshToken = await CreateRefreshTokenAsync(user)
-            };
+            AccessToken = await CreateAccessTokenAsync(user),
+            RefreshToken = await CreateRefreshTokenAsync(user)
+        };
+    }
+
+    public async Task<TokenResponseDTO> RefreshTokensAsync(string refreshToken)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _options.Issuer,
+            ValidAudience = _options.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_options.Key
+                )),
+            ClockSkew = TimeSpan.Zero
+        };
+
+        ClaimsPrincipal principal;
+        try
+        {
+            principal = tokenHandler.ValidateToken(refreshToken, validationParameters, out _);
+        }
+        catch (Exception)
+        {
+            throw new UnauthorizedException("Не валідний refresh токен");
         }
 
-        public async Task<TokenResponseDTO> RefreshTokensAsync(string refreshToken)
+        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                     ?? throw new UnauthorizedException("Не валідний refresh токен");
+
+        var tokenVersion = principal.FindFirst("Version")?.Value
+                           ?? throw new UnauthorizedException("Не валідний refresh токен");
+
+        var user = userManager.Users.FirstOrDefault(u => u.Id.ToString() == userId)
+                   ?? throw new UnauthorizedException("Користувача не знайдено");
+
+        if (user.RefreshTokenVersion != int.Parse(tokenVersion))
+            throw new UnauthorizedException("Не валідний refresh токен");
+
+        if (user.IsBanned) throw new NotAllowedException("Аккаунт заблокований");
+
+        return await GenerateTokensAsync(user);
+    }
+
+    public string GenerateUploadToken(Guid videoId, Guid userId)
+    {
+        var claims = new[] { new Claim("videoId", videoId.ToString()), new Claim("userId", userId.ToString()) };
+        
+        var creds = GetSigningCredentials();
+
+        var token = new JwtSecurityToken(
+            _options.Issuer,
+            _options.Audience,
+            claims,
+            expires: DateTime.UtcNow.AddMinutes(15),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public UploadTokenPayload ValidateUpdateToken(string token)
+    {
+        try
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = new TokenValidationParameters
+            var handler = new JwtSecurityTokenHandler();
+            var key = _options.Key;
+
+            handler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidateAudience = true,
+                ValidateAudience = true,    
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = _options.Issuer,
@@ -41,98 +108,71 @@ namespace Infrastructure.Services.Token
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(_options.Key
                     )),
-            };
-
-            ClaimsPrincipal principal;
-            try
-            {
-                principal = tokenHandler.ValidateToken(refreshToken, validationParameters, out _);
-            }
-            catch (Exception)
-            {
-                throw new UnauthorizedException("Не валідний refresh токен");
-            }
-
-            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                         ?? throw new UnauthorizedException("Не валідний refresh токен");
-
-            var tokenVersion = principal.FindFirst("Version")?.Value
-                               ?? throw new UnauthorizedException("Не валідний refresh токен");
-
-            var user = userManager.Users.FirstOrDefault(u => u.Id.ToString() == userId)
-                       ?? throw new UnauthorizedException("Користувача не знайдено");
-
-            if (user.RefreshTokenVersion != int.Parse(tokenVersion))
-            {
-                throw new UnauthorizedException("Не валідний refresh токен");
-            }
-
-            if (user.IsBanned is true)
-            {
-                throw new NotAllowedException("Аккаунт заблокований");
-            }
-
-            return await GenerateTokensAsync(user);
+                ClockSkew = TimeSpan.Zero
+            }, out var validatedToken);
+            
+            var jwt = (JwtSecurityToken)validatedToken;
+            return new UploadTokenPayload(Guid.Parse(jwt.Claims.First(c => c.Type == "videoId").Value), Guid.Parse(jwt.Claims.First(c => c.Type == "userId").Value));
         }
-
-        private async Task<string> CreateAccessTokenAsync(UserEntity user)
+        catch(Exception ex)
         {
-            var claims = new List<Claim>
-            {
-                new Claim("sub", user.Id.ToString()),
-                new Claim("email", user.Email ?? ""),
-                new Claim("username", user.UserName ?? "")
-            };
-
-            foreach (var role in await userManager.GetRolesAsync(user))
-            {
-                claims.Add(new Claim("role", role));
-            }
-
-            var signingCredentials = GetSigningCredentials();
-
-            var accessToken = new JwtSecurityToken(
-                issuer: _options.Issuer,
-                audience: _options.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_options.AccessTokenExpiryMinutes),
-                signingCredentials: signingCredentials
-            );
-
-            string accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);
-
-            return accessTokenString;
+            return null;
         }
+    }
 
-
-        private async Task<string> CreateRefreshTokenAsync(UserEntity user)
+    private async Task<string> CreateAccessTokenAsync(UserEntity user)
+    {
+        var claims = new List<Claim>
         {
-            var claims = new List<Claim>()
-            {
-                new Claim("sub", user.Id.ToString()),
-                new Claim("Version", user.RefreshTokenVersion.ToString()),
-            };
+            new("sub", user.Id.ToString()),
+            new("email", user.Email ?? "")
+        };
 
-            var signingCredentials = GetSigningCredentials();
+        foreach (var role in await userManager.GetRolesAsync(user)) claims.Add(new Claim("role", role));
 
-            var refreshToken = new JwtSecurityToken(
-                issuer: _options.Issuer,
-                audience: _options.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(Convert.ToInt32(_options.RefreshTokenExpiryDays)),
-                signingCredentials: signingCredentials
-            );
+        var signingCredentials = GetSigningCredentials();
 
-            string refreshTokenString = new JwtSecurityTokenHandler().WriteToken(refreshToken);
+        var accessToken = new JwtSecurityToken(
+            _options.Issuer,
+            _options.Audience,
+            claims,
+            expires: DateTime.UtcNow.AddMinutes(_options.AccessTokenExpiryMinutes),
+            signingCredentials: signingCredentials
+        );
 
-            return refreshTokenString;
-        }
+        var accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);
 
-        private SigningCredentials GetSigningCredentials()
+        return accessTokenString;
+    }
+
+
+    private async Task<string> CreateRefreshTokenAsync(UserEntity user)
+    {
+        var claims = new List<Claim>
         {
-            var keyBytes = System.Text.Encoding.UTF8.GetBytes(_options.Key);
-            var signingInKey = new SymmetricSecurityKey(keyBytes);
-            return new SigningCredentials(signingInKey, SecurityAlgorithms.HmacSha256);
-        }
+            new("sub", user.Id.ToString()),
+            new("Version", user.RefreshTokenVersion.ToString())
+        };
+
+        var signingCredentials = GetSigningCredentials();
+
+        var refreshToken = new JwtSecurityToken(
+            _options.Issuer,
+            _options.Audience,
+            claims,
+            expires: DateTime.UtcNow.AddDays(Convert.ToInt32(_options.RefreshTokenExpiryDays)),
+            signingCredentials: signingCredentials
+        );
+
+        var refreshTokenString = new JwtSecurityTokenHandler().WriteToken(refreshToken);
+
+        return refreshTokenString;
+    }
+
+    private SigningCredentials GetSigningCredentials()
+    {
+        var keyBytes = Encoding.UTF8.GetBytes(_options.Key);
+        var signingInKey = new SymmetricSecurityKey(keyBytes);
+        return new SigningCredentials(signingInKey, SecurityAlgorithms.HmacSha256);
     }
 }

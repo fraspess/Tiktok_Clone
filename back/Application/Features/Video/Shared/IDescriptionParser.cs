@@ -1,7 +1,6 @@
-﻿namespace Application.Features.Video.Shared
+﻿namespace Application.Features.Video.Shared;
+
+public interface IDescriptionParser
 {
-    public interface IDescriptionParser
-    {
-        public ParsedDescription ParseDescription(string input);
-    }
+    public ParsedDescription ParseDescription(string input);
 }

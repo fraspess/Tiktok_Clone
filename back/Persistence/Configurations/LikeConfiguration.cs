@@ -1,12 +1,12 @@
-﻿using Domain.Entities.Like;
+﻿using Domain.Entities.Video;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Persistence.Configurations;
 
-public class LikeConfiguration : IEntityTypeConfiguration<LikeEntity>
+public class LikeConfiguration : IEntityTypeConfiguration<VideoLikeEntity>
 {
-    public void Configure(EntityTypeBuilder<LikeEntity> builder)
+    public void Configure(EntityTypeBuilder<VideoLikeEntity> builder)
     {
         // ── Likes (many-to-many) ─────────────────────────────
         builder

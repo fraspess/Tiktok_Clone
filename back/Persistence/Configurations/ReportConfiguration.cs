@@ -15,7 +15,7 @@ public class ReportConfiguration : IEntityTypeConfiguration<ReportEntity>
             .WithMany()
             .HasForeignKey(r => r.SenderId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         builder
             .HasIndex(r => new { r.SenderId, r.ContentId })
             .IsUnique();

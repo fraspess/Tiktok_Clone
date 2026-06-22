@@ -55,9 +55,10 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
 
 
     [HttpGet("videos")]
-    public async Task<IActionResult> GetVideos([FromQuery] int pageNumber = 1, [FromQuery] int pageSize= 5)
+    public async Task<IActionResult> GetVideos([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5)
     {
-        var videos = await _mediator.Send(new AdminPanelGetVideosCommand(new PaginationSettings{ PageNumber = pageNumber, PageSize = pageSize }));
+        var videos = await _mediator.Send(new AdminPanelGetVideosCommand(new PaginationSettings
+            { PageNumber = pageNumber, PageSize = pageSize }));
         return Ok(ApiResponse<object>.Success(videos));
     }
 
@@ -76,11 +77,12 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
     }
 
     [HttpGet("users/video")]
-    public async Task<IActionResult> GetUserVideos([FromQuery] Guid id, [FromQuery] int pageNumber = 1, [FromQuery]  int pageSize = 5 )
+    public async Task<IActionResult> GetUserVideos([FromQuery] Guid id, [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 5)
     {
         var videos = await _mediator.Send(new AdminPanelGetUserVideosCommand(id,
             new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-        
+
         return Ok(ApiResponse<object>.Success(videos));
     }
 
@@ -90,7 +92,7 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
     {
         var reports = await _mediator.Send(new AdminPanelGetReportsCommand(reportType,
             new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
-        
+
         return Ok(ApiResponse<object>.Success(reports));
     }
 
@@ -100,5 +102,4 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
         await _mediator.Send(new DeleteCommentCommand(id));
         return Ok(ApiResponse<object>.Success(null!));
     }
-
 }

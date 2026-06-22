@@ -35,7 +35,7 @@ try
     builder.Services.AddPersistence(builder.Configuration);
     builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
     builder.Services.AddApi(builder.Configuration, builder.Environment);
-    
+
     var app = builder.Build();
     app.MapHealthChecks("/health");
     // Configure the HTTP request pipeline.
@@ -50,10 +50,10 @@ try
     app.UseSerilogRequestLogging();
 
     app.UseCors();
-    
+
     var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
     Directory.CreateDirectory(uploadsPath);
-    app.UseStaticFiles(new StaticFileOptions()
+    app.UseStaticFiles(new StaticFileOptions
     {
         RequestPath = "/uploads",
         FileProvider = new PhysicalFileProvider(uploadsPath),
@@ -70,12 +70,12 @@ try
 
     var imagesPath = Path.Combine(builder.Environment.ContentRootPath, "images");
     Directory.CreateDirectory(imagesPath);
-    app.UseStaticFiles(new StaticFileOptions()
+    app.UseStaticFiles(new StaticFileOptions
     {
-        RequestPath = "/user-images",      
+        RequestPath = "/user-images",
         FileProvider = new PhysicalFileProvider(imagesPath)
     });
-    
+
     app.UseAuthentication();
     app.UseAuthorization();
 

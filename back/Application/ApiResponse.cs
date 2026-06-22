@@ -7,24 +7,33 @@ public class ApiResponse<T>
     public string? Message { get; set; }
     public List<string>? Errors { get; set; }
 
-    public static ApiResponse<T> Success(T data, string? message = null) => new()
+    public static ApiResponse<T> Success(T data, string? message = null)
     {
-        IsSuccess = true,
-        Data = data,
-        Message = message,
-    };
+        return new ApiResponse<T>
+        {
+            IsSuccess = true,
+            Data = data,
+            Message = message
+        };
+    }
 
-    public static ApiResponse<T> Error(List<string> errors, string? message = null) => new()
+    public static ApiResponse<T> Error(List<string> errors, string? message = null)
     {
-        IsSuccess = false,
-        Message = message,
-        Errors = errors,
-    };
+        return new ApiResponse<T>
+        {
+            IsSuccess = false,
+            Message = message,
+            Errors = errors
+        };
+    }
 
-    public static ApiResponse<T> Error(string error, string? message = null) => new()
+    public static ApiResponse<T> Error(string error, string? message = null)
     {
-        IsSuccess = false,
-        Message = message,
-        Errors = [error]
-    };
+        return new ApiResponse<T>
+        {
+            IsSuccess = false,
+            Message = message,
+            Errors = [error]
+        };
+    }
 }

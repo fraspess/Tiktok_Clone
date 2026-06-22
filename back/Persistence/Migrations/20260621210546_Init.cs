@@ -257,11 +257,16 @@ namespace Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    ShortId = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProccessedInPercents = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     BanReason = table.Column<int>(type: "integer", nullable: false),
+                    CommentCount = table.Column<int>(type: "integer", nullable: false),
+                    LikeCount = table.Column<int>(type: "integer", nullable: false),
+                    FavoriteCount = table.Column<int>(type: "integer", nullable: false),
+                    ViewCount = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -420,35 +425,6 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Likes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    VideoId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Likes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Likes_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Likes_Videos_VideoId",
-                        column: x => x.VideoId,
-                        principalTable: "Videos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "VideoHashTags",
                 columns: table => new
                 {
@@ -473,7 +449,66 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CommentLikeEntity",
+                name: "VideoLikes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    VideoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VideoLikes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VideoLikes_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VideoLikes_Videos_VideoId",
+                        column: x => x.VideoId,
+                        principalTable: "Videos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VideoViews",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    VideoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ViewedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VideoViews", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VideoViews_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VideoViews_Videos_VideoId",
+                        column: x => x.VideoId,
+                        principalTable: "Videos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CommentLikes",
                 columns: table => new
                 {
                     CommentId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -482,15 +517,15 @@ namespace Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CommentLikeEntity", x => new { x.UserId, x.CommentId });
+                    table.PrimaryKey("PK_CommentLikes", x => new { x.UserId, x.CommentId });
                     table.ForeignKey(
-                        name: "FK_CommentLikeEntity_AspNetUsers_UserId",
+                        name: "FK_CommentLikes_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CommentLikeEntity_Comments_CommentId",
+                        name: "FK_CommentLikes_Comments_CommentId",
                         column: x => x.CommentId,
                         principalTable: "Comments",
                         principalColumn: "Id",
@@ -547,13 +582,13 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CommentLikeEntity_CommentId",
-                table: "CommentLikeEntity",
+                name: "IX_CommentLikes_CommentId",
+                table: "CommentLikes",
                 column: "CommentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CommentLikeEntity_UserId_CommentId",
-                table: "CommentLikeEntity",
+                name: "IX_CommentLikes_UserId_CommentId",
+                table: "CommentLikes",
                 columns: new[] { "UserId", "CommentId" },
                 unique: true);
 
@@ -589,17 +624,6 @@ namespace Persistence.Migrations
                 column: "VideoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Likes_UserId_VideoId",
-                table: "Likes",
-                columns: new[] { "UserId", "VideoId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Likes_VideoId",
-                table: "Likes",
-                column: "VideoId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Messages_ConversationId",
                 table: "Messages",
                 column: "ConversationId");
@@ -626,9 +650,36 @@ namespace Persistence.Migrations
                 column: "HashTagId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_VideoLikes_UserId_VideoId",
+                table: "VideoLikes",
+                columns: new[] { "UserId", "VideoId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoLikes_VideoId",
+                table: "VideoLikes",
+                column: "VideoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Videos_ShortId",
+                table: "Videos",
+                column: "ShortId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Videos_UserId",
                 table: "Videos",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoViews_UserId_VideoId_ViewedAt",
+                table: "VideoViews",
+                columns: new[] { "UserId", "VideoId", "ViewedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoViews_VideoId",
+                table: "VideoViews",
+                column: "VideoId");
         }
 
         /// <inheritdoc />
@@ -650,16 +701,13 @@ namespace Persistence.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CommentLikeEntity");
+                name: "CommentLikes");
 
             migrationBuilder.DropTable(
                 name: "ConversationParticipant");
 
             migrationBuilder.DropTable(
                 name: "Favorites");
-
-            migrationBuilder.DropTable(
-                name: "Likes");
 
             migrationBuilder.DropTable(
                 name: "Messages");
@@ -672,6 +720,12 @@ namespace Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "VideoHashTags");
+
+            migrationBuilder.DropTable(
+                name: "VideoLikes");
+
+            migrationBuilder.DropTable(
+                name: "VideoViews");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

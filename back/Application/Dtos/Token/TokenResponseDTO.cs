@@ -1,9 +1,8 @@
-﻿namespace Application.Dtos.Token
-{
-    public class TokenResponseDTO
-    {
-        public String AccessToken { get; set; } = String.Empty;
+﻿namespace Application.Dtos.Token;
 
-        public String RefreshToken { get; set; } = String.Empty;
-    }
+public class TokenResponseDTO
+{
+    public string AccessToken { get; set; } = string.Empty;
+
+    public string RefreshToken { get; set; } = string.Empty;
 }

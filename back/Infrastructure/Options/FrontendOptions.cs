@@ -4,6 +4,6 @@ namespace Infrastructure.Options;
 
 public class FrontendOptions
 {
-    [Required]
-    public string Url { get; set; }
+    public const string SectionName = "Frontend";
+    [Required] public string Url { get; set; }
 }

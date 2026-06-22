@@ -9,16 +9,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.AdminPanel.GetUserVideos;
 
-internal class AdminPanelGetuserVideosCommandHandler(IAppDbContext appDbContext, VideoMapper mapper, ICurrentUser currentUser) : IRequestHandler<AdminPanelGetUserVideosCommand, PagedResult<SimpleVideoDto>>
+internal class AdminPanelGetuserVideosCommandHandler(
+    IAppDbContext appDbContext,
+    VideoMapper mapper,
+    ICurrentUser currentUser) : IRequestHandler<AdminPanelGetUserVideosCommand, PagedResult<SimpleVideoDto>>
 {
-    public async Task<PagedResult<SimpleVideoDto>> Handle(AdminPanelGetUserVideosCommand request, CancellationToken cancellationToken)
+    public async Task<PagedResult<SimpleVideoDto>> Handle(AdminPanelGetUserVideosCommand request,
+        CancellationToken cancellationToken)
     {
         var videos = await appDbContext
             .Videos
             .IgnoreQueryFilters()
             .Where(v => v.UserId == request.UserId && v.Status == VideoStatus.Processed)
             .ToProjectionDto(currentUser.Id)
-            .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
+            .ToPagedResultAsync(request.PaginationSettings, cancellationToken);
 
         var result = videos.MapItems(mapper.ToSimpleDto);
         return result;

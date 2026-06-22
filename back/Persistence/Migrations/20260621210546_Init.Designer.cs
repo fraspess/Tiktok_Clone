@@ -12,7 +12,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260603091144_Init")]
+    [Migration("20260621210546_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -103,7 +103,7 @@ namespace Persistence.Migrations
                     b.HasIndex("UserId", "CommentId")
                         .IsUnique();
 
-                    b.ToTable("CommentLikeEntity");
+                    b.ToTable("CommentLikes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Conversation.ConversationEntity", b =>
@@ -379,40 +379,6 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.Like.LikeEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("VideoId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VideoId");
-
-                    b.HasIndex("UserId", "VideoId")
-                        .IsUnique();
-
-                    b.ToTable("Likes");
-                });
-
             modelBuilder.Entity("Domain.Entities.Message.MessageEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -535,6 +501,9 @@ namespace Persistence.Migrations
                     b.Property<Guid?>("BannedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("CommentCount")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -548,9 +517,11 @@ namespace Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<int>("FavoriteCount")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsBanned")
                         .HasColumnType("boolean");
@@ -558,8 +529,15 @@ namespace Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ProccessedInPercents")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ShortId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -573,7 +551,13 @@ namespace Persistence.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ShortId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -593,6 +577,76 @@ namespace Persistence.Migrations
                     b.HasIndex("HashTagId");
 
                     b.ToTable("VideoHashTags");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Video.VideoLikeEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VideoId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VideoId");
+
+                    b.HasIndex("UserId", "VideoId")
+                        .IsUnique();
+
+                    b.ToTable("VideoLikes");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Video.VideoViewEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VideoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ViewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VideoId");
+
+                    b.HasIndex("UserId", "VideoId", "ViewedAt");
+
+                    b.ToTable("VideoViews");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -804,25 +858,6 @@ namespace Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Like.LikeEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Identity.UserEntity", "User")
-                        .WithMany("Likes")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Video.VideoEntity", "Video")
-                        .WithMany("Likes")
-                        .HasForeignKey("VideoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("Video");
-                });
-
             modelBuilder.Entity("Domain.Entities.Message.MessageEntity", b =>
                 {
                     b.HasOne("Domain.Entities.Conversation.ConversationEntity", "Conversation")
@@ -879,6 +914,44 @@ namespace Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("HashTag");
+
+                    b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Video.VideoLikeEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.Identity.UserEntity", "User")
+                        .WithMany("Likes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Video.VideoEntity", "Video")
+                        .WithMany("Likes")
+                        .HasForeignKey("VideoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Video.VideoViewEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.Identity.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Video.VideoEntity", "Video")
+                        .WithMany()
+                        .HasForeignKey("VideoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
 
                     b.Navigation("Video");
                 });

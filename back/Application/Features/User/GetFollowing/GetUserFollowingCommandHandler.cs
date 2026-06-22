@@ -9,13 +9,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.User.GetFollowing;
 
-public class GetUserFollowingCommandHandler(UserManager<UserEntity> userManager, IStorageService storageService) : IRequestHandler<GetUserFollowingCommand, PagedResult<SimpleUserDto>>
+public class GetUserFollowingCommandHandler(UserManager<UserEntity> userManager, IStorageService storageService)
+    : IRequestHandler<GetUserFollowingCommand, PagedResult<SimpleUserDto>>
 {
-    public async Task<PagedResult<SimpleUserDto>> Handle(GetUserFollowingCommand request, CancellationToken cancellationToken)
+    public async Task<PagedResult<SimpleUserDto>> Handle(GetUserFollowingCommand request,
+        CancellationToken cancellationToken)
     {
         var user = await userManager.Users
             .Where(u => u.UserName == request.Username)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken);
 
         Console.WriteLine($"Found user: {user?.Id}");
         var following = await userManager
@@ -23,13 +25,13 @@ public class GetUserFollowingCommandHandler(UserManager<UserEntity> userManager,
             .Where(u => u.UserName == request.Username)
             .SelectMany(u => u.Following)
             .Select(f => new { f.FollowingId, f.Following.UserName })
-            .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
-        
-        return following.MapItems(f => new SimpleUserDto()
+            .ToPagedResultAsync(request.PaginationSettings, cancellationToken);
+
+        return following.MapItems(f => new SimpleUserDto
         {
             Id = f.FollowingId,
             Username = f.UserName!,
-            Avatar = storageService.GetUserAvatar(f.FollowingId),
+            Avatar = storageService.GetUserAvatar(f.FollowingId)
         });
     }
 }

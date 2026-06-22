@@ -14,12 +14,15 @@ public class VideoConfiguration : IEntityTypeConfiguration<VideoEntity>
             .WithMany(u => u.Videos)
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-
+        
+        builder
+            .HasIndex(v => v.ShortId)
+            .IsUnique();
 
         builder
-            .HasQueryFilter(v => 
-                v.Status == VideoStatus.Processed && 
-                !v.IsBanned && 
+            .HasQueryFilter(v =>
+                v.Status == VideoStatus.Processed &&
+                !v.IsBanned &&
                 !v.IsDeleted);
     }
 }
