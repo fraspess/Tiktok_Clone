@@ -1,0 +1,21 @@
+{
+  "auth": {
+    "signInTitle": "Sign in",
+    "signUpTitle": "Sign up",
+    "googleAuth": "Continue with google",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "validation": {
+      "email": "Invalid email address",
+      "required": "This field is required",
+      "passwordMin": "Password must be at least 6 char long",
+      "usernameMin": "Username must be at least 3 characters"
+    },
+    "confirmPasswordLabel": "Confirm password",
+    "loading": "Loading...",
+    "hasAccountPrompt": "Already have an account? Sign in",
+    "noAccountPrompt": "Don't have an account? Sign up",
+    "identifierLabel": "Email or Username",
+    "usernameLabel": "Username"
+  }
+}

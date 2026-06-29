@@ -1,0 +1,17 @@
+{
+  "auth": {
+    "signInTitle": "Увійти",
+    "signUpTitle": "Зареєструватися",
+    "emailLabel": "Електронна пошта",
+    "passwordLabel": "Пароль",
+    "confirmPasswordLabel": "Підтвердіть пароль",
+    "noAccountPrompt": "Немає акаунту? Зареєструватися",
+    "hasAccountPrompt": "Вже є акаунт? Увійти",
+    "loading": "Завантаження...",
+    "validation": {
+      "required": "Це поле обов'язкове",
+      "email": "Невірна адреса електронної пошти",
+      "passwordMin": "Пароль має містити щонайменше 6 символів"
+    }
+  }
+}

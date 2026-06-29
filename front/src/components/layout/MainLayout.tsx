@@ -1,5 +1,6 @@
 import {Outlet} from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar.tsx";
+import AuthModal from "@/components/modals/AuthModal.tsx";
 
 const MainLayout = () => {
     return(
@@ -10,6 +11,8 @@ const MainLayout = () => {
             <main className="flex-1">
                 <Outlet />
             </main>
+
+            <AuthModal></AuthModal>
         </div>
     )
 }
