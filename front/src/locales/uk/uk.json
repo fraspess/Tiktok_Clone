@@ -1,6 +1,8 @@
 {
   "auth": {
     "signInTitle": "Увійти",
+    "identifierLabel": "Електронна пошта або ім'я користувача",
+    "usernameLabel": "Ім'я користувача",
     "signUpTitle": "Зареєструватися",
     "emailLabel": "Електронна пошта",
     "passwordLabel": "Пароль",

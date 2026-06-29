@@ -94,19 +94,6 @@ const AuthModal = () => {
                             </>
                         ) : (
                             <>
-                                <Field>
-                                    <Label>{t("auth.identifierLabel")}</Label>
-                                    <Input
-                                        id="identifier"
-                                        type="text"
-                                        {...register("identifier", {
-                                            required: t("auth.validation.required"),
-                                        })}
-                                    />
-                                    {errors.identifier && (
-                                        <p className="text-sm text-red-500">{errors.identifier.message}</p>
-                                    )}
-                                </Field>
 
                                 <Field>
                                     <Label>{t("auth.emailLabel")}</Label>
