@@ -3,7 +3,7 @@
     "signInTitle": "Увійти",
     "identifierLabel": "Електронна пошта або ім'я користувача",
     "usernameLabel": "Ім'я користувача",
-    "signUpTitle": "Зареєструватися",
+    "signUpTitle": "Реєстрація",
     "emailLabel": "Електронна пошта",
     "passwordLabel": "Пароль",
     "confirmPasswordLabel": "Підтвердіть пароль",
@@ -14,6 +14,7 @@
       "required": "Це поле обов'язкове",
       "email": "Невірна адреса електронної пошти",
       "passwordMin": "Пароль має містити щонайменше 6 символів"
-    }
+    },
+    "googleAuth": "Продовжити через Google"
   }
 }

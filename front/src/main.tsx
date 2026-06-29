@@ -7,13 +7,16 @@ import {ThemeProvider} from "next-themes";
 import {Provider} from "react-redux";
 import {store} from "@/store/store.ts";
 import {BrowserRouter} from "react-router-dom";
+import {TooltipProvider} from "@/components/ui/tooltip.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <Provider store={store}>
             <BrowserRouter>
-                <ThemeProvider attribute="class" defaultTheme="dark">
-                    <App/>
+                <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange enableSystem>
+                    <TooltipProvider>
+                        <App/>
+                    </TooltipProvider>
                 </ThemeProvider>
             </BrowserRouter>
         </Provider>

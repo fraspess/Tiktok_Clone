@@ -17,5 +17,6 @@
     "noAccountPrompt": "Don't have an account? Sign up",
     "identifierLabel": "Email or Username",
     "usernameLabel": "Username"
-  }
+  },
+  "collapseSidebar": "Collapse sidebar"
 }
