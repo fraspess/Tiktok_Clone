@@ -19,6 +19,15 @@ public class ApiResponse<T>
         };
     }
 
+    public static ApiResponse<T> ErrorWithPayload(T data, string code)
+    {
+        return new ApiResponse<T>()
+        {
+            IsSuccess = false,
+            Code = code,
+            Data = data,
+        };
+    }
     public static ApiResponse<T> Error(string code, string? message = null)
     {
         return new ApiResponse<T>

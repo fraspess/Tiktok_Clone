@@ -12,6 +12,7 @@ const AuthModal = () => {
     const isOpened = useAppSelector(state => state.authModal.isOpened)
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
+    const [currentConfirmEmail, setCurrentConfirmEmail] = useState<string>("");
     const handleClose = () => {
         dispatch(closeModal());
         setStep("signIn");
@@ -25,8 +26,9 @@ const AuthModal = () => {
         setStep("signIn");
     }
 
-    const onUnConfirmedEmail = () => {
-        setStep("confirmEmail")
+    const onUnConfirmedEmail = (email: string) => {
+        setCurrentConfirmEmail(email);
+        setStep("confirmEmail");
     }
 
     return (
@@ -49,10 +51,13 @@ const AuthModal = () => {
                                 }}/>
                 )}
                 {step === "signUp" && (
-                    <SignUpForm onSwitchToSignIn={onSwitchToSignIn}/>
+                    <SignUpForm onSwitchToSignIn={onSwitchToSignIn} onSuccess={(email) => {
+                        setCurrentConfirmEmail(email);
+                        setStep("confirmEmail");
+                    }}/>
                 )}
                 {step === "confirmEmail" && (
-                    <ConfirmEmailForm/>
+                    <ConfirmEmailForm email={currentConfirmEmail}/>
                 )}
             </DialogContent>
         </Dialog>

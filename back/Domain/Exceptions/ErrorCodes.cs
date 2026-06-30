@@ -50,4 +50,10 @@ public static class ErrorCodes
     public const string InternalServerError = "INTERNAL_SERVER_ERROR";
     
     public const string ValidationError = "VALIDATION_ERROR";
+    public const string EmailAlreadyConfirmed = "EMAIL_ALREADY_CONFIRMED";
+    public const string TooFast = "TOO_FAST";
+    public const string GoogleLoginFailed = "GOOGLE_LOGIN_FAILED";
+    public const string UserBanned = "USER_IS_BANNED";
+    public const string CantResetPasswordExternal = "CANT_RESET_PASSWORD_EXTERNAL";
+    public const string TooManyRequests = "TOO_MANY_REQUESTS";
 }

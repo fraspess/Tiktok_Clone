@@ -4,11 +4,14 @@ import {useState} from "react";
 import {Field, FieldGroup} from "@/components/ui/field.tsx";
 import {Label} from "@/components/ui/label.tsx";
 import {Input} from "@/components/ui/input.tsx";
-import {Eye, EyeOff} from "lucide-react";
+import {CircleAlert, Eye, EyeOff} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {DialogFooter} from "@/components/ui/dialog.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useGoogleLogin} from "@react-oauth/google";
+import {useRegisterMutation} from "@/store/apis/authApi.ts";
+import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
+import type {ApiResponse} from "@/types/ApiResponse.ts";
 
 interface SignUpFormData {
     email: string;
@@ -18,15 +21,19 @@ interface SignUpFormData {
 }
 
 interface SignUpProps {
-    onSwitchToSignIn: () => void
+    onSwitchToSignIn: () => void,
+    onSuccess: (email: string) => void,
 }
 
-const SignUpForm = ({onSwitchToSignIn}: SignUpProps) => {
+const SignUpForm = ({onSwitchToSignIn, onSuccess}: SignUpProps) => {
     const {t} = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [registerRequest, {isLoading: isRegisterLoading}] = useRegisterMutation();
+    const [bannerError, setBannerError] = useState<string | null>(null);
+
     const {
-        register, handleSubmit, watch, trigger, formState: {errors, isSubmitting},
+        register, setError, handleSubmit, watch, trigger, formState: {errors, isSubmitting},
     } = useForm<SignUpFormData>({
         mode: "onChange",
         reValidateMode: "onChange"
@@ -37,12 +44,48 @@ const SignUpForm = ({onSwitchToSignIn}: SignUpProps) => {
         onError: (error) => console.log(error),
     })
 
-    const onSubmit = (data: SignUpFormData) => {
+    const onSubmit = async (data: SignUpFormData) => {
         console.log(data);
+        try {
+            await registerRequest(data).unwrap();
+            onSuccess(data.email);
+        } catch (error) {
+            if (!isFetchBaseQueryError(error)) {
+                setBannerError(t("auth.fallbackError"));
+                return;
+            }
+            const errResponse = error.data as ApiResponse<null>;
+            const {code} = errResponse;
+
+            switch (code) {
+                case 'USERNAME_ALREADY_EXISTS':
+                    setError("username", {
+                        type: "custom",
+                        message: t("auth.usernameAlreadyTaken"),
+                    }, {shouldFocus: true});
+                    break;
+                case 'EMAIL_ALREADY_EXISTS':
+                    setError("email", {
+                        type: "custom",
+                        message: t("auth.emailAlreadyTaken")
+                    })
+                    break;
+                default:
+                    setBannerError(t("auth.fallbackError"))
+            }
+
+        }
     }
 
     return (
         <>
+            {bannerError && (
+                <div
+                    className="mb-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                    <CircleAlert size={16} className="shrink-0"/>
+                    <span>{bannerError}</span>
+                </div>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
                 <FieldGroup>
                     <Field>
@@ -156,10 +199,8 @@ const SignUpForm = ({onSwitchToSignIn}: SignUpProps) => {
                 </FieldGroup>
 
                 <DialogFooter className="mt-6 w-full flex flex-col gap-2 sm:flex-col">
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting
-                            ? t("auth.loading")
-                            : t("auth.signUpTitle")}
+                    <Button type="submit" disabled={isSubmitting && isRegisterLoading}>
+                        {t("auth.signUpTitle")}
                     </Button>
 
                     <Button type="button" variant="ghost" onClick={() => onSwitchToSignIn()}>

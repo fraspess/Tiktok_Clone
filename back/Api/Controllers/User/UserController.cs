@@ -42,7 +42,7 @@ public class UserController(IMediator _mediator) : ControllerBase
 
     [RateLimit(10, 60_000)]
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromForm] RegisterUserCommand command)
+    public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
     {
         await _mediator.Send(command);
 

@@ -6,9 +6,15 @@ export const authApi = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (build) => ({
         login: build.mutation({
-            query: (formData) => ({url: "users/login", method: "post", body: formData})
+            query: (data) => ({url: "users/login", method: "post", body: data})
+        }),
+        register: build.mutation({
+            query: (data) => ({url: "users/register", method: "post", body: data})
+        }),
+        confirmEmail: build.mutation({
+            query: (data) => ({url: "users/confirm-email", method: "post", body: data})
         })
     })
 });
 
-export const {useLoginMutation} = authApi;
+export const {useLoginMutation, useRegisterMutation, useConfirmEmailMutation} = authApi;

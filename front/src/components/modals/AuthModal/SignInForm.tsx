@@ -4,12 +4,14 @@ import {Label} from "@/components/ui/label.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {useTranslation} from "react-i18next";
 import {useState} from "react";
-import {Eye, EyeOff} from "lucide-react";
+import {CircleAlert, Eye, EyeOff} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {DialogFooter} from "@/components/ui/dialog.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useGoogleLogin} from "@react-oauth/google";
 import {useLoginMutation} from "@/store/apis/authApi.ts";
+import type {ApiResponse} from "@/types/ApiResponse.ts";
+import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 
 interface SignInFormData {
     login: string;
@@ -26,9 +28,10 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
     const {t} = useTranslation();
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [login, {isLoading: isLoginLoading}] = useLoginMutation();
+    const [error, setFormError] = useState<string | null>(null);
 
     const {
-        register, setError, handleSubmit, formState: {errors, isSubmitting}
+        register, handleSubmit, formState: {errors, isSubmitting}
     } = useForm<SignInFormData>({
         mode: "onChange",
         reValidateMode: "onChange"
@@ -37,10 +40,32 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
 
     const onSubmit = async (data: SignInFormData) => {
         try {
+            setFormError(null);
             await login(data).unwrap();
+            onSuccess();
+        } catch (error) {
+            if (!isFetchBaseQueryError(error)) {
+                setFormError(t("auth.fallbackError"));
+                return;
+            }
+            const errResponse = error.data as ApiResponse<{ email: string }>
+            const {data: responseData, code} = errResponse;
 
-        } catch (error: any) {
-            setError("root.serverError", {type: "server", message: error?.errors as string})
+            switch (code) {
+                case 'INVALID_CREDENTIALS':
+                    setFormError(t("auth.invalidCredentials"));
+                    break;
+                case 'TOO_MANY_REQUESTS':
+                    setFormError(t("auth.tooManyRequests"));
+                    break;
+                case 'EMAIL_NOT_CONFIRMED':
+                    onUnConfirmedEmail(responseData.email);
+                    break;
+                default:
+                    setFormError(t("auth.fallbackError"));
+                    break;
+            }
+
             return;
         }
     }
@@ -53,6 +78,13 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
 
     return (
         <>
+            {error && (
+                <div
+                    className="mb-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                    <CircleAlert size={16} className="shrink-0"/>
+                    <span>{error}</span>
+                </div>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
                 <FieldGroup>
                     <Field>
@@ -107,18 +139,10 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
                     </Field>
                 </FieldGroup>
 
-                {errors.root?.serverError && (
-                    <p className="text-sm text-red-500 mt-3 text-center">
-                        {errors.root.serverError.message}
-                    </p>
-                )}
 
                 <DialogFooter className="mt-6 w-full flex flex-col gap-2 sm:flex-col">
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting
-                            ? t("auth.loading")
-                            : t("auth.signInTitle")
-                        }
+                    <Button type="submit" disabled={isSubmitting || isLoginLoading}>
+                        {t("auth.signInTitle")}
                     </Button>
 
                     <Button type="button" variant="ghost" onClick={() => onSwitchToSignUp()}>

@@ -46,7 +46,7 @@ public class GlobalExceptionHandler
         {
             _logger.LogWarning(ex, "Недостатньо прав");
             context.Response.StatusCode = 403;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Message));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object?>.ErrorWithPayload(ex.Payload, ex.Message));
         }
         catch (BadRequestException ex)
         {
@@ -60,12 +60,12 @@ public class GlobalExceptionHandler
             {
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsJsonAsync(
-                    ApiResponse<object>.Error($"Внутрішня помилка сервера: {ex.Message}"));
+                    ApiResponse<object>.Error(null,$"Внутрішня помилка сервера: {ex.Message}"));
                 return;
             }
 
             context.Response.StatusCode = 500;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error("Внутрішня помилка сервера"));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ErrorCodes.InternalServerError,"Внутрішня помилка сервера"));
         }
     }
 }

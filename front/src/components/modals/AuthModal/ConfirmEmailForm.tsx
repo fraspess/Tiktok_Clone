@@ -6,20 +6,45 @@ import {InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot,} from "@/compo
 import {REGEXP_ONLY_DIGITS} from "input-otp";
 import {useTranslation} from "react-i18next";
 import {DialogDescription} from "@/components/ui/dialog.tsx";
+import {useConfirmEmailMutation} from "@/store/apis/authApi.ts";
+import {cn} from "@/lib/utils.ts";
+import {Input} from "@/components/ui/input.tsx";
+import {Controller, useForm} from "react-hook-form";
 
-export function ConfirmEmailForm() {
+interface ConfirmEmailFormData {
+    email: string;
+    token: string;
+}
+
+interface ConfirmEmailFormProps {
+    email: string;
+}
+
+export function ConfirmEmailForm({email}: ConfirmEmailFormProps) {
     const {t} = useTranslation();
+    const [confirmEmail, {isLoading}] = useConfirmEmailMutation();
 
+    const {
+        register, handleSubmit, control
+    } = useForm<ConfirmEmailFormData>();
+
+    const onSubmit = (data: ConfirmEmailFormData) => {
+        console.log(data);
+    }
+
+
+    const otpSlotClass = "h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl";
     return (
         <>
             <DialogDescription>
                 {t("auth.email.description", {email: ""})}
             </DialogDescription>
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <Input type="hidden" id="email" {...register("email")} value={email}></Input>
                 <FieldGroup>
                     <Field>
-                        <div className="flex items-center justify-between w-fit mx-auto">
-                            <FieldLabel htmlFor="otp-verification">
+                        <div className="flex items-center justify-between w-full my-1 gap-2 flex-wrap sm:flex-nowrap ">
+                            <FieldLabel htmlFor="otp-verification" className="min-w-0">
                                 {t("auth.email.verificationCode")}
                             </FieldLabel>
                             <Button variant="outline" type="button" size="xs">
@@ -29,25 +54,42 @@ export function ConfirmEmailForm() {
                         </div>
 
                         <div className="flex justify-center">
-                            <InputOTP maxLength={6} id="otp-verification" required pattern={REGEXP_ONLY_DIGITS}>
-                                <InputOTPGroup
-                                    className="*:data-[slot=input-otp-slot]:h-12 *:data-[slot=input-otp-slot]:w-11 *:data-[slot=input-otp-slot]:text-xl">
-                                    <InputOTPSlot index={0}/>
-                                    <InputOTPSlot index={1}/>
-                                    <InputOTPSlot index={2}/>
-                                </InputOTPGroup>
-                                <InputOTPSeparator className="mx-2"/>
-                                <InputOTPGroup
-                                    className="*:data-[slot=input-otp-slot]:h-12 *:data-[slot=input-otp-slot]:w-11 *:data-[slot=input-otp-slot]:text-xl">
-                                    <InputOTPSlot index={3}/>
-                                    <InputOTPSlot index={4}/>
-                                    <InputOTPSlot index={5}/>
-                                </InputOTPGroup>
-                            </InputOTP>
+                            <Controller
+                                name="token"
+                                control={control}
+                                rules={{
+                                    required: true,
+                                    minLength: 6,
+                                    maxLength: 6,
+                                    pattern: /^\d+$/,
+                                }}
+                                render={({field}) => (
+                                    <InputOTP
+                                        {...field}
+                                        maxLength={6}
+                                        id="otp-verification"
+                                        pattern={REGEXP_ONLY_DIGITS}
+                                    >
+                                        <InputOTPGroup>
+                                            <InputOTPSlot index={0} className={otpSlotClass}/>
+                                            <InputOTPSlot index={1} className={otpSlotClass}/>
+                                            <InputOTPSlot index={2} className={otpSlotClass}/>
+                                        </InputOTPGroup>
+
+                                        <InputOTPSeparator/>
+
+                                        <InputOTPGroup>
+                                            <InputOTPSlot index={3} className={otpSlotClass}/>
+                                            <InputOTPSlot index={4} className={otpSlotClass}/>
+                                            <InputOTPSlot index={5} className={otpSlotClass}/>
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                )}
+                            />
                         </div>
                     </Field>
                     <Field>
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" className={cn("w-full", isLoading && "disabled")}>
                             {t("auth.email.verify")}
                         </Button>
                         <div className="text-sm text-muted-foreground text-center">

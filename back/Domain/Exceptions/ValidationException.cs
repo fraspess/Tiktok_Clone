@@ -1,7 +1,5 @@
 ﻿namespace Domain.Exceptions;
 
-public sealed record ValidationError(string PropertyName, string ErrorCode);
-
 public class ValidationException : Exception
 {
     public IReadOnlyDictionary<string, string[]> Errors { get; }
