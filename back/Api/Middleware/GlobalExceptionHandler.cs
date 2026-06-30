@@ -28,7 +28,7 @@ public class GlobalExceptionHandler
         {
             _logger.LogInformation(ex, "Помилка валідації");
             context.Response.StatusCode = 400;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Message));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.ValidationError(ex.Errors));
         }
         catch (UnauthorizedException ex)
         {

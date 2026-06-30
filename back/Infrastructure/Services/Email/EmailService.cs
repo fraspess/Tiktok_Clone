@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Infrastructure.Options;
+using Application.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;

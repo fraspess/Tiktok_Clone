@@ -3,7 +3,7 @@ using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Features.Video.UnLike;
+namespace Application.Features.Video.Unlike;
 
 public class UnlikeVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser user) : IRequestHandler<UnlikeVideoCommand, Unit>
 {

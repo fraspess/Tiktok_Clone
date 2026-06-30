@@ -1,15 +1,18 @@
-﻿using Application.Constants;
+﻿using System.Net.Http.Json;
+using Application.Constants;
 using Application.Dtos.Token;
 using Application.Dtos.User;
 using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
+using Application.Options;
 using Domain.Entities.Identity;
 using Domain.Exceptions;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Persistence.Services;
 
@@ -20,9 +23,12 @@ internal class UserService(
     IConfiguration configuration,
     IEmailService emailService,
     UserMapper mapper,
-    ICurrentUser currentUser)
+    HttpClient httpClient,
+    ICurrentUser currentUser,
+    IOptions<GoogleOptions> options)
     : IUserService
 {
+    private readonly GoogleOptions _googleOptions = options.Value;
     private string GetHtmlTemplate(string templateName)
     {
         var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates", templateName);
@@ -36,7 +42,7 @@ internal class UserService(
             ?? throw new BadRequestException("Невірний логін або пароль");
 
         var checkPassword = await userManager.CheckPasswordAsync(user, dto.Password);
-        if (!checkPassword) throw new ValidationException("Невірний логін або пароль");
+        if (!checkPassword) throw new BadRequestException("Невірний логін або пароль");
 
         if (!user.EmailConfirmed) throw new NotAllowedException("Підтвердіть свою електронну пошту, щоб увійти");
 
@@ -104,13 +110,13 @@ internal class UserService(
         var user = userManager.Users.FirstOrDefault(u => u.Email == email)
                    ?? throw new UnauthorizedException("Користувач не знайдений");
 
-        if (user.EmailConfirmed == true) throw new ValidationException("Пошта вже підтверджена");
+        if (user.EmailConfirmed == true) throw new BadRequestException("Пошта вже підтверджена");
 
         var result = await userManager.ConfirmEmailAsync(user, token);
         if (result.Succeeded)
             return await tokenService.GenerateTokensAsync(user);
         else
-            throw new ValidationException("Невірний токен підтвердження");
+            throw new BadRequestException("Невірний токен підтвердження");
     }
 
     // Скидає пароль і міняє версію токен на + 1 щоб інші токени стали недійсними
@@ -124,7 +130,7 @@ internal class UserService(
         if (result.Succeeded)
             await UpdateTokenVersion(user.Id);
         else
-            throw new ValidationException("Невірний токен для скидання пароля");
+            throw new BadRequestException("Невірний токен для скидання пароля");
     }
 
     public async Task ResendConfirmationEmailAsync(string email)
@@ -132,7 +138,7 @@ internal class UserService(
         var user = await userManager.FindByEmailAsync(email)
                    ?? throw new NotFoundException("Почту не знайдено");
 
-        if (user.EmailConfirmed) throw new ValidationException("Почту уже підтвердженно");
+        if (user.EmailConfirmed) throw new BadRequestException("Почту уже підтвердженно");
 
         if (user.LastConfirmationEmailSentAt.HasValue)
         {
@@ -140,7 +146,7 @@ internal class UserService(
             if (timePassed.TotalMinutes < 5)
             {
                 var remaining = 5 - (int)timePassed.TotalMinutes;
-                throw new ValidationException($"Повторіть спробу через {remaining} хвилин ");
+                throw new BadRequestException($"Повторіть спробу через {remaining} хвилин ");
             }
         }
 
@@ -158,8 +164,29 @@ internal class UserService(
         await emailService.SendEmailAsync(user.Email!, "Підтвердження реєстрації", body);
     }
 
-    public async Task<TokenResponseDTO> GoogleAuth(string idToken)
+    public async Task<TokenResponseDTO> GoogleAuth(string code)
     {
+        var tokenResponse = await httpClient.PostAsync(
+            "https://oauth2.googleapis.com/token",
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                { "code", code },
+                {"client_id", _googleOptions.ClientId},
+                {"client_secret", _googleOptions.ClientSecret},
+                {"redirect_uri", "postmessage"},
+                {"grant_type", "authorization_code"}
+            }));
+
+        if (!tokenResponse.IsSuccessStatusCode)
+            throw new UnauthorizedException("Помилка при вході через гугл. Спробуйте ще раз.");
+
+        var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<GoogleTokenExchangeResponse>();
+
+        if (tokenJson?.IdToken is null)
+            throw new UnauthorizedException("Помилка при вході через гугл. Спробуйте ще раз.");
+        
+        var idToken = tokenJson.IdToken;
+                
         GoogleJsonWebSignature.Payload payload;
         try
         {

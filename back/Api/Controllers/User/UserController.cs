@@ -31,7 +31,7 @@ namespace Api.Controllers.User;
 public class UserController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("login")]
-    [RateLimit(5, 60_000)]
+    [RateLimit(10, 60_000)]
     public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
     {
         var tokens = await _mediator.Send(command);
@@ -40,7 +40,7 @@ public class UserController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<object>.Success(new { accessToken = tokens.AccessToken }, "Успішний вхід"));
     }
 
-    [RateLimit(3, 60_000)]
+    [RateLimit(10, 60_000)]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromForm] RegisterUserCommand command)
     {
@@ -58,12 +58,12 @@ public class UserController(IMediator _mediator) : ControllerBase
         AppendRefreshTokenCookie(tokens.RefreshToken);
         return Ok(ApiResponse<object>.Success(new { accessToken = tokens.AccessToken }, "Пошта підтверджена."));
     }
-
+    
     [HttpPost("google")]
     [RateLimit(10, 60_000)]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthDto request)
     {
-        var tokens = await _mediator.Send(new GoogleAuthCommand(request.IdToken));
+        var tokens = await _mediator.Send(new GoogleAuthCommand(request.Code));
         AppendRefreshTokenCookie(tokens.RefreshToken);
         return Ok(ApiResponse<object>.Success(new { accessToken = tokens.AccessToken }));
     }

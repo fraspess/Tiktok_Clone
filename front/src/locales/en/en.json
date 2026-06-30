@@ -8,15 +8,26 @@
     "validation": {
       "email": "Invalid email address",
       "required": "This field is required",
-      "passwordMin": "Password must be at least 6 char long",
-      "usernameMin": "Username must be at least 3 characters"
+      "passwordMin": "Password must be at least 8 char long",
+      "usernameMin": "Username must be at least 3 characters",
+      "passwordNotStrong": "Password must at least have 1 letter and 1 number",
+      "passwordMismatch": "Passwords do not match",
+      "tooSmallLoginLength": "Login must be at least 3 char long"
     },
     "confirmPasswordLabel": "Confirm password",
     "loading": "Loading...",
     "hasAccountPrompt": "Already have an account? Sign in",
     "noAccountPrompt": "Don't have an account? Sign up",
-    "identifierLabel": "Email or Username",
-    "usernameLabel": "Username"
+    "loginLabel": "Email or Username",
+    "usernameLabel": "Username",
+    "email": {
+      "verificationCode": "Verification Code",
+      "resendCode": "Resend Code",
+      "description": "Enter the verification code we sent to your email address: {{email}}",
+      "verify": "Verify",
+      "resetPassword": "I no longer have access to this email address"
+    }
   },
-  "collapseSidebar": "Collapse sidebar"
+  "collapseSidebar": "Collapse sidebar",
+  "auth.confirmEmailTitle": "Confirm email"
 }

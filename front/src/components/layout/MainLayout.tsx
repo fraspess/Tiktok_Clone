@@ -1,8 +1,8 @@
 import {Outlet} from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar.tsx";
-import AuthModal from "@/components/modals/AuthModal.tsx";
 import Topbar from "@/components/layout/Topbar.tsx";
 import {useState} from "react";
+import AuthModal from "@/components/modals/AuthModal";
 
 const MainLayout = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);

@@ -19,5 +19,5 @@ public interface IUserService
 
     Task ResendConfirmationEmailAsync(string email);
 
-    Task<TokenResponseDTO> GoogleAuth(string idToken);
+    Task<TokenResponseDTO> GoogleAuth(string code);
 }

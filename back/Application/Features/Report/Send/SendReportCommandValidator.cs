@@ -1,5 +1,6 @@
 ﻿using Application.Dtos.Report;
 using Domain;
+using Domain.Exceptions;
 using FluentValidation;
 
 namespace Application.Features.Report.Send;
@@ -16,10 +17,10 @@ public class SendReportCommandValidator : AbstractValidator<SendReportCommand>
                     .NotEmpty().WithMessage("ContentId є обов'язковим");
 
                 RuleFor(c => c.Dto.ContentType)
-                    .IsInEnum().WithMessage("Невірний тип контенту");
+                    .IsInEnum().WithErrorCode(ErrorCodes.InvalidFileType);
 
                 RuleFor(c => c.Dto.CustomReason)
-                    .MaximumLength(255).WithMessage("Інша причина не може перевищувати 255 символів")
+                    .MaximumLength(255).WithErrorCode(ErrorCodes.TooLong)
                     .When(c => !string.IsNullOrWhiteSpace(c.Dto.CustomReason));
 
                 RuleFor(c => c.Dto)

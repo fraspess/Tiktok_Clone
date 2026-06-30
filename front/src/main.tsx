@@ -8,6 +8,8 @@ import {Provider} from "react-redux";
 import {store} from "@/store/store.ts";
 import {BrowserRouter} from "react-router-dom";
 import {TooltipProvider} from "@/components/ui/tooltip.tsx";
+import {GoogleOAuthProvider} from "@react-oauth/google";
+import {GOOGLE_CLIENT_ID} from "@/env.ts";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -15,7 +17,9 @@ createRoot(document.getElementById('root')!).render(
             <BrowserRouter>
                 <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange enableSystem>
                     <TooltipProvider>
-                        <App/>
+                        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                            <App/>
+                        </GoogleOAuthProvider>
                     </TooltipProvider>
                 </ThemeProvider>
             </BrowserRouter>

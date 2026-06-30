@@ -1,7 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Transfer;
 using Application.Interfaces;
-using Infrastructure.Options;
+using Application.Options;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
