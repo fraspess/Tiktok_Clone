@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Domain.Exceptions;
 using ValidationException = Domain.Exceptions.ValidationException;
 
 namespace Application.Behaviors;
@@ -24,8 +25,11 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
             failures.AddRange(result.Errors);
         }
 
-        if (failures.Any())
-            throw new ValidationException(failures.First().ErrorMessage);
+        if (failures.Count != 0)
+        {
+            var domainErrors = failures.Select(f => new ValidationError(f.PropertyName, f.ErrorCode));
+            throw new ValidationException(domainErrors);
+        }
 
         return await next();
     }

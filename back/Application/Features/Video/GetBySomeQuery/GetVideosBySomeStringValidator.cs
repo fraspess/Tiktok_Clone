@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Domain.Exceptions;
+using FluentValidation;
 
 namespace Application.Features.Video.GetBySomeQuery;
 
@@ -7,6 +8,6 @@ public class GetVideosBySomeStringValidator : AbstractValidator<GetVideosBySomeS
     public GetVideosBySomeStringValidator()
     {
         RuleFor(v => v.SomeString)
-            .NotEmpty().WithMessage("Query не може бути порожній");
+            .NotEmpty().WithErrorCode(ErrorCodes.Required);
     }
 }

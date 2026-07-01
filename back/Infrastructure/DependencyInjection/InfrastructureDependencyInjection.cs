@@ -2,8 +2,8 @@
 using Amazon.Runtime;
 using Amazon.S3;
 using Application.Interfaces;
+using Application.Options;
 using Contracts;
-using Infrastructure.Options;
 using Infrastructure.RabbitMQ;
 using Infrastructure.RabbitMQ.Consumers;
 using Infrastructure.Services;
@@ -100,9 +100,7 @@ public static class InfrastructureDependencyInjection
             return ConnectionMultiplexer.Connect(configOptions);
         });
         services.AddScoped<ICacheService, CacheService>();
-        services.AddConfigOptions(config);
-
-
+        
         return services;
     }
 }

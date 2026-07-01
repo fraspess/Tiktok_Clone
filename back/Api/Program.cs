@@ -3,7 +3,6 @@ using Api.Middleware;
 using Application.DependencyInjection;
 using Application.Interfaces;
 using Infrastructure.DependencyInjection;
-using Infrastructure.Options;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;

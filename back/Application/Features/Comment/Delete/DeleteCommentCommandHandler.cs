@@ -11,7 +11,7 @@ public class DeleteCommentCommandHandler(IAppDbContext appDbContext, ICurrentUse
     public async Task<Unit> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
     {
         var comment = await appDbContext.Comments.FirstOrDefaultAsync(c => c.Id == request.CommentId, cancellationToken)
-                      ?? throw new ValidationException("Коментарій не знайдено");
+                      ?? throw new NotFoundException("Коментарій не знайдено");
         if (comment.UserId == user.Id)
         {
             appDbContext.Comments.Remove(comment);

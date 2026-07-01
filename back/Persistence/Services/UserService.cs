@@ -1,15 +1,19 @@
-﻿using Application.Constants;
+﻿using System.Net.Http.Json;
+using System.Runtime.InteropServices.JavaScript;
+using Application.Constants;
 using Application.Dtos.Token;
 using Application.Dtos.User;
 using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
+using Application.Options;
 using Domain.Entities.Identity;
 using Domain.Exceptions;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Persistence.Services;
 
@@ -20,9 +24,12 @@ internal class UserService(
     IConfiguration configuration,
     IEmailService emailService,
     UserMapper mapper,
-    ICurrentUser currentUser)
+    HttpClient httpClient,
+    ICurrentUser currentUser,
+    IOptions<GoogleOptions> options)
     : IUserService
 {
+    private readonly GoogleOptions _googleOptions = options.Value;
     private string GetHtmlTemplate(string templateName)
     {
         var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates", templateName);
@@ -33,14 +40,14 @@ internal class UserService(
     {
         var user =
             await userManager.Users.FirstOrDefaultAsync(u => u.UserName == dto.Login || u.Email == dto.Login)
-            ?? throw new BadRequestException("Невірний логін або пароль");
+            ?? throw new BadRequestException(ErrorCodes.InvalidCredentials);
 
         var checkPassword = await userManager.CheckPasswordAsync(user, dto.Password);
-        if (!checkPassword) throw new ValidationException("Невірний логін або пароль");
+        if (!checkPassword) throw new BadRequestException(ErrorCodes.InvalidCredentials);
 
-        if (!user.EmailConfirmed) throw new NotAllowedException("Підтвердіть свою електронну пошту, щоб увійти");
+        if (!user.EmailConfirmed) throw new NotAllowedException(ErrorCodes.EmailNotConfirmed, new {email = user.Email});
 
-        if (user.IsBanned is true) throw new NotAllowedException("Аккаунт був заблокований");
+        if (user.IsBanned) throw new NotAllowedException(ErrorCodes.UserBanned);
 
         return await tokenService.GenerateTokensAsync(user);
     }
@@ -48,16 +55,15 @@ internal class UserService(
     public async Task Register(RegisterUserDto dto)
     {
         var isEmailTaken = await userManager.Users.AnyAsync(u => u.Email == dto.Email);
-        if (isEmailTaken) throw new BadRequestException("Почта вже занята");
-        var isUsernameTaken = await userManager.Users.AnyAsync(u => u.UserName == dto.Username);
-        if (isUsernameTaken) throw new BadRequestException("Ім'я користувача вже заняте");
+        if (isEmailTaken) throw new BadRequestException(ErrorCodes.EmailAlreadyExists);
+        var isUsernameTaken = await userManager.Users.AnyAsync(u => u.NormalizedUserName == dto.Username.ToUpper());
+        if (isUsernameTaken) throw new BadRequestException(ErrorCodes.UsernameAlreadyExists);
 
         var user = mapper.ToEntity(dto);
 
         var result = await userManager.CreateAsync(user, dto.Password);
         if (result.Succeeded)
         {
-            if (dto.Avatar is not null) await imageService.SaveImageAsync(dto.Avatar, user.Id);
 
             await userManager.AddToRoleAsync(user, RoleNames.USER_ROLE);
 
@@ -75,7 +81,7 @@ internal class UserService(
     public async Task UpdateTokenVersion(Guid userId)
     {
         var user = userManager.Users.FirstOrDefault(u => u.Id == userId)
-                   ?? throw new UnauthorizedException("Користувач не знайдений");
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
 
         var currentVersion = user.RefreshTokenVersion;
         user.RefreshTokenVersion = currentVersion + 1;
@@ -86,10 +92,10 @@ internal class UserService(
     public async Task ForgotPasswordAsync(string email)
     {
         var user = await userManager.FindByEmailAsync(email)
-                   ?? throw new UnauthorizedException("Користувач не знайдений");
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
 
         if (!await userManager.HasPasswordAsync(user))
-            throw new BadRequestException("Аккаунтам створених зовнішними сервісами не можливо сбросити пароль");
+            throw new BadRequestException(ErrorCodes.CantResetPasswordExternal);
 
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
         var resetLink = $"{configuration["Frontend:Url"]}/reset-password?token={token}&email={email}";
@@ -102,45 +108,45 @@ internal class UserService(
     public async Task<TokenResponseDTO> ConfirmEmail(string email, string token)
     {
         var user = userManager.Users.FirstOrDefault(u => u.Email == email)
-                   ?? throw new UnauthorizedException("Користувач не знайдений");
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
 
-        if (user.EmailConfirmed == true) throw new ValidationException("Пошта вже підтверджена");
+        if (user.EmailConfirmed == true) throw new BadRequestException(ErrorCodes.EmailAlreadyConfirmed);
 
         var result = await userManager.ConfirmEmailAsync(user, token);
         if (result.Succeeded)
             return await tokenService.GenerateTokensAsync(user);
         else
-            throw new ValidationException("Невірний токен підтвердження");
+            throw new BadRequestException(ErrorCodes.InvalidToken);
     }
 
     // Скидає пароль і міняє версію токен на + 1 щоб інші токени стали недійсними
     public async Task ResetPasswordAsync(ResetPasswordDto dto)
     {
         var user = userManager.Users.FirstOrDefault(u => u.Email == dto.Email)
-                   ?? throw new UnauthorizedException("Користувач не знайдений");
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
 
         var result = await userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
 
         if (result.Succeeded)
             await UpdateTokenVersion(user.Id);
         else
-            throw new ValidationException("Невірний токен для скидання пароля");
+            throw new BadRequestException(ErrorCodes.InvalidToken);
     }
 
     public async Task ResendConfirmationEmailAsync(string email)
     {
         var user = await userManager.FindByEmailAsync(email)
-                   ?? throw new NotFoundException("Почту не знайдено");
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
-        if (user.EmailConfirmed) throw new ValidationException("Почту уже підтвердженно");
+        if (user.EmailConfirmed) throw new BadRequestException(ErrorCodes.EmailAlreadyConfirmed);
 
         if (user.LastConfirmationEmailSentAt.HasValue)
         {
             var timePassed = DateTime.UtcNow - user.LastConfirmationEmailSentAt.Value;
-            if (timePassed.TotalMinutes < 5)
+            if (timePassed.TotalMinutes < 1)
             {
-                var remaining = 5 - (int)timePassed.TotalMinutes;
-                throw new ValidationException($"Повторіть спробу через {remaining} хвилин ");
+                var remaining = 1 - (int)timePassed.TotalMinutes;
+                throw new BadRequestException(ErrorCodes.TooFast);
             }
         }
 
@@ -155,27 +161,48 @@ internal class UserService(
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         var body = GetHtmlTemplate("ConfirmEmail.html");
         body = body.Replace("{confirmCode}", token);
-        await emailService.SendEmailAsync(user.Email!, "Підтвердження реєстрації", body);
+        await emailService.SendEmailAsync(user.Email!, "Confirm registration", body);
     }
 
-    public async Task<TokenResponseDTO> GoogleAuth(string idToken)
+    public async Task<TokenResponseDTO> GoogleAuth(string code)
     {
+        var tokenResponse = await httpClient.PostAsync(
+            "https://oauth2.googleapis.com/token",
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                { "code", code },
+                {"client_id", _googleOptions.ClientId},
+                {"client_secret", _googleOptions.ClientSecret},
+                {"redirect_uri", "postmessage"},
+                {"grant_type", "authorization_code"}
+            }));
+
+        if (!tokenResponse.IsSuccessStatusCode)
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
+
+        var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<GoogleTokenExchangeResponse>();
+
+        if (tokenJson?.IdToken is null)
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
+        
+        var idToken = tokenJson.IdToken;
+                
         GoogleJsonWebSignature.Payload payload;
         try
         {
             var settings = new GoogleJsonWebSignature.ValidationSettings
             {
-                Audience = new[] { configuration["Google:ClientId"] }
+                Audience = new[] { _googleOptions.ClientId }
             };
             payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
         }
         catch (InvalidJwtException)
         {
-            throw new UnauthorizedException("Помилка при вході через гугл. Спробуйте ще раз.");
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
         }
 
         if (!payload.EmailVerified)
-            throw new UnauthorizedException("Помилка при валідації почти. Спробуйте ще раз.");
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
 
         var existingUser = await userManager.FindByLoginAsync("Google", payload.Subject);
         if (existingUser is not null)

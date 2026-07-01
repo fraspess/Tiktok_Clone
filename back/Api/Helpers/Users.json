@@ -5,7 +5,7 @@
     "FirstName": "string",
     "LastName": "string",
     "Image": "https://randomuser.me/api/portraits/men/1.jpg",
-    "Password": "string",
+    "Password": "String!1",
     "Roles": [
       "Admin"
     ]
@@ -27,7 +27,7 @@
     "FirstName": "Іван",
     "LastName": "Борисюк",
     "Image": "https://randomuser.me/api/portraits/men/2.jpg",
-    "Password": "bb123456",
+    "Password": "B!b123456",
     "Roles": [
       "User"
     ]
@@ -38,7 +38,7 @@
     "FirstName": "Олена",
     "LastName": "Шаглінська",
     "Image": "https://randomuser.me/api/portraits/women/1.jpg",
-    "Password": "password",
+    "Password": "Password@",
     "Roles": [
       "User"
     ]
@@ -104,7 +104,7 @@
     "FirstName": "Юрій",
     "LastName": "Кравченко",
     "Image": "https://randomuser.me/api/portraits/men/5.jpg",
-    "Password": "YuraK_2023",
+    "Password": "YuraK@2023",
     "Roles": [
       "User"
     ]
@@ -126,7 +126,7 @@
     "FirstName": "Тарас",
     "LastName": "Романюк",
     "Image": "https://randomuser.me/api/portraits/men/6.jpg",
-    "Password": "TarasR123",
+    "Password": "TarasR@123",
     "Roles": [
       "Admin"
     ]
@@ -203,7 +203,7 @@
     "FirstName": "Яна",
     "LastName": "Тимошенко",
     "Image": "https://randomuser.me/api/portraits/women/9.jpg",
-    "Password": "YanaTpass1",
+    "Password": "YanaTpa@ss1",
     "Roles": [
       "User"
     ]

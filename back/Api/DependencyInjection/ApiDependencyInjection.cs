@@ -83,7 +83,7 @@ public static class ApiDependencyInjection
             });
 
         services.AddHealthChecks();
-
+ 
         services.AddSwaggerGen(opt =>
         {
             opt.AddSecurityDefinition("bearer", new OpenApiSecurityScheme

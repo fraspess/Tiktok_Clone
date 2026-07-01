@@ -1,0 +1,44 @@
+{
+  "auth": {
+    "signInTitle": "Sign in",
+    "signUpTitle": "Sign up",
+    "googleAuth": "Continue with Google",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "validation": {
+      "email": "Invalid email address",
+      "required": "This field is required",
+      "passwordMin": "Password must be at least 8 characters long",
+      "usernameMin": "Username must be at least 3 characters",
+      "passwordNotStrong": "Password must have at least 1 uppercase letter, 1 number, and 1 special character",
+      "passwordMismatch": "Passwords do not match",
+      "tooSmallLoginLength": "Login must be at least 3 characters long"
+    },
+    "confirmPasswordLabel": "Confirm password",
+    "loading": "Loading...",
+    "hasAccountPrompt": "Already have an account? Sign in",
+    "noAccountPrompt": "Don’t have an account? Sign up",
+    "tooManyRequests": "Slow down! Too many requests",
+    "loginLabel": "Email or username",
+    "usernameLabel": "Username",
+    "invalidCredentials": "Invalid username or password",
+    "fallbackError": "Something went wrong. Please wait and try again",
+    "email": {
+      "verificationCode": "Verification code",
+      "resendCode": "Resend code",
+      "description": "Enter the verification code we sent to your email address: {{email}}",
+      "verify": "Verify",
+      "resetPassword": "I no longer have access to this email address",
+      "invalidConfirmEmailToken": "Invalid verification code",
+      "tooFast": "Too fast! Please wait at least 1 minute before resending confirmation code",
+      "confirmedTitle": "Email is confirmed",
+      "confirmedDescription": "Your email is confirmed now. Please sign in again",
+      "alreadyConfirmed": "This email is already confirmed",
+      "resendCodeSuccess": "Code has been sent to your email"
+    },
+    "confirmEmailTitle": "Confirm email",
+    "usernameAlreadyTaken": "Username is already taken",
+    "emailAlreadyTaken": "This email is already taken"
+  },
+  "collapseSidebar": "Collapse sidebar"
+}

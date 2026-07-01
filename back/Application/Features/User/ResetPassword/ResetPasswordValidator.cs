@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Domain.Exceptions;
+using FluentValidation;
 
 namespace Application.Features.User.ResetPassword;
 
@@ -7,11 +8,11 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordCommand>
     public ResetPasswordValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Почта не може бути пустой")
-            .EmailAddress().WithMessage("Невірний формат электронной почти");
+            .NotEmpty().WithErrorCode(ErrorCodes.EmailRequired)
+            .EmailAddress().WithErrorCode(ErrorCodes.InvalidEmail);
 
         RuleFor(x => x.NewPassword)
-            .NotEmpty().WithMessage("Пароль не може бути пустим")
-            .MinimumLength(6).WithMessage("Пароль має бути не менше ніж 6 символів");
+            .NotEmpty().WithErrorCode(ErrorCodes.PasswordRequired)
+            .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$").WithErrorCode(ErrorCodes.InvalidPassword);
     }
 }

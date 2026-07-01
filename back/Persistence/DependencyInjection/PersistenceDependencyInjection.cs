@@ -23,11 +23,11 @@ public static class PersistenceDependencyInjection
 
         services.AddIdentityCore<UserEntity>(options =>
             {
-                options.Password.RequiredLength = 6;
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
                 options.User.RequireUniqueEmail = true;
 
                 options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
@@ -37,11 +37,7 @@ public static class PersistenceDependencyInjection
             .AddDefaultTokenProviders();
 
         services.AddDataProtection();
-
-        services.Configure<DataProtectionTokenProviderOptions>(opt =>
-        {
-            opt.TokenLifespan = TimeSpan.FromMinutes(30);
-        });
+        
 
         services.AddScoped<IUserService, UserService>();
         return services;

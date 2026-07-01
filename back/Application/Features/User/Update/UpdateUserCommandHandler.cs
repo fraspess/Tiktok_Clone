@@ -33,7 +33,7 @@ internal class UpdateUserCommandHandler(
 
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
-            throw new ValidationException(
+            throw new BadRequestException(
                 string.Join("; ", result.Errors.Select(e => e.Description)));
 
         return Unit.Value;

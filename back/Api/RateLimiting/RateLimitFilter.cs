@@ -1,4 +1,5 @@
 using Application;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -29,7 +30,7 @@ public class RateLimitFilter(SlidingWindowRateLimiter _limiter) : IAsyncActionFi
 
         if (!allowed)
         {
-            context.Result = new ObjectResult(ApiResponse<object>.Error("Занадто багатів запитів!"))
+            context.Result = new ObjectResult(ApiResponse<object>.Error(ErrorCodes.TooManyRequests))
             {
                 StatusCode = 429
             };

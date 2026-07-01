@@ -19,7 +19,6 @@ public class ConversationController(IMediator _mediator) : ControllerBase
 {
     [Authorize]
     [HttpGet]
-    [RateLimit(30, 60_000)]
     public async Task<IActionResult> GetConversations(int pageNumber = 1, int pageSize = 10)
     {
         var conversations = await _mediator.Send(new GetConversationsQuery(
@@ -29,7 +28,6 @@ public class ConversationController(IMediator _mediator) : ControllerBase
 
     [Authorize]
     [HttpGet("{id}")]
-    [RateLimit(30, 60_000)]
     public async Task<IActionResult> GetConversationById(Guid id)
     {
         var conversation = await _mediator.Send(new GetConversationQuery(id));
@@ -38,7 +36,6 @@ public class ConversationController(IMediator _mediator) : ControllerBase
 
     [Authorize]
     [HttpPost]
-    [RateLimit(5, 60_000)]
     public async Task<IActionResult> CreateConversation([FromBody] CreateConversationDto dto)
     {
         var conversation = await _mediator.Send(new CreateConversationCommand(dto.UserIds));
@@ -47,7 +44,6 @@ public class ConversationController(IMediator _mediator) : ControllerBase
 
     [HttpGet("messages")]
     [Authorize]
-    [RateLimit(30, 60_000)]
     public async Task<IActionResult> GetMessages(Guid conversationId, int pageNumber = 1, int pageSize = 10)
     {
         var messages = await _mediator.Send(new GetConversationMessagesQuery(conversationId,
