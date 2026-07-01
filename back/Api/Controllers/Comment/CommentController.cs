@@ -21,7 +21,6 @@ public class CommentController(IMediator _mediator) : ControllerBase
 {
     [HttpPost]
     [Authorize]
-    [RateLimit(10, 60_000)]
     public async Task<IActionResult> CreateComment([FromBody] CreateCommentDto dto)
     {
         await _mediator.Send(new CreateCommentCommand(dto));
@@ -46,7 +45,6 @@ public class CommentController(IMediator _mediator) : ControllerBase
 
     [HttpDelete]
     [Authorize]
-    [RateLimit(10, 60_000)]
     public async Task<IActionResult> DeleteComment(Guid commentId)
     {
         await _mediator.Send(new DeleteCommentCommand(commentId));
@@ -56,7 +54,6 @@ public class CommentController(IMediator _mediator) : ControllerBase
 
     [HttpPost("like")]
     [Authorize]
-    [RateLimit(20, 60_000)]
     public async Task<IActionResult> ToggleLikeComment([FromQuery] Guid commentId)
     {
         await _mediator.Send(new LikeCommentCommand(commentId));

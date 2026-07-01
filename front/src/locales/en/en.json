@@ -28,7 +28,13 @@
       "resendCode": "Resend code",
       "description": "Enter the verification code we sent to your email address: {{email}}",
       "verify": "Verify",
-      "resetPassword": "I no longer have access to this email address"
+      "resetPassword": "I no longer have access to this email address",
+      "invalidConfirmEmailToken": "Invalid verification code",
+      "tooFast": "Too fast! Please wait at least 1 minute before resending confirmation code",
+      "confirmedTitle": "Email is confirmed",
+      "confirmedDescription": "Your email is confirmed now. Please sign in again",
+      "alreadyConfirmed": "This email is already confirmed",
+      "resendCodeSuccess": "Code has been sent to your email"
     },
     "confirmEmailTitle": "Confirm email",
     "usernameAlreadyTaken": "Username is already taken",

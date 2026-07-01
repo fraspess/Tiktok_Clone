@@ -4,21 +4,25 @@ import Topbar from "@/components/layout/Topbar.tsx";
 import {useState} from "react";
 import AuthModal from "@/components/modals/AuthModal";
 
-const MainLayout = () => {
+
+interface MainLayoutProps {
+    children?: React.ReactNode;
+}
+
+const MainLayout = ({children}: MainLayoutProps) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    return(
+    return (
         <div className="flex h-screen">
-            <Sidebar collapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
+            <Sidebar collapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}/>
             <div className="flex flex-col flex-1">
-                <Topbar />
+                <Topbar/>
                 <main className="flex-1 overflow-auto">
-                    <Outlet />
+                    {children ?? <Outlet/>}
                 </main>
             </div>
-            <AuthModal />
+            <AuthModal/>
         </div>
     )
 }
-
 export default MainLayout

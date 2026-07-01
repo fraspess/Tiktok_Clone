@@ -15,7 +15,6 @@ namespace Api.Controllers.Reports;
 public class ReportController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
-    [RateLimit(5, 15 * 60_000)]
     public async Task<IActionResult> SendReport([FromBody] ReportDTO dto)
     {
         await mediator.Send(new SendReportCommand(dto));

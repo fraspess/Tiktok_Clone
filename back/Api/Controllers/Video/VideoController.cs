@@ -24,7 +24,6 @@ namespace Api.Controllers.Video;
 
 [Route("api/videos")]
 [ApiController]
-[RateLimit(100, 60_000)]
 public class VideoController(IMediator _mediator) : ControllerBase
 {
     /*[HttpGet("video/{fileName}")]
@@ -50,7 +49,6 @@ public class VideoController(IMediator _mediator) : ControllerBase
 
     [Authorize]
     [HttpDelete("{id}")]
-    [RateLimit(10, 60_000)]
     public async Task<IActionResult> DeleteVideo(string id)
     {
         await _mediator.Send(new DeleteVideoCommand(id));
@@ -59,7 +57,6 @@ public class VideoController(IMediator _mediator) : ControllerBase
 
     [Authorize]
     [HttpPost]
-    [RateLimit(5, 60_000)]
     public async Task<IActionResult> UploadVideo([FromBody] UploadVideoCommand command)
     {
         var url = await _mediator.Send(command);
@@ -69,7 +66,6 @@ public class VideoController(IMediator _mediator) : ControllerBase
 
     [HttpPost("upload-complete")]
     [Authorize]
-    [RateLimit(5, 60_000)]
     public async Task<IActionResult> UploadComplete([FromBody] CompleteUploadVideoCommand command)
     {       
         await _mediator.Send(command);
@@ -141,7 +137,6 @@ public class VideoController(IMediator _mediator) : ControllerBase
     
     [HttpPost("{videoId}/favorite")]
     [Authorize]
-    [RateLimit(20, 60_000)]
     public async Task<IActionResult> Favorite(string videoId)
     {
         await _mediator.Send(new FavoriteVideoCommand(videoId));
@@ -150,7 +145,6 @@ public class VideoController(IMediator _mediator) : ControllerBase
 
     [HttpDelete("{videoId}/favorite")]
     [Authorize]
-    [RateLimit(20, 60_000)]
     public async Task<IActionResult> Unfavorite(string videoId)
     {
         await _mediator.Send(new UnfavoriteCommand(videoId));

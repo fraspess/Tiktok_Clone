@@ -12,6 +12,9 @@ import {useGoogleLogin} from "@react-oauth/google";
 import {useLoginMutation} from "@/store/apis/authApi.ts";
 import type {ApiResponse} from "@/types/ApiResponse.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
+import {useAppDispatch} from "@/store/hooks.ts";
+import type {AuthResponse} from "@/types/AuthResponse.ts";
+import {setAccessToken} from "@/store/slices/authSlice.ts";
 
 interface SignInFormData {
     login: string;
@@ -29,6 +32,7 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [login, {isLoading: isLoginLoading}] = useLoginMutation();
     const [error, setFormError] = useState<string | null>(null);
+    const dispatch = useAppDispatch();
 
     const {
         register, handleSubmit, formState: {errors, isSubmitting}
@@ -41,7 +45,8 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
     const onSubmit = async (data: SignInFormData) => {
         try {
             setFormError(null);
-            await login(data).unwrap();
+            const response = await login(data).unwrap() as AuthResponse;
+            dispatch(setAccessToken(response.accessToken));
             onSuccess();
         } catch (error) {
             if (!isFetchBaseQueryError(error)) {

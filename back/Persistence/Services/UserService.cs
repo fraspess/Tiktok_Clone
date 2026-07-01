@@ -143,9 +143,9 @@ internal class UserService(
         if (user.LastConfirmationEmailSentAt.HasValue)
         {
             var timePassed = DateTime.UtcNow - user.LastConfirmationEmailSentAt.Value;
-            if (timePassed.TotalMinutes < 5)
+            if (timePassed.TotalMinutes < 1)
             {
-                var remaining = 5 - (int)timePassed.TotalMinutes;
+                var remaining = 1 - (int)timePassed.TotalMinutes;
                 throw new BadRequestException(ErrorCodes.TooFast);
             }
         }

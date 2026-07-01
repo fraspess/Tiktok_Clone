@@ -57,7 +57,7 @@ const AuthModal = () => {
                     }}/>
                 )}
                 {step === "confirmEmail" && (
-                    <ConfirmEmailForm email={currentConfirmEmail}/>
+                    <ConfirmEmailForm onSuccess={onSwitchToSignIn} email={currentConfirmEmail}/>
                 )}
             </DialogContent>
         </Dialog>
