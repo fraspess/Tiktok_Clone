@@ -17,13 +17,13 @@ createRoot(document.getElementById('root')!).render(
         <Provider store={store}>
             <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange enableSystem>
                 <TooltipProvider>
-                    <AuthBootstrap>
-                        <BrowserRouter>
-                            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                    <BrowserRouter>
+                        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                            <AuthBootstrap>
                                 <App/>
-                            </GoogleOAuthProvider>
-                        </BrowserRouter>
-                    </AuthBootstrap>
+                            </AuthBootstrap>
+                        </GoogleOAuthProvider>
+                    </BrowserRouter>
                 </TooltipProvider>
             </ThemeProvider>
         </Provider>

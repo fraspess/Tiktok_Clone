@@ -56,4 +56,5 @@ public static class ErrorCodes
     public const string UserBanned = "USER_IS_BANNED";
     public const string CantResetPasswordExternal = "CANT_RESET_PASSWORD_EXTERNAL";
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
+    public const string ExternalLoginOnly = "EXTERNAL_LOGIN_ONLY";
 }

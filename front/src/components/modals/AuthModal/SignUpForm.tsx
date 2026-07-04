@@ -9,9 +9,12 @@ import {Button} from "@/components/ui/button.tsx";
 import {DialogFooter} from "@/components/ui/dialog.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useGoogleLogin} from "@react-oauth/google";
-import {useRegisterMutation} from "@/store/apis/authApi.ts";
+import {useGoogleAuthMutation, useRegisterMutation} from "@/store/apis/authApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import type {ApiResponse} from "@/types/ApiResponse.ts";
+import {setAccessToken} from "@/store/slices/authSlice.ts";
+import {useDispatch} from "react-redux";
+import {closeModal} from "@/store/slices/authModalSlice.ts";
 
 interface SignUpFormData {
     email: string;
@@ -28,9 +31,11 @@ interface SignUpProps {
 const SignUpForm = ({onSwitchToSignIn, onSuccess}: SignUpProps) => {
     const {t} = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
+    const [googleAuth, {isLoading: isGoogleAuthLoading}] = useGoogleAuthMutation();
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [registerRequest, {isLoading: isRegisterLoading}] = useRegisterMutation();
     const [bannerError, setBannerError] = useState<string | null>(null);
+    const dispatch = useDispatch();
 
     const {
         register, setError, handleSubmit, watch, trigger, formState: {errors, isSubmitting},
@@ -40,7 +45,18 @@ const SignUpForm = ({onSwitchToSignIn, onSuccess}: SignUpProps) => {
     });
     const googleLogin = useGoogleLogin({
         flow: "auth-code",
-        onSuccess: (codeResponse) => console.log(codeResponse),
+        onSuccess: async (codeResponse) => {
+            try {
+                const response = await googleAuth(codeResponse).unwrap() as ApiResponse<{ accessToken: string }>;
+                dispatch(setAccessToken(response.data.accessToken));
+                dispatch(closeModal())
+            } catch (err) {
+                if (!isFetchBaseQueryError(err)) {
+                    setBannerError(t("auth.fallbackError"));
+                    return;
+                }
+            }
+        },
         onError: (error) => console.log(error),
     })
 
@@ -210,7 +226,8 @@ const SignUpForm = ({onSwitchToSignIn, onSuccess}: SignUpProps) => {
             </form>
 
             <Separator/>
-            <Button onClick={googleLogin} className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200">
+            <Button onClick={googleLogin} className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200"
+                    disabled={isGoogleAuthLoading}>
                 <svg viewBox="-3 0 262 262" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"
                      fill="#000000">
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>

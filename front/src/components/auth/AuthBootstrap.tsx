@@ -3,6 +3,7 @@ import {useEffect} from "react";
 import {useRefreshTokenMutation} from "@/store/apis/authApi.ts";
 import {logout, setAccessToken, setIsLoading} from "@/store/slices/authSlice.ts";
 import {FullPageSpinner} from "@/pages/FullPageSpinner.tsx";
+import type {ApiResponse} from "@/types/ApiResponse.ts";
 
 
 function AuthBootstrap({children}: { children: React.ReactNode }) {
@@ -12,10 +13,15 @@ function AuthBootstrap({children}: { children: React.ReactNode }) {
 
     useEffect(() => {
         dispatch(setIsLoading(true));
-        sessionStorage.setItem('lastRefreshAttempt', String(Date.now()));
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         refreshToken()
             .unwrap()
-            .then((data) => dispatch(setAccessToken(data.accessToken)))
+            .then((data) => {
+                const response = data as ApiResponse<{ accessToken: string }>
+                console.log(data)
+                dispatch(setAccessToken(response.data.accessToken))
+            })
             .catch(() => dispatch(logout()));
     }, [])
     if (status) {
