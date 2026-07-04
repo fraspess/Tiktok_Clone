@@ -17,7 +17,7 @@ internal class AdminPanelGetUsersCommandHandler(UserManager<UserEntity> userMana
     {
         var users = await userManager.Users
             .ToProjectionDto(null)
-            .ToPagedResultAsync(request.PaginationSettings);
+            .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 
         var result = users.MapItems(mapper.ToSimpleDto);
         return result;

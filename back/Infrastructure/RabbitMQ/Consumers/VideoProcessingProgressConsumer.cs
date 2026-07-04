@@ -5,11 +5,11 @@ using MediatR;
 
 namespace Infrastructure.RabbitMQ.Consumers;
 
-internal class VideoProcessingProgressConsumer(IMediator _mediator) : IConsumer<VideoProcessingProgressEvent>
+internal class VideoProcessingProgressConsumer(IMediator mediator) : IConsumer<VideoProcessingProgressEvent>
 {
     public async Task Consume(ConsumeContext<VideoProcessingProgressEvent> context)
     {
-        await _mediator.Send(
+        await mediator.Send(
             new VideoProcessInfoInPercentCommand(context.Message.VideoId, context.Message.Progress));
     }
 }

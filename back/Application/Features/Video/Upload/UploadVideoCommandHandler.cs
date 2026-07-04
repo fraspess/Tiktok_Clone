@@ -12,7 +12,7 @@ namespace Application.Features.Video.Upload;
 
 internal class UploadVideoCommandHandler(
     IStorageService storageService,
-    IJWTTokenService jwtTokenService,
+    IJwtTokenService jwtTokenService,
     ICurrentUser currentUser) : IRequestHandler<UploadVideoCommand, object>
 {
     public async Task<object> Handle(UploadVideoCommand request, CancellationToken cancellationToken)

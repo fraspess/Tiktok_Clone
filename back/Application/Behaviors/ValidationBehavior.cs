@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Domain.Constants;
 using Domain.Exceptions;
 using ValidationException = Domain.Exceptions.ValidationException;
 

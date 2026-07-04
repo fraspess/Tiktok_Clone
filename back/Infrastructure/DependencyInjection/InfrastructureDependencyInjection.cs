@@ -25,14 +25,13 @@ namespace Infrastructure.DependencyInjection;
 public static class InfrastructureDependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
+        this IServiceCollection services, IConfiguration config)
     {
         services.AddSignalR();
         services.AddScoped<IImageService, ImageService>();
-        services.AddScoped<IJWTTokenService, JWTTokenService>();
         services.AddScoped<IEmailService, EmailService>();
 
-        services.AddScoped<IJWTTokenService, JWTTokenService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IEmailService, EmailService>();
 
         services.AddScoped<IChatNotifier, ChatNotifier>();

@@ -2,6 +2,7 @@
 using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ public class GetVideoByIdQueryHandler(IAppDbContext appDbContext, ICurrentUser c
                         .Videos
                         .ToProjectionDto(currentUser.Id)
                         .FirstOrDefaultAsync(v => v.ShortId == request.Id, cancellationToken)
-                    ?? throw new NotFoundException("Відео не знайдено");
+                    ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
         var dto = videoMapper.ToDto(video);
         return dto;
     }

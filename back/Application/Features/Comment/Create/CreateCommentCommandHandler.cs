@@ -1,6 +1,7 @@
 ﻿using Application.Extensions;
 using Application.Interfaces;
 using Domain.Entities.Comment;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +15,14 @@ internal class CreateCommentCommandHandler(IAppDbContext appDbContext, ICurrentU
     {
         var dto = request.Dto;
         var videoId = await appDbContext.Videos.GetIdFromShortIdAsync(dto.VideoId, cancellationToken);
-        if (videoId == Guid.Empty) throw new NotFoundException("Відео не знайдено");
+        if (videoId == Guid.Empty) throw new NotFoundException(ErrorCodes.VideoNotFound);
 
         var ownerId = currentUser.Id!.Value;
         if (dto.ParentCommentId is not null)
         {
             var exists =
                 await appDbContext.Comments.AnyAsync(c => c.Id == dto.ParentCommentId, cancellationToken);
-            if (!exists) throw new NotFoundException("Коментарій не знайдено");
+            if (!exists) throw new NotFoundException(ErrorCodes.CommentNotFound);
             var newComment = new CommentEntity
             {
                 Text = dto.Text, ParentCommentId = dto.ParentCommentId.Value, UserId = ownerId,

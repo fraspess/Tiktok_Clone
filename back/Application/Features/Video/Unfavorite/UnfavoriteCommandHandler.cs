@@ -1,6 +1,7 @@
 using System.Text.Unicode;
 using Application.Extensions;
 using Application.Interfaces;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ internal class UnfavoriteCommandHandler(IAppDbContext appDbContext) : IRequestHa
     public async Task<Unit> Handle(UnfavoriteCommand request, CancellationToken cancellationToken)
     {
         var videoId = await appDbContext.Videos.GetIdFromShortIdAsync(request.VideoId, ct: cancellationToken);
-        if (videoId == Guid.Empty) throw new NotFoundException("Відео не знайдено");
+        if (videoId == Guid.Empty) throw new NotFoundException(ErrorCodes.VideoNotFound);
         
         var favorite = await appDbContext
             .Favorites

@@ -1,6 +1,7 @@
 ﻿using Application.Extensions;
 using Application.Interfaces;
 using Domain.Entities.Favorite;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ internal class FavoriteVideoCommandHandler(IAppDbContext appDbContext, ICurrentU
         var userId = user.Id!.Value;
 
         var existingVideo = await appDbContext.Videos.GetIdFromShortIdAsync(videoId, ct: cancellationToken);
-        if (existingVideo == Guid.Empty) throw new NotFoundException("Відео не знайдено");
+        if (existingVideo == Guid.Empty) throw new NotFoundException(ErrorCodes.Forbidden);
 
         var favoriteEntity = await appDbContext.Favorites.Where(f => f.UserId == userId && f.VideoId == existingVideo)
             .FirstOrDefaultAsync(cancellationToken);

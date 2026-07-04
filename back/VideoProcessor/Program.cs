@@ -9,7 +9,7 @@ using VideoProcessor;
 
 DotNetEnv.Env.Load();
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddOptions<FFmpegOptions>()
+builder.Services.AddOptions<FfmpegOptions>()
     .BindConfiguration("FFmpeg")
     .ValidateDataAnnotations()
     .ValidateOnStart();

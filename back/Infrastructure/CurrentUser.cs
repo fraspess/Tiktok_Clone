@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using Application.Extensions;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 
@@ -17,7 +16,7 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
         }
     }
 
-    public string? Email => httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value;
+    //public string? Email => httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value;
 
     public bool IsAuthenticated =>
         httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;

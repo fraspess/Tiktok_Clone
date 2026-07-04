@@ -1,6 +1,7 @@
 using Application.Extensions;
 using Application.Interfaces;
 using Domain.Entities.Video;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ public class ViewVideoCommandHandler(IAppDbContext context, ICurrentUser user) :
     public async Task<Unit> Handle(ViewVideoCommand request, CancellationToken cancellationToken)
     {
         var videoId = await context.Videos.GetIdFromShortIdAsync(request.Id, cancellationToken);
-        if (videoId == Guid.Empty) throw new NotFoundException("Відео не знайдено");
+        if (videoId == Guid.Empty) throw new NotFoundException(ErrorCodes.VideoNotFound);
 
         var existingView = await context
             .VideoViews

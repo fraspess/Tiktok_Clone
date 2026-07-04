@@ -24,7 +24,7 @@ public class GetConversationsQueryHandler(
             .ThenInclude(f => f.User)
             .Where(c => c.Participants.Any(p => p.UserId == user.Id))
             .OrderByDescending(x => x.CreatedAt)
-            .ToPagedResultAsync(request.PaginationSettings);
+            .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 
         var result = convo.MapItems(conversationMapper.ToDto);
         return result;

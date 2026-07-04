@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Video;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ internal class LikeVideoCommandHandler(ICurrentUser user, IAppDbContext appDbCon
     public async Task<Unit> Handle(LikeVideoCommand request, CancellationToken cancellationToken)
     {
         var videoId = await appDbContext.Videos.Where(v => v.ShortId == request.VideoId).Select(v => v.Id).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-        if (videoId == Guid.Empty) throw new NotFoundException("Відео не знайдено");
+        if (videoId == Guid.Empty) throw new NotFoundException(ErrorCodes.VideoNotFound);
         
         var existingLike =
             await appDbContext.VideoLikes.AnyAsync(l => l.UserId == user.Id && l.VideoId == videoId,

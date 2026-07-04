@@ -6,7 +6,7 @@ using Application.Pagination;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
-namespace Application.Features.Video.GetFYP;
+namespace Application.Features.Video.GetFyp;
 
 public class GetForYouPageVideosQueryHandler(
     IAppDbContext appDbContext,

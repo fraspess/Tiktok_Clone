@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Application.Mapper;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +18,7 @@ internal class GetUserByIdCommandHandler(
     public async Task<GetUserAdminDto> Handle(GetUserByIdCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken)
-                   ?? throw new NotFoundException("Користувача не знайдено");
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
         var dto = mapper.ToGetUserAdminDto(user);
         dto.Avatar = storageService.GetUserAvatar(user.Id);
         return dto;

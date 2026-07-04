@@ -2,7 +2,7 @@
 using Application.Pagination;
 using MediatR;
 
-namespace Application.Features.Video.GetFYP;
+namespace Application.Features.Video.GetFyp;
 
 public record GetForYouPageVideosQuery(PaginationSettings PaginationSettings)
     : IRequest<PagedResult<VideoDto>>;

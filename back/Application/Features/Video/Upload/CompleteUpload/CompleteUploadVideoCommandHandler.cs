@@ -6,6 +6,7 @@ using Contracts;
 using Contracts.Events;
 using Domain;
 using Domain.Entities.Video;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,10 +17,10 @@ namespace Application.Features.Video.Upload.CompleteUpload;
 public class CompleteUploadVideoCommandHandler(
     IAppDbContext appDbContext,
     IEventBus<VideoStartProcessingEvent> eventBus,
-    IDescriptionParser _parser,
+    IDescriptionParser parser,
     ICurrentUser currentUser,
-    IHashTagService _hashtag,
-    IJWTTokenService jwtTokenService) : IRequestHandler<CompleteUploadVideoCommand, Unit>
+    IHashTagService hashtag,
+    IJwtTokenService jwtTokenService) : IRequestHandler<CompleteUploadVideoCommand, Unit>
 {
     public async Task<Unit> Handle(CompleteUploadVideoCommand request, CancellationToken cancellationToken)
     {
@@ -32,7 +33,7 @@ public class CompleteUploadVideoCommandHandler(
             .FirstOrDefaultAsync(cancellationToken);
         if (video != null) throw new BadRequestException("Відео вже існує");
         
-        var parsedDescription = _parser.ParseDescription(request.Description);
+        var parsedDescription = parser.ParseDescription(request.Description);
         var newVideo = new VideoEntity
         {
             Id = payload.VideoId,
@@ -43,7 +44,7 @@ public class CompleteUploadVideoCommandHandler(
             ProccessedInPercents = 0
         };
 
-        var hashtags = await _hashtag.GetOrCreateAsync(parsedDescription.Tags);
+        var hashtags = await hashtag.GetOrCreateAsync(parsedDescription.Tags);
         foreach (var tag in hashtags)
             newVideo.HashTags.Add(new VideoHashTagEntity { HashTagId = tag.Id });
 

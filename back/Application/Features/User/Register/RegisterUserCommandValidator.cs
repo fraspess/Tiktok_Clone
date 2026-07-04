@@ -1,5 +1,5 @@
 ﻿using Application.Extensions;
-using Domain.Exceptions;
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.User.Register;

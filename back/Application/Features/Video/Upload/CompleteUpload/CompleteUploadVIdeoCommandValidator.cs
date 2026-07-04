@@ -1,4 +1,4 @@
-using Domain.Exceptions;
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.Video.Upload.CompleteUpload;

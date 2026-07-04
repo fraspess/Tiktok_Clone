@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +12,9 @@ public class DeleteVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser 
     public async Task<Unit> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
     {
         var video = await appDbContext.Videos.FirstOrDefaultAsync(v => v.ShortId == request.VideoId, cancellationToken)
-                    ?? throw new NotFoundException("Відео не знайдено");
+                    ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
 
-        if (video.UserId != user.Id) throw new NotAllowedException("Ви не маєте прав на цю дію");
+        if (video.UserId != user.Id) throw new NotAllowedException(ErrorCodes.Forbidden);
 
         appDbContext.Videos.Remove(video);
         await appDbContext.SaveChangesAsync(cancellationToken);

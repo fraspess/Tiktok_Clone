@@ -1,6 +1,6 @@
 ﻿using Application.Dtos.Report;
 using Domain;
-using Domain.Exceptions;
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.Report.Send;

@@ -1,5 +1,6 @@
-﻿using Domain.Exceptions;
+﻿using Domain.Constants;
 using System.Security.Claims;
+using Domain.Exceptions;
 
 namespace Application.Extensions;
 
