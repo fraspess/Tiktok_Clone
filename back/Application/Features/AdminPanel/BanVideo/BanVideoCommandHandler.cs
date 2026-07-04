@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ internal class BanVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser u
         var video = await appDbContext
                         .Videos
                         .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
-                    ?? throw new NotFoundException("Відео не знайдено");
+                    ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
 
         video.Ban(user.Id!.Value);
 

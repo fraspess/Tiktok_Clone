@@ -1,13 +1,13 @@
-﻿using System.Net.Http.Json;
-using System.Runtime.InteropServices.JavaScript;
+﻿using System.Globalization;
+using System.Net.Http.Json;
 using Application.Constants;
 using Application.Dtos.Token;
 using Application.Dtos.User;
-using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
 using Application.Options;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
@@ -19,7 +19,7 @@ namespace Persistence.Services;
 
 internal class UserService(
     UserManager<UserEntity> userManager,
-    IJWTTokenService tokenService,
+    IJwtTokenService tokenService,
     IImageService imageService,
     IConfiguration configuration,
     IEmailService emailService,
@@ -30,7 +30,7 @@ internal class UserService(
     : IUserService
 {
     private readonly GoogleOptions _googleOptions = options.Value;
-    private string GetHtmlTemplate(string templateName)
+    private static string GetHtmlTemplate(string templateName)
     {
         var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates", templateName);
         return File.ReadAllText(path);
@@ -73,8 +73,7 @@ internal class UserService(
         }
         else
         {
-            throw new Exception("Помилка при створенні користувача : " +
-                                string.Join(", ", result.Errors.Select(e => e.Description)));
+            throw new Exception(ErrorCodes.InternalServerError);
         }
     }
 
@@ -110,13 +109,12 @@ internal class UserService(
         var user = userManager.Users.FirstOrDefault(u => u.Email == email)
                    ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
 
-        if (user.EmailConfirmed == true) throw new BadRequestException(ErrorCodes.EmailAlreadyConfirmed);
+        if (user.EmailConfirmed) throw new BadRequestException(ErrorCodes.EmailAlreadyConfirmed);
 
         var result = await userManager.ConfirmEmailAsync(user, token);
         if (result.Succeeded)
             return await tokenService.GenerateTokensAsync(user);
-        else
-            throw new BadRequestException(ErrorCodes.InvalidToken);
+        throw new BadRequestException(ErrorCodes.InvalidToken);
     }
 
     // Скидає пароль і міняє версію токен на + 1 щоб інші токени стали недійсними
@@ -145,7 +143,7 @@ internal class UserService(
             var timePassed = DateTime.UtcNow - user.LastConfirmationEmailSentAt.Value;
             if (timePassed.TotalMinutes < 1)
             {
-                var remaining = 1 - (int)timePassed.TotalMinutes;
+                //var remaining = 1 - (int)timePassed.TotalMinutes;
                 throw new BadRequestException(ErrorCodes.TooFast);
             }
         }
@@ -192,7 +190,7 @@ internal class UserService(
         {
             var settings = new GoogleJsonWebSignature.ValidationSettings
             {
-                Audience = new[] { _googleOptions.ClientId }
+                Audience = [_googleOptions.ClientId]
             };
             payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
         }

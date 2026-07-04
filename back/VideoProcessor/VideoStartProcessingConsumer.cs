@@ -9,14 +9,13 @@ using Microsoft.Extensions.Options;
 namespace VideoProcessor;
 
 internal class VideoStartProcessingConsumer(
-    ILogger<VideoStartProcessingConsumer> _logger,
-    IOptions<FFmpegOptions> _fFmpegOptions,
+    ILogger<VideoStartProcessingConsumer> logger,
+    IOptions<FfmpegOptions> ffmpegOptions,
     IPublishEndpoint publishEndpoint,
-    IConfiguration config,
     IAmazonS3 amazonS3,
     IOptions<AwsS3Options> options) : IConsumer<VideoStartProcessingEvent>
 {
-    private readonly FFmpegOptions _opts = _fFmpegOptions.Value;
+    private readonly FfmpegOptions _opts = ffmpegOptions.Value;
     private readonly AwsS3Options _awsS3Options = options.Value;
 
     public async Task Consume(ConsumeContext<VideoStartProcessingEvent> context)
@@ -40,7 +39,7 @@ internal class VideoStartProcessingConsumer(
             //     throw new Exception("Файл не знайдений");
             // }
 
-            _logger.LogInformation("Started processing video {inputPath}", inputPath);
+            logger.LogInformation("Started processing video {inputPath}", inputPath);
 
             await ValidateVideoAsync(inputPath);
 
@@ -68,11 +67,11 @@ internal class VideoStartProcessingConsumer(
             await publishEndpoint.Publish(new VideoProcessedEvent
                 { VideoId = context.Message.VideoId });
 
-            _logger.LogInformation("Video successfully processed {outputPath}", outputPath);
+            logger.LogInformation("Video successfully processed {outputPath}", outputPath);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to convert file: {Error} ", ex.Message);
+            logger.LogError("Failed to convert file: {Error} ", ex.Message);
             await publishEndpoint.Publish(new VideoProcessingFailedEvent(context.Message.VideoId, ex.Message));
             throw;
         }
@@ -86,7 +85,7 @@ internal class VideoStartProcessingConsumer(
         }
     }
 
-    private async Task ValidateVideoAsync(string filePath)
+    private static async Task ValidateVideoAsync(string filePath)
     {
         IMediaAnalysis mediaInfo;
         try
@@ -153,8 +152,8 @@ internal class VideoStartProcessingConsumer(
                     .WithCustomArgument($"-preset {_opts.Encoding.Preset}")
                     .WithCustomArgument($"-vf scale={q.Scale}")
                     .WithCustomArgument($"-b:v {q.VideoBitrate} -maxrate {q.MaxRate} -bufsize {q.BuffSize}")
-                    .WithCustomArgument($"-hls_time 4")
-                    .WithCustomArgument($"-hls_playlist_type vod")
+                    .WithCustomArgument("-hls_time 4")
+                    .WithCustomArgument("-hls_playlist_type vod")
                     .WithCustomArgument("-hls_flags independent_segments")
                     .WithCustomArgument($"-hls_segment_filename \"{Path.Combine(dir, "seg_%03d.ts")}\"")
                     .ForceFormat("hls"))
@@ -184,7 +183,7 @@ internal class VideoStartProcessingConsumer(
         await File.WriteAllTextAsync(Path.Combine(output, "master.m3u8"), sb.ToString());
     }
 
-    private async Task GenerateThumbnailAsync(string input, string output)
+    private static async Task GenerateThumbnailAsync(string input, string output)
     {
         var thumbPath = Path.Combine(output, "thumbnail.jpg");
         await FFMpeg.SnapshotAsync(input, thumbPath, captureTime: TimeSpan.FromSeconds(1));

@@ -3,6 +3,7 @@ using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -29,7 +30,7 @@ public class GetCurrentUserQueryHandler(
                        .Where(u => u.Id == currentUser.Id)
                        .ToProjectionDto(currentUser.Id)
                        .FirstOrDefaultAsync(cancellationToken)
-                   ?? throw new NotFoundException("Користувача не знайдено?");
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
         var dto = mapper.ToMeDto(user);
         await cache.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(1));

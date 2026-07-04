@@ -3,6 +3,7 @@ using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -24,7 +25,7 @@ public class GetUserByUsernameQueryHandler(
         if (cached is not null) return cached;
         var user = await userManager.Users.ToProjectionDto(currentUser.Id)
                        .FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken)
-                   ?? throw new NotFoundException("Користувача не знайдено");
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
         var dto = userMapper.ToDto(user);
         await cache.SetAsync(cacheKey, dto);
         return dto;

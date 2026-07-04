@@ -4,11 +4,11 @@ using MediatR;
 
 namespace Application.Features.User.RefreshTokens;
 
-public class RefreshTokensCommandHandler(IJWTTokenService jWTTokenService)
+public class RefreshTokensCommandHandler(IJwtTokenService jWtTokenService)
     : IRequestHandler<RefreshTokensCommand, TokenResponseDTO>
 {
     public async Task<TokenResponseDTO> Handle(RefreshTokensCommand request, CancellationToken cancellationToken)
     {
-        return await jWTTokenService.RefreshTokensAsync(request.refreshToken);
+        return await jWtTokenService.RefreshTokensAsync(request.refreshToken);
     }
 }

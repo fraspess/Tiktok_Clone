@@ -1,13 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Amazon.S3;
+﻿using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3.Transfer;
 using Application.Dtos.User;
 using Application.Interfaces;
 using Application.Options;
 using Domain.Exceptions;
 using Microsoft.Extensions.Options;
-using ValidationException = Domain.Exceptions.ValidationException;
 
 namespace Infrastructure.Services.Storage;
 

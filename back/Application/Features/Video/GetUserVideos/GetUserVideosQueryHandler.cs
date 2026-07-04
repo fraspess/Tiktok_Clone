@@ -17,7 +17,7 @@ public class GetUserVideosQueryHandler(IAppDbContext appDbContext, VideoMapper v
             .Where(v => v.UserId == request.UserId)
             .OrderBy(v => v.CreatedAt)
             .ToProjectionDto(currentUser.Id)
-            .ToPagedResultAsync(request.Settings);
+            .ToPagedResultAsync(request.Settings, cancellationToken: cancellationToken);
 
         var result = videos.MapItems(videoMapper.ToDto);
         return result;

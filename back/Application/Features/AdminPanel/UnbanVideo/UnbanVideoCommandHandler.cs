@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Features.AdminPanel.UnBanVideo;
+namespace Application.Features.AdminPanel.UnbanVideo;
 
 internal class UnbanVideoCommandHandler(IAppDbContext appDbContext) : IRequestHandler<UnbanVideoCommand, Unit>
 {
@@ -12,7 +13,7 @@ internal class UnbanVideoCommandHandler(IAppDbContext appDbContext) : IRequestHa
         var video = await appDbContext
                         .Videos
                         .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
-                    ?? throw new NotFoundException("Відео не знайдено");
+                    ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
 
         video.Unban();
 

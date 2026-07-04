@@ -5,9 +5,8 @@ import type {RootState} from "@/store/store.ts";
 import {logout, setAccessToken} from "@/store/slices/authSlice.ts";
 import {API_BASE_URL} from "@/env.ts";
 
-
-const baseQuery = fetchBaseQuery({
-    baseUrl: `${API_BASE_URL}/`,
+export const baseQuery = fetchBaseQuery({
+    baseUrl: `${API_BASE_URL ?? ""}/`,
     credentials: "include",
     prepareHeaders: (headers, {getState}) => {
         const token = (getState() as RootState).auth.accessToken;

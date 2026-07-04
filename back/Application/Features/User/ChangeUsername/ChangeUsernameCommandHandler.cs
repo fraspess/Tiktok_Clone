@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -17,15 +18,15 @@ internal class ChangeUsernameCommandHandler(
         var id = currentUser.Id!.Value;
 
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken)
-                   ?? throw new NotFoundException("Користувача не знайдено");
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
         var cacheKey = $"user:username:{user.UserName}";
         await cache.RemoveAsync(cacheKey);
         if (user.LastUsernameChangedAt.HasValue && DateTime.Now <= user.LastUsernameChangedAt.Value.AddDays(7))
-            throw new BadRequestException("Ви можете змінювати ім'я користувача лише 1 раз в 7 днів");
+            throw new BadRequestException(ErrorCodes.CooldownOnChangeUsername);
 
         if (await userManager.FindByNameAsync(request.newUsername) is not null)
-            throw new BadRequestException("Ім'я користувача уже є зайнятим");
+            throw new BadRequestException(ErrorCodes.AlreadyExists);
 
         user.UserName = request.newUsername;
         user.LastUsernameChangedAt = DateTime.UtcNow;

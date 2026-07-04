@@ -3,6 +3,7 @@ using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
 using Application.Pagination;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -22,10 +23,10 @@ public class GetConversationMessagesQueryHandler(
                                .Conversations
                                .Include(c => c.Participants)
                                .FirstOrDefaultAsync(c => c.Id == request.ConversationId, cancellationToken)
-                           ?? throw new NotFoundException("Розмову не знайдено");
+                           ?? throw new NotFoundException(ErrorCodes.ResourceNotFound);
 
         if (conversation.Participants.All(p => p.UserId != user.Id))
-            throw new NotAllowedException("Ви не маєте прав на перегляд цієї сторінки.");
+            throw new NotAllowedException(ErrorCodes.Forbidden);
 
         var messages = await appDbContext
             .Messages

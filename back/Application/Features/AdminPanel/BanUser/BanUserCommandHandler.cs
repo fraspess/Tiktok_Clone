@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +14,7 @@ internal class BanUserCommandHandler(UserManager<UserEntity> userManager, ICurre
     public async Task<Unit> Handle(BanUserCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken)
-                   ?? throw new NotFoundException("Користувача не знайдено");
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
         user.BannedBy = currentUser.Id;
         user.BannedAt = DateTime.UtcNow;

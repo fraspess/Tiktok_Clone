@@ -10,8 +10,8 @@ namespace Application.Features.Video.Upload.Dev;
 
 internal class UploadVideoCommandDevHandler(
     IAppDbContext appDbContext,
-    IDescriptionParser _parser,
-    IHashTagService _hashtags)
+    IDescriptionParser parser,
+    IHashTagService hashtagsService)
     : IRequestHandler<UploadVideoCommandDev, Unit>
 {
     public async Task<Unit> Handle(UploadVideoCommandDev request, CancellationToken cancellationToken)
@@ -46,11 +46,11 @@ internal class UploadVideoCommandDevHandler(
 
                 var randomUserId = request.RandomUserIds[Random.Shared.Next(request.RandomUserIds.Count())];
 
-                var parsedDescription = _parser.ParseDescription(request.VideoDescription);
+                var parsedDescription = parser.ParseDescription(request.VideoDescription);
                 var newVideo = new VideoEntity
                     { Description = parsedDescription.CleanText, UserId = randomUserId };
 
-                var hashtags = await _hashtags.GetOrCreateAsync(parsedDescription.Tags);
+                var hashtags = await hashtagsService.GetOrCreateAsync(parsedDescription.Tags);
                 foreach (var tag in hashtags)
                     newVideo.HashTags.Add(new VideoHashTagEntity { HashTagId = tag.Id, VideoId = newVideo.Id });
 

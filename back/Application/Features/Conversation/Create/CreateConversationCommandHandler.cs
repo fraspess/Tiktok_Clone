@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Mapper;
 using Domain.Entities.Conversation;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +14,7 @@ namespace Application.Features.Conversation.Create;
 public class CreateConversationCommandHandler(
     IAppDbContext appDbContext,
     ConversationMapper mapper,
-    UserManager<UserEntity> _userManager,
+    UserManager<UserEntity> userManager,
     ICurrentUser currentUser)
     : IRequestHandler<CreateConversationCommand, ConversationDto>
 {
@@ -35,8 +36,8 @@ public class CreateConversationCommandHandler(
         if (existingConversation is not null) return mapper.ToDto(existingConversation);
 
         foreach (var participant in participants)
-            if (!await _userManager.Users.AnyAsync(u => u.Id == participant, cancellationToken))
-                throw new NotFoundException("Користувача не знайдено. Спробуйте створити бесіду ще раз.");
+            if (!await userManager.Users.AnyAsync(u => u.Id == participant, cancellationToken))
+                throw new NotFoundException(ErrorCodes.UserNotFound);
 
         var conversation = new ConversationEntity
         {

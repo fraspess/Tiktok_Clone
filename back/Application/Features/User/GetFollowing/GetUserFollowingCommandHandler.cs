@@ -18,8 +18,7 @@ public class GetUserFollowingCommandHandler(UserManager<UserEntity> userManager,
         var user = await userManager.Users
             .Where(u => u.UserName == request.Username)
             .FirstOrDefaultAsync(cancellationToken);
-
-        Console.WriteLine($"Found user: {user?.Id}");
+        
         var following = await userManager
             .Users
             .Where(u => u.UserName == request.Username)

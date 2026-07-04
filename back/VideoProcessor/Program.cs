@@ -7,9 +7,9 @@ using MassTransit;
 using Microsoft.Extensions.Options;
 using VideoProcessor;
 
-DotNetEnv.Env.Load("../.env");
+DotNetEnv.Env.Load();
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddOptions<FFmpegOptions>()
+builder.Services.AddOptions<FfmpegOptions>()
     .BindConfiguration("FFmpeg")
     .ValidateDataAnnotations()
     .ValidateOnStart();

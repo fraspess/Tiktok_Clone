@@ -22,7 +22,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    DotNetEnv.Env.Load("../.env");
+    DotNetEnv.Env.Load();
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -32,7 +32,7 @@ try
 
     builder.Services.AddApplication(builder.Configuration);
     builder.Services.AddPersistence(builder.Configuration);
-    builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+    builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddApi(builder.Configuration, builder.Environment);
 
     var app = builder.Build();

@@ -1,8 +1,6 @@
 ﻿using Application.Dtos.Token;
 using Application.Interfaces;
-using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,12 +8,12 @@ using System.Text;
 using Application.Features.Video.Upload.CompleteUpload;
 using Application.Options;
 using Domain.Entities.Identity;
+using Domain.Exceptions;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Infrastructure.Services.Token;
 
-internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEntity> userManager) : IJWTTokenService
+internal class JwtTokenService(IOptions<JwtOptions> settings, UserManager<UserEntity> userManager) : IJwtTokenService
 {
     private readonly JwtOptions _options = settings.Value;
 
@@ -95,7 +93,6 @@ internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
         try
         {
             var handler = new JwtSecurityTokenHandler();
-            var key = _options.Key;
 
             handler.ValidateToken(token, new TokenValidationParameters
             {
@@ -127,8 +124,8 @@ internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
             new("sub", user.Id.ToString()),
             new("email", user.Email ?? "")
         };
-
-        foreach (var role in await userManager.GetRolesAsync(user)) claims.Add(new Claim("role", role));
+        
+        claims.AddRange(from role in await userManager.GetRolesAsync(user) select new Claim("role", role));
 
         var signingCredentials = GetSigningCredentials();
 
@@ -146,7 +143,7 @@ internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
     }
 
 
-    private async Task<string> CreateRefreshTokenAsync(UserEntity user)
+    private Task<string> CreateRefreshTokenAsync(UserEntity user)
     {
         var claims = new List<Claim>
         {
@@ -166,7 +163,7 @@ internal class JWTTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
 
         var refreshTokenString = new JwtSecurityTokenHandler().WriteToken(refreshToken);
 
-        return refreshTokenString;
+        return Task.FromResult(refreshTokenString);
     }
 
     private SigningCredentials GetSigningCredentials()

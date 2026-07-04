@@ -1,4 +1,4 @@
-﻿using Domain.Exceptions;
+﻿using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

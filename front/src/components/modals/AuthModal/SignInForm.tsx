@@ -9,11 +9,10 @@ import {Button} from "@/components/ui/button.tsx";
 import {DialogFooter} from "@/components/ui/dialog.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useGoogleLogin} from "@react-oauth/google";
-import {useLoginMutation} from "@/store/apis/authApi.ts";
+import {useGoogleAuthMutation, useLoginMutation} from "@/store/apis/authApi.ts";
 import type {ApiResponse} from "@/types/ApiResponse.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import {useAppDispatch} from "@/store/hooks.ts";
-import type {AuthResponse} from "@/types/AuthResponse.ts";
 import {setAccessToken} from "@/store/slices/authSlice.ts";
 
 interface SignInFormData {
@@ -30,6 +29,7 @@ interface SignInFormProps {
 const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFormProps) => {
     const {t} = useTranslation();
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [googleAuth, {isLoading: isGoogleAuthLoading}] = useGoogleAuthMutation();
     const [login, {isLoading: isLoginLoading}] = useLoginMutation();
     const [error, setFormError] = useState<string | null>(null);
     const dispatch = useAppDispatch();
@@ -45,8 +45,8 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
     const onSubmit = async (data: SignInFormData) => {
         try {
             setFormError(null);
-            const response = await login(data).unwrap() as AuthResponse;
-            dispatch(setAccessToken(response.accessToken));
+            const response = await login(data).unwrap() as ApiResponse<{ accessToken: string }>;
+            dispatch(setAccessToken(response.data.accessToken));
             onSuccess();
         } catch (error) {
             if (!isFetchBaseQueryError(error)) {
@@ -77,7 +77,18 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
 
     const googleLogin = useGoogleLogin({
         flow: "auth-code",
-        onSuccess: (codeResponse) => console.log(codeResponse),
+        onSuccess: async (codeResponse) => {
+            try {
+                const response = await googleAuth(codeResponse).unwrap() as ApiResponse<{ accessToken: string }>;
+                dispatch(setAccessToken(response.data.accessToken));
+                onSuccess();
+            } catch (err) {
+                if (!isFetchBaseQueryError(err)) {
+                    setFormError(t("auth.fallbackError"));
+                    return;
+                }
+            }
+        },
         onError: (error) => console.log(error),
     })
 
@@ -157,7 +168,7 @@ const SignInForm = ({onSwitchToSignUp, onSuccess, onUnConfirmedEmail}: SignInFor
 
             </form>
             <Separator/>
-            <Button onClick={() => googleLogin()}
+            <Button disabled={isGoogleAuthLoading} onClick={() => googleLogin()}
                     className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200">
                 <svg viewBox="-3 0 262 262" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"
                      fill="#000000">

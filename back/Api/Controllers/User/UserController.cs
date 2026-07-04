@@ -19,6 +19,7 @@ using Application.Features.User.ResendConfirmationEmail;
 using Application.Features.User.ResetPassword;
 using Application.Features.User.Update;
 using Application.Pagination;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
