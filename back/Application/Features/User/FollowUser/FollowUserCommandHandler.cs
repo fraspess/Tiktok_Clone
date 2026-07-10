@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +16,7 @@ public class FollowUserCommandHandler(
     public async Task<Unit> Handle(FollowUserCommand request, CancellationToken cancellationToken)
     {
         var followingUserExists = await userManager.Users.AnyAsync(u => u.Id == request.FollowingId, cancellationToken);
-        if (!followingUserExists) throw new NotFoundException("Користувача не знайдено");
+        if (!followingUserExists) throw new NotFoundException(ErrorCodes.UserNotFound);
 
         appDbContext.UserFollows.Add(new UserFollowEntity
         {

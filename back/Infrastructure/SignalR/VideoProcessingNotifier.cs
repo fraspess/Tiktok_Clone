@@ -4,21 +4,21 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Infrastructure.SignalR;
 
-internal class VideoProcessingNotifier(IHubContext<VideoProcessingHub, IVideoHubClient> _hub)
+internal class VideoProcessingNotifier(IHubContext<VideoProcessingHub, IVideoHubClient> hub)
     : IVideoProcessingNotifier
 {
     public async Task SendVideoProcessFailed(Guid videoId, Guid userId, string message)
     {
-        await _hub.Clients.User(userId.ToString()).SendVideoProcessingFailed(videoId, message);
+        await hub.Clients.User(userId.ToString()).SendVideoProcessingFailed(videoId, message);
     }
 
     public async Task SendVideoProcessingProgress(Guid videoId, Guid userId, int progress)
     {
-        await _hub.Clients.User(userId.ToString()).SendVideoProcessingProgress(videoId, progress);
+        await hub.Clients.User(userId.ToString()).SendVideoProcessingProgress(videoId, progress);
     }
 
     public async Task SendVideoProcessSucceded(Guid videoId, Guid userId)
     {
-        await _hub.Clients.User(userId.ToString()).SendVideoProcessingSucceded(videoId);
+        await hub.Clients.User(userId.ToString()).SendVideoProcessingSucceded(videoId);
     }
 }

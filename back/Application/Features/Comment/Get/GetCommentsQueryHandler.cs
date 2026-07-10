@@ -7,19 +7,19 @@ using MediatR;
 
 namespace Application.Features.Comment.Get;
 
-public class GetCommentsQueryHandler(CommentMapper _mapper, ICurrentUser currentUser, IAppDbContext dbContext)
+public class GetCommentsQueryHandler(CommentMapper mapper, ICurrentUser currentUser, IAppDbContext dbContext)
     : IRequestHandler<GetCommentsQuery, PagedResult<CommentDto>>
 {
     public async Task<PagedResult<CommentDto>> Handle(GetCommentsQuery request, CancellationToken cancellationToken)
     {
-        var videoid = await dbContext.Videos.GetIdFromShortIdAsync(request.VideoId, ct: cancellationToken);
+        var videoId = await dbContext.Videos.GetIdFromShortIdAsync(request.VideoId, ct: cancellationToken);
         var comments = await dbContext
             .Comments
-            .Where(c => c.VideoId == videoid)
+            .Where(c => c.VideoId == videoId)
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 
-        var result = comments.MapItems(_mapper.ToDto);
+        var result = comments.MapItems(mapper.ToDto);
         return result;
     }
 }

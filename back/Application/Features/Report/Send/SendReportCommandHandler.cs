@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain;
 using Domain.Entities.Report;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ public class SendReportCommandHandler(IAppDbContext appDbContext, ICurrentUser u
 
         if (await appDbContext.Reports.AnyAsync(r => r.SenderId == userId && r.ContentId == contentId,
                 cancellationToken))
-            throw new BadRequestException("Ви вже надіслали скаргу на цей контент");
+            throw new BadRequestException(ErrorCodes.Duplicate);
 
         appDbContext.Reports.Add(new ReportEntity
         {

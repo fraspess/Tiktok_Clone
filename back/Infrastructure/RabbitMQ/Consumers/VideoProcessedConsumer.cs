@@ -5,10 +5,10 @@ using MediatR;
 
 namespace Infrastructure.RabbitMQ.Consumers;
 
-internal class VideoProcessedConsumer(IMediator _mediator) : IConsumer<VideoProcessedEvent>
+internal class VideoProcessedConsumer(IMediator mediator) : IConsumer<VideoProcessedEvent>
 {
     public async Task Consume(ConsumeContext<VideoProcessedEvent> context)
     {
-        await _mediator.Send(new VideoProcessedCommand(context.Message.VideoId));
+        await mediator.Send(new VideoProcessedCommand(context.Message.VideoId));
     }
 }

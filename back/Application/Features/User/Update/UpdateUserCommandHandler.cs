@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Application.Mapper;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -20,8 +21,8 @@ internal class UpdateUserCommandHandler(
         var id = currentUser.Id!.Value;
         var dto = request.dto;
 
-        var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id)
-                   ?? throw new NotFoundException("Користувача не знайдено");
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken: cancellationToken)
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
         user.Description = dto.Bio;
 
@@ -34,7 +35,7 @@ internal class UpdateUserCommandHandler(
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
             throw new BadRequestException(
-                string.Join("; ", result.Errors.Select(e => e.Description)));
+                ErrorCodes.ValidationError);
 
         return Unit.Value;
     }

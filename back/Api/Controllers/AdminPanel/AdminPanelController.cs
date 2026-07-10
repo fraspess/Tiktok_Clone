@@ -9,7 +9,7 @@ using Application.Features.AdminPanel.GetUsers;
 using Application.Features.AdminPanel.GetUserVideos;
 using Application.Features.AdminPanel.GetVideos;
 using Application.Features.AdminPanel.UnbanUser;
-using Application.Features.AdminPanel.UnBanVideo;
+using Application.Features.AdminPanel.UnbanVideo;
 using Application.Features.Comment.Delete;
 using Application.Pagination;
 using Domain;

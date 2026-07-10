@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Comment;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ public class LikeCommentCommandHandler(IAppDbContext appDbContext, ICurrentUser 
     {
         var exists = await appDbContext.Comments.AnyAsync(c => c.Id == request.CommentId,
             cancellationToken);
-        if (!exists) throw new NotFoundException("Коментарій не знайдено");
+        if (!exists) throw new NotFoundException(ErrorCodes.CommentNotFound);
 
         var isExists =
             await appDbContext.CommentLikes.FirstOrDefaultAsync(

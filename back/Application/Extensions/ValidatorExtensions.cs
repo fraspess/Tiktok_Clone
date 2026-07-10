@@ -1,5 +1,4 @@
 ﻿using Domain.Constants;
-using Domain.Exceptions;
 using FluentValidation;
 
 namespace Application.Extensions;

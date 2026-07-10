@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Pagination;
 using Domain;
 using Domain.Entities.Identity;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -64,7 +65,7 @@ internal class AdminPanelGetReportsCommandHandler(
                     Id = u.Id,
                     Title = u.Text
                 }),
-            _ => throw new BadRequestException("Невалідний тип скарг")
+            _ => throw new BadRequestException(ErrorCodes.InvalidValue)
         };
 
 

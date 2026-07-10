@@ -24,7 +24,5 @@ internal class AdminPanelGetVideosCommandHandler(IAppDbContext appDbContext, Vid
 
         var result = videos.MapItems(mapper.ToSimpleDto);
         return result;
-
-        throw new NotImplementedException();
     }
 }

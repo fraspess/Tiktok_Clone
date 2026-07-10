@@ -5,8 +5,8 @@ using Application.Features.Video.Delete;
 using Application.Features.Video.Favorite;
 using Application.Features.Video.GetById;
 using Application.Features.Video.GetBySomeQuery;
-using Application.Features.Video.GetFollowingFYP;
-using Application.Features.Video.GetFYP;
+using Application.Features.Video.GetFollowingFyp;
+using Application.Features.Video.GetFyp;
 using Application.Features.Video.GetUserVideos;
 using Application.Features.Video.Like;
 using Application.Features.Video.MyVideos;
@@ -85,7 +85,7 @@ public class VideoController(IMediator _mediator) : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetFollowingVideos([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        return Ok(ApiResponse<object>.Success(await _mediator.Send(new GetFollowingFYPCommand(new PaginationSettings
+        return Ok(ApiResponse<object>.Success(await _mediator.Send(new GetFollowingFypCommand(new PaginationSettings
             { PageNumber = pageNumber, PageSize = pageSize }))));
     }
 

@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +12,14 @@ public class DeleteCommentCommandHandler(IAppDbContext appDbContext, ICurrentUse
     public async Task<Unit> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
     {
         var comment = await appDbContext.Comments.FirstOrDefaultAsync(c => c.Id == request.CommentId, cancellationToken)
-                      ?? throw new NotFoundException("Коментарій не знайдено");
+                      ?? throw new NotFoundException(ErrorCodes.CommentNotFound);
         if (comment.UserId == user.Id)
         {
             appDbContext.Comments.Remove(comment);
         }
         else
         {
-            throw new NotAllowedException("Ви не маєте прав на це");
+            throw new NotAllowedException(ErrorCodes.Forbidden);
         }
 
         await appDbContext.SaveChangesAsync(cancellationToken);

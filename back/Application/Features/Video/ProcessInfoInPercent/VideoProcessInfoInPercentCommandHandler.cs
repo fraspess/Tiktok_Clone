@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain;
+using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ internal class VideoProcessInfoInPercentCommandHandler(
     {
         var video = await appDbContext.Videos.IgnoreQueryFilters()
                         .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
-                    ?? throw new NotFoundException("Відео не знайдено");
+                    ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
 
         video.ProccessedInPercents = request.Percentage;
         if (video.Status != VideoStatus.Processing) video.Status = VideoStatus.Processing;

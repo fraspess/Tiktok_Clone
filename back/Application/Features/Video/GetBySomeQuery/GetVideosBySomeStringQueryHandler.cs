@@ -26,15 +26,15 @@ public class GetVideosBySomeStringQueryHandler(
 
         if (!string.IsNullOrWhiteSpace(someString))
             query = query.Where(v =>
-                v.Description.ToLower().Contains(someString) ||
-                v.Author!.UserName!.ToLower().Contains(someString) ||
-                v.HashTags.Any(h => h.HashTag.Tag.ToLower().Contains(someString))
+                v.Description != null && (v.Description.ToLower().Contains(someString) ||
+                                                       v.Author!.UserName!.ToLower().Contains(someString) ||
+                                                       v.HashTags.Any(h => h.HashTag.Tag.ToLower().Contains(someString)))
             );
 
         var videos = await query
             .OrderByDescending(v => v.CreatedAt)
             .ToProjectionDto(currentUser.Id)
-            .ToPagedResultAsync(request.Settings);
+            .ToPagedResultAsync(request.Settings, cancellationToken: cancellationToken);
 
         var result = videos.MapItems(videoMapper.ToSimpleDto);
         return result;

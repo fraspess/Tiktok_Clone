@@ -4,7 +4,7 @@ using Application.Interfaces;
 using Application.Mapper;
 using Application.Pagination;
 using Domain.Entities.Identity;
-using Domain.Exceptions;
+using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

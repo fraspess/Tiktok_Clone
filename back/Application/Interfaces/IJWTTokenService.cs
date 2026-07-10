@@ -4,7 +4,7 @@ using Domain.Entities.Identity;
 
 namespace Application.Interfaces;
 
-public interface IJWTTokenService
+public interface IJwtTokenService
 {
     Task<TokenResponseDTO> GenerateTokensAsync(UserEntity user);
 

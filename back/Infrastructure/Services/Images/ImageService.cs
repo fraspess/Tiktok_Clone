@@ -2,7 +2,6 @@
 using Amazon.S3.Transfer;
 using Application.Interfaces;
 using Application.Options;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -35,7 +34,7 @@ public class ImageService(
             var imageFolder = Path.Combine(Path.GetTempPath(), "images", userId.ToString());
             if (!Directory.Exists(imageFolder)) Directory.CreateDirectory(imageFolder);
 
-            using var image = Image.Load(stream);
+            using var image = await Image.LoadAsync(stream);
 
             foreach (var (quality, name) in _qualities)
                 await image.Clone(x => x.Resize(quality, quality))

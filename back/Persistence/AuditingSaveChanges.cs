@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
-using Domain.Entities.Video;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -15,27 +14,26 @@ public class AuditingSaveChanges(ICurrentUser currentUser) : SaveChangesIntercep
         var dbContext = eventData.Context;
 
         foreach (var entry in dbContext!.ChangeTracker.Entries().Where(e =>
-                     e.State == EntityState.Deleted || e.State == EntityState.Modified || e.State == EntityState.Added))
+                     e.State is EntityState.Deleted or EntityState.Modified or EntityState.Added))
         {
-            if (entry.State == EntityState.Added && entry.Entity is AuditableEntity entity1)
+            if (entry is { State: EntityState.Added, Entity: AuditableEntity entity1 })
             {
                 entity1.CreatedAt = DateTime.UtcNow;
                 entity1.CreatedBy = currentUser.Id;
             }
 
-            if (entry.State == EntityState.Modified && entry.Entity is AuditableEntity entity)
+            if (entry is { State: EntityState.Modified, Entity: AuditableEntity entity })
             {
                 entity.UpdatedAt = DateTime.UtcNow;
                 entity.UpdatedBy = currentUser.Id;
             }
 
-            if (entry.State == EntityState.Deleted && entry.Entity is SoftDeletableEntity deletedEntity)
-            {
-                entry.State = EntityState.Modified;
-                deletedEntity.IsDeleted = true;
-                deletedEntity.DeletedAt = DateTime.UtcNow;
-                deletedEntity.DeletedBy = currentUser.Id;
-            }
+            if (entry is not { State: EntityState.Deleted, Entity: SoftDeletableEntity deletedEntity }) continue;
+            
+            entry.State = EntityState.Modified;
+            deletedEntity.IsDeleted = true;
+            deletedEntity.DeletedAt = DateTime.UtcNow;
+            deletedEntity.DeletedBy = currentUser.Id;
         }
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);

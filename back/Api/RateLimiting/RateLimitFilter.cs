@@ -1,5 +1,5 @@
 using Application;
-using Domain.Exceptions;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

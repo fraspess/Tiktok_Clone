@@ -7,12 +7,12 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Features.Video.GetFollowingFYP;
+namespace Application.Features.Video.GetFollowingFyp;
 
-public class GetFollowingFYPCommandHandler(IAppDbContext context, ICurrentUser currentUser, VideoMapper videoMapper)
-    : IRequestHandler<GetFollowingFYPCommand, PagedResult<VideoDto>>
+public class GetFollowingFypCommandHandler(IAppDbContext context, ICurrentUser currentUser, VideoMapper videoMapper)
+    : IRequestHandler<GetFollowingFypCommand, PagedResult<VideoDto>>
 {
-    public async Task<PagedResult<VideoDto>> Handle(GetFollowingFYPCommand request, CancellationToken cancellationToken)
+    public async Task<PagedResult<VideoDto>> Handle(GetFollowingFypCommand request, CancellationToken cancellationToken)
     {
         var followingIds = await context
             .UserFollows
