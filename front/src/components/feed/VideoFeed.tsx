@@ -14,9 +14,9 @@ const VideoFeed = () => {
 
     const displayVideos = useMemo(() => [...MOCK_VIDEOS, ...videos], [videos]);
 
-    useEffect(() => {
-        loadMore();
-    }, []);
+    // useEffect(() => {
+    //     loadMore();
+    // }, []);
     const sentinelOptions = useMemo(
         () => ({ root: containerRef, rootMargin: "600px" }),
         [containerRef]
