@@ -40,5 +40,31 @@
     "usernameAlreadyTaken": "Username is already taken",
     "emailAlreadyTaken": "This email is already taken"
   },
-  "collapseSidebar": "Collapse sidebar"
+  "collapseSidebar": "Collapse sidebar",
+  "feed": {
+    "loading": "Loading videos...",
+    "empty": "No videos yet",
+    "loadError": "Failed to load videos",
+    "share": "Share"
+  },
+  "report": {
+    "reportButton": "Report",
+    "title": "Report video",
+    "description": "Choose the reason you don't like this video",
+    "reasons": {
+      "spam": "Spam",
+      "inappropriateContent": "Inappropriate content",
+      "hateSpeech": "Hate speech",
+      "harassment": "Harassment or bullying",
+      "misinformation": "Misinformation",
+      "other": "Other"
+    },
+    "customReasonLabel": "Add more details (optional)",
+    "customReasonPlaceholder": "Tell us more about the reason for the report...",
+    "selectReasonError": "Please select a reason",
+    "submit": "Submit report",
+    "cancel": "Cancel",
+    "success": "Report submitted successfully",
+    "error": "Failed to submit the report. Please try again"
+  }
 }

@@ -17,7 +17,7 @@ const MainLayout = ({children}: MainLayoutProps) => {
             <Sidebar collapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}/>
             <div className="flex flex-col flex-1">
                 <Topbar/>
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1 overflow-hidden">
                     {children ?? <Outlet/>}
                 </main>
             </div>
