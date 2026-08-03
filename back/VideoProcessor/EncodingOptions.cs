@@ -1,9 +1,9 @@
 namespace VideoProcessor;
 
-public abstract class EncodingOptions
+public class EncodingOptions
 {
-    public string VideoCodec { get; } = string.Empty;
-    public string AudioCodec { get; } = string.Empty;
-    public string Preset { get; } = string.Empty;
-    public int Crf { get; } = 23;
+    public string VideoCodec { get; set; } = string.Empty;
+    public string AudioCodec { get; set; } = string.Empty;
+    public string Preset { get; set; } = string.Empty;
+    public int Crf { get; set; } = 23;
 }

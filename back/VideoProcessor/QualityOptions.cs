@@ -1,6 +1,6 @@
 namespace VideoProcessor;
 
-public abstract class QualityOptions
+public class QualityOptions
 {
     public int Quality { get; set; }
     public string Scale { get; set; } = string.Empty;

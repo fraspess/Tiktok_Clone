@@ -1,9 +1,10 @@
+import VideoFeed from "@/components/feed/VideoFeed.tsx";
 
 const HomePage = () => {
-    return(
-        <>
-            <h1>HomePage</h1>
-        </>
+    return (
+        <div className="h-full w-full">
+            <VideoFeed/>
+        </div>
     )
 }
 

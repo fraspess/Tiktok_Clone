@@ -2,6 +2,6 @@
 
 public class FfmpegOptions
 {
-    public List<QualityOptions> Qualities { get; } = null!;
-    public EncodingOptions Encoding { get; } = null!;
+    public List<QualityOptions> Qualities { get; set; } = null!;
+    public EncodingOptions Encoding { get; set; } = null!;
 }
