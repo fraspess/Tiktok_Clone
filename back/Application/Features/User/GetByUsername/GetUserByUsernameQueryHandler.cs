@@ -20,7 +20,7 @@ public class GetUserByUsernameQueryHandler(
 {
     public async Task<UserDto> Handle(GetUserByUsernameQuery request, CancellationToken cancellationToken)
     {
-        var cacheKey = $"user:username:{request.Username}";
+        var cacheKey = $"user:username:{request.Username}:{currentUser.Id?.ToString() ?? "anon"}";
         var cached = await cache.GetAsync<UserDto>(cacheKey);
         if (cached is not null) return cached;
         var user = await userManager.Users.ToProjectionDto(currentUser.Id)

@@ -66,5 +66,17 @@
     "cancel": "Cancel",
     "success": "Report submitted successfully",
     "error": "Failed to submit the report. Please try again"
+  },
+  "profile": {
+    "loading": "Loading profile...",
+    "notFound": "User not found",
+    "following": "following",
+    "followers": "followers",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "followError": "Something went wrong. Please try again",
+    "videosLoading": "Loading videos...",
+    "videosEmpty": "No videos yet",
+    "videosLoadError": "Failed to load videos"
   }
 }

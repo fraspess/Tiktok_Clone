@@ -9,6 +9,12 @@ interface FypParams {
     pageSize: number;
 }
 
+interface UserVideosParams {
+    userId: string;
+    pageNumber: number;
+    pageSize: number;
+}
+
 export interface ReportVideoParams {
     contentId: string;
     reason?: number;
@@ -22,6 +28,12 @@ export const videoApi = createApi({
         getFyp: build.query<ApiResponse<PagedResult<VideoDto>>, FypParams>({
             query: ({pageNumber, pageSize}) => ({
                 url: `api/videos/fyp?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
+        getUserVideos: build.query<ApiResponse<PagedResult<VideoDto>>, UserVideosParams>({
+            query: ({userId, pageNumber, pageSize}) => ({
+                url: `api/videos/user/${userId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
                 method: "get",
             }),
         }),
@@ -40,4 +52,4 @@ export const videoApi = createApi({
     }),
 });
 
-export const {useLazyGetFypQuery, useReportVideoMutation} = videoApi;
+export const {useLazyGetFypQuery, useLazyGetUserVideosQuery, useReportVideoMutation} = videoApi;

@@ -11,23 +11,43 @@ namespace Application.Features.User.FollowUser;
 public class FollowUserCommandHandler(
     UserManager<UserEntity> userManager,
     ICurrentUser currentUser,
+    ICacheService cache,
     IAppDbContext appDbContext) : IRequestHandler<FollowUserCommand, Unit>
 {
     public async Task<Unit> Handle(FollowUserCommand request, CancellationToken cancellationToken)
     {
-        var followingUserExists = await userManager.Users.AnyAsync(u => u.Id == request.FollowingId, cancellationToken);
-        if (!followingUserExists) throw new NotFoundException(ErrorCodes.UserNotFound);
+        var followerId = currentUser.Id!.Value;
 
-        appDbContext.UserFollows.Add(new UserFollowEntity
+        if (request.FollowingId == followerId)
+            throw new BadRequestException(ErrorCodes.ValidationError);
+
+        var followingUsername = await userManager.Users
+            .Where(u => u.Id == request.FollowingId)
+            .Select(u => u.UserName)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (followingUsername is null) throw new NotFoundException(ErrorCodes.UserNotFound);
+
+        var existingFollow = await appDbContext.UserFollows.FirstOrDefaultAsync(
+            f => f.FollowerId == followerId && f.FollowingId == request.FollowingId, cancellationToken);
+
+        if (existingFollow is null)
         {
-            FollowingId = request.FollowingId,
-            FollowerId = currentUser.Id!.Value
-        });
+            appDbContext.UserFollows.Add(new UserFollowEntity
+            {
+                FollowingId = request.FollowingId,
+                FollowerId = followerId
+            });
+        }
+        else
+        {
+            appDbContext.UserFollows.Remove(existingFollow);
+        }
+
         await appDbContext.SaveChangesAsync(cancellationToken);
+        await cache.RemoveAsync($"user:username:{followingUsername}:{followerId}");
         return Unit.Value;
     }
 }
-
 /*var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == follower)
        ?? throw new UnauthorizedException("Користувача не знайдено");
 var isAlreadyFollw

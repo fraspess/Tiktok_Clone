@@ -37,6 +37,7 @@ internal class UpdateUserCommandHandler(
             throw new BadRequestException(
                 ErrorCodes.ValidationError);
 
+        await cache.RemoveAsync($"user:username:{user.UserName}:{user.Id}");
         return Unit.Value;
     }
 }
