@@ -10,13 +10,14 @@ using Infrastructure.Services;
 using Infrastructure.Services.Storage;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.Images;
-using Infrastructure.Services.TempVideoStorage;
 using Infrastructure.Services.Token;
 using Infrastructure.SignalR;
 using MassTransit;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
@@ -25,10 +26,9 @@ namespace Infrastructure.DependencyInjection;
 public static class InfrastructureDependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services, IConfiguration config)
+        this IServiceCollection services, WebApplicationBuilder builder, IConfiguration config)
     {
         services.AddSignalR();
-        services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IEmailService, EmailService>();
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -36,11 +36,23 @@ public static class InfrastructureDependencyInjection
 
         services.AddScoped<IChatNotifier, ChatNotifier>();
         services.AddScoped<IVideoProcessingNotifier, VideoProcessingNotifier>();
-        services.AddScoped<ITempVideoStorage, TempVideoStorage>();
         services.AddScoped(typeof(IEventBus<>), typeof(EventBus<>));
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<HttpClient>();
-        services.AddScoped<IStorageService, S3StorageService>();
+        
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.Configure<LocalStorageOptions>(builder.Configuration.GetSection("LocalStorage"));
+            builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
+            services.AddScoped<IImageService, LocalImageService>();
+        }
+        else
+        {
+            builder.Services.Configure<AwsS3Options>(builder.Configuration.GetSection("AWS:S3"));
+            builder.Services.AddScoped<IStorageService, S3StorageService>();
+            services.AddScoped<IImageService, ImageService>();
+        }
+        
         services.AddMassTransit(x =>
         {
             x.AddConsumer<VideoProcessedConsumer>();

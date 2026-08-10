@@ -482,4 +482,4 @@ $RECYCLE.BIN/
 Api/images/
 Api/uploads/
 .env
-
+local-storage

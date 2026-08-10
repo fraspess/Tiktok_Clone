@@ -2,6 +2,7 @@ using Api.DependencyInjection;
 using Api.Middleware;
 using Application.DependencyInjection;
 using Application.Interfaces;
+using Application.Options;
 using Infrastructure.DependencyInjection;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.StaticFiles;
@@ -32,7 +33,7 @@ try
 
     builder.Services.AddApplication(builder.Configuration);
     builder.Services.AddPersistence(builder.Configuration);
-    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddInfrastructure(builder, builder.Configuration);
     builder.Services.AddApi(builder.Configuration, builder.Environment);
 
     var app = builder.Build();
@@ -50,7 +51,7 @@ try
 
     app.UseCors();
 
-    var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
+    /*var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
     Directory.CreateDirectory(uploadsPath);
     app.UseStaticFiles(new StaticFileOptions
     {
@@ -65,15 +66,31 @@ try
                 [".ts"] = "video/mp2t"
             }
         }
-    });
+    });*/
+    
 
-    var imagesPath = Path.Combine(builder.Environment.ContentRootPath, "images");
-    Directory.CreateDirectory(imagesPath);
-    app.UseStaticFiles(new StaticFileOptions
+    var localStorageOptions = app.Configuration.GetSection("LocalStorage").Get<LocalStorageOptions>();
+    if (app.Environment.IsDevelopment() && localStorageOptions is not null)
     {
-        RequestPath = "/user-images",
-        FileProvider = new PhysicalFileProvider(imagesPath)
-    });
+        var absoluteRoot = Path.GetFullPath(localStorageOptions.RootPath);
+        Directory.CreateDirectory(absoluteRoot);
+        var uploadsRoot =  Path.Combine(absoluteRoot, "uploads");
+        Directory.CreateDirectory(uploadsRoot);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(uploadsRoot),
+            RequestPath = "/uploads",
+            ServeUnknownFileTypes = true,
+            ContentTypeProvider = new FileExtensionContentTypeProvider
+            {
+                Mappings =
+                {
+                    [".m3u8"] = "application/vnd.apple.mpegurl",
+                    [".ts"] = "video/mp2t"
+                }
+            }
+        });
+    }
 
     app.UseAuthentication();
     app.UseAuthorization();
