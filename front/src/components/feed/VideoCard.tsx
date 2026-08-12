@@ -89,14 +89,18 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
         const videoEl = videoRef.current;
         if (!videoEl) return;
 
-        const handleTimeUpdate = () => {
+        let rafId: number;
+
+        const updateProgress = () => {
             if (videoEl.duration) {
                 setProgress((videoEl.currentTime / videoEl.duration) * 100);
             }
+            rafId = requestAnimationFrame(updateProgress);
         };
 
-        videoEl.addEventListener("timeupdate", handleTimeUpdate);
-        return () => videoEl.removeEventListener("timeupdate", handleTimeUpdate);
+        rafId = requestAnimationFrame(updateProgress);
+
+        return () => cancelAnimationFrame(rafId);
     }, []);
 
     useEffect(() => {
@@ -145,7 +149,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
             className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-neutral-100 px-4 dark:bg-neutral-950"
         >
             <div
-                className="relative h-[85%] max-h-[760px] aspect-[9/16] overflow-hidden rounded-2xl bg-black shadow-2xl">
+                className="relative aspect-[9/16] h-full max-h-full max-w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
                 <video
                     ref={videoRef}
                     poster={video.thumbnailUrl || undefined}
@@ -156,21 +160,20 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                     preload="metadata"
                     onClick={togglePlayPause}
                 />
-
                 <button
                     type="button"
                     onClick={togglePlayPause}
-                    className="absolute left-3 top-3 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm"
+                    className="absolute left-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
-                    {isPlaying ? <Pause size={18}/> : <Play size={18}/>}
+                    {isPlaying ? <Pause size={26}/> : <Play size={26}/>}
                 </button>
 
                 <button
                     type="button"
                     onClick={() => setIsMuted((prev) => !prev)}
-                    className="absolute right-3 top-3 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm"
+                    className="absolute right-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
-                    {isMuted ? <VolumeX size={18}/> : <Volume2 size={18}/>}
+                    {isMuted ? <VolumeX size={26}/> : <Volume2 size={26}/>}
                 </button>
 
                 <div className="absolute bottom-4 left-4 right-4 text-white">
@@ -187,7 +190,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                 >
                     <div className="h-1 w-full bg-white/30">
                         <div
-                            className="h-full bg-white transition-[width] duration-150 ease-linear"
+                            className="h-full bg-white"
                             style={{width: `${progress}%`}}
                         />
                     </div>
