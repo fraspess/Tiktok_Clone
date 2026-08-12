@@ -47,6 +47,18 @@
     "loadError": "Failed to load videos",
     "share": "Share"
   },
+  "profile": {
+    "followers": "Followers",
+    "following": "Following",
+    "follow": "Follow",
+    "followingStatus": "Following",
+    "followError": "Couldn't follow this user. Please try again",
+    "notFound": "User not found",
+    "loadError": "Failed to load profile",
+    "loadingVideos": "Loading videos...",
+    "emptyVideos": "No videos yet",
+    "videosLoadError": "Failed to load videos"
+  },
   "report": {
     "reportButton": "Report",
     "title": "Report video",

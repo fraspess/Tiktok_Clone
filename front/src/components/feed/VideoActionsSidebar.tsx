@@ -3,19 +3,10 @@ import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import type {VideoDto} from "@/types/Video.ts";
 import ReportVideoDialog from "@/components/feed/ReportVideoDialog.tsx";
+import {formatCount} from "@/lib/utils.ts";
 
 interface VideoActionsSidebarProps {
     video: VideoDto;
-}
-
-function formatCount(count: number): string {
-    if (count >= 1_000_000) {
-        return `${(count / 1_000_000).toFixed(1)}M`;
-    }
-    if (count >= 1_000) {
-        return `${(count / 1_000).toFixed(1)}K`;
-    }
-    return String(count);
 }
 
 const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {

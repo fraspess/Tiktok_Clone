@@ -5,6 +5,7 @@ import authModalReducer from "@/store/slices/authModalSlice";
 import authReducer from "@/store/slices/authSlice"
 import {authApi} from "@/store/apis/authApi.ts";
 import {videoApi} from "@/store/apis/videoApi.ts";
+import {userApi} from "@/store/apis/userApi.ts";
 
 export const store = configureStore({
     reducer: {
@@ -13,11 +14,12 @@ export const store = configureStore({
         auth: authReducer,
         [authApi.reducerPath]: authApi.reducer,
         [videoApi.reducerPath]: videoApi.reducer,
+        [userApi.reducerPath]: userApi.reducer,
     },
     // Adding the api middleware enables caching, invalidation, polling,
     // and other useful features of `rtk-query`.
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(authApi.middleware, videoApi.middleware),
+        getDefaultMiddleware().concat(authApi.middleware, videoApi.middleware, userApi.middleware),
 })
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors

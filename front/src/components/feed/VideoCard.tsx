@@ -1,5 +1,6 @@
 import {type MouseEvent, type RefObject, useEffect, useMemo, useRef, useState} from "react";
 import Hls from "hls.js";
+import {Link} from "react-router-dom";
 import {Pause, Play, Volume2, VolumeX} from "lucide-react";
 import {useIntersectionObserver} from "@/hooks/useIntersectionObserver.ts";
 import VideoActionsSidebar from "@/components/feed/VideoActionsSidebar.tsx";
@@ -177,7 +178,17 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                 </button>
 
                 <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <p className="font-semibold">@{video.author?.username ?? "unknown"}</p>
+                    {video.author?.username ? (
+                        <Link
+                            to={`/@${video.author.username}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-semibold hover:underline"
+                        >
+                            @{video.author.username}
+                        </Link>
+                    ) : (
+                        <p className="font-semibold">@unknown</p>
+                    )}
                     {video.description && (
                         <p className="mt-1 line-clamp-2 text-sm text-white/90">{video.description}</p>
                     )}
