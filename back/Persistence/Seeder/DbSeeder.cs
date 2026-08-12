@@ -2,12 +2,18 @@
 using Application.Constants;
 using Application.Dtos.User;
 using Application.Interfaces;
+using Application.Options;
+using Domain;
 using Domain.Entities.Identity;
+using Domain.Entities.Video;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using NanoidDotNet;
 using Serilog;
 
 namespace Persistence.Seeder;
@@ -23,10 +29,17 @@ public static class DbSeeder
         var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
         var imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var localStorageOptions = scope.ServiceProvider.GetRequiredService<IOptions<LocalStorageOptions>>();
+        
+        var _options = localStorageOptions.Value;
         await context.Database.MigrateAsync();
         await SeedRolesAsync(roleManager);
         await SeedUsersAsync(userManager, imageService, environment);
-        //await SeedVideosAsync(configuration, mediator, userManager, context);
+
+        if (environment.IsDevelopment())
+        {
+            await SeedVideosAsync(context, environment, _options, userManager);
+        }
     }
 
     private static async Task SeedRolesAsync(RoleManager<RoleEntity> roleManager)
@@ -115,6 +128,53 @@ public static class DbSeeder
         else
         {
             Log.Information("Users already exists in database, skipping seeding");
+        }
+    }
+
+    private static async Task SeedVideosAsync(AppDbContext context, IWebHostEnvironment environment, LocalStorageOptions localStorageOptions, UserManager<UserEntity> userManager)
+    {
+        var seedVideoFolder = Path.Combine(environment.ContentRootPath, "SeedVideos");
+        var outputFolder = Path.Combine(localStorageOptions.RootPath, "uploads", "processed");
+        Directory.CreateDirectory(seedVideoFolder);
+        var userIds = userManager.Users.Select(u => u.Id).ToArray();
+        
+        foreach (var folder in Directory.GetDirectories(seedVideoFolder))
+        {
+            var guid = Guid.NewGuid();
+            var videoFolder = Directory.CreateDirectory(Path.Combine(outputFolder, guid.ToString()));
+
+            CopyDirectory(folder, videoFolder.FullName);
+            
+            context.Videos
+                .Add(new VideoEntity
+                {
+                    Id = guid,
+                    ShortId = await Nanoid.GenerateAsync(
+                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 9),
+                    UserId = userIds[Random.Shared.Next(0, userIds.Length)],
+                    Status = VideoStatus.Processed,
+                    ProccessedInPercents = 100
+                });
+
+            await context.SaveChangesAsync();
+        }
+    }
+
+    private static void CopyDirectory(string source, string dest, bool recursive = true)
+    {
+        var dir = new DirectoryInfo(source);
+        if(!dir.Exists) throw new DirectoryNotFoundException();
+
+        Directory.CreateDirectory(dest);
+
+        foreach (FileInfo file in dir.GetFiles())
+        {
+            file.CopyTo(Path.Combine(dest, file.Name), true);
+        }
+
+        foreach (DirectoryInfo subDir in dir.GetDirectories())
+        {
+            CopyDirectory(subDir.FullName, Path.Combine(dest, subDir.Name));
         }
     }
 }
