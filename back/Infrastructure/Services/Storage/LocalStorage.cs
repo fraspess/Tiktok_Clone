@@ -25,9 +25,9 @@ internal class LocalFileStorageService(IOptions<LocalStorageOptions> options) : 
         var v = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         return new AvatarDto
         {
-            Small = $"{_options.BaseUrl}/uploads/avatars/{userId}/small.webp?v={v}",
-            Medium = $"{_options.BaseUrl}/uploads/avatars/{userId}/medium.webp?v={v}",
-            Large = $"{_options.BaseUrl}/uploads/avatars/{userId}/large.webp?v={v}"
+            Small = $"{_options.BaseUrl}/avatars/{userId}/small.webp?v={v}",
+            Medium = $"{_options.BaseUrl}/avatars/{userId}/medium.webp?v={v}",
+            Large = $"{_options.BaseUrl}/avatars/{userId}/large.webp?v={v}"
         };
     }
 

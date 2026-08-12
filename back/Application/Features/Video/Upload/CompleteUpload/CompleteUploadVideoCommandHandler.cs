@@ -25,13 +25,12 @@ public class CompleteUploadVideoCommandHandler(
     public async Task<Unit> Handle(CompleteUploadVideoCommand request, CancellationToken cancellationToken)
     {
         var payload = jwtTokenService.ValidateUpdateToken(request.Token);
-        if(payload is null || payload.UserId != currentUser.Id) throw new BadRequestException("Невалідний токен!");
+        if(payload is null || payload.UserId != currentUser.Id) throw new BadRequestException(ErrorCodes.InvalidToken);
 
         var video = await appDbContext
             .Videos
-            .Where(v => v.Id == payload.VideoId)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (video != null) throw new BadRequestException("Відео вже існує");
+            .AnyAsync(x => x.Id == payload.VideoId, cancellationToken);
+        if (video) throw new BadRequestException(ErrorCodes.AlreadyExists);
         
         var parsedDescription = parser.ParseDescription(request.Description);
         var newVideo = new VideoEntity

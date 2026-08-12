@@ -1,0 +1,144 @@
+services:
+    frontend:
+        build:
+          context: front/
+          args:
+            NGINX_ENV: local
+            VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+            VITE_API_BASE_URL: "http://localhost:8080"
+        ports:
+            - "80:80"
+        depends_on:
+            api:
+                condition: service_healthy
+        networks:
+            - tiktok_network
+
+    db:
+        image: postgres
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: mypassword
+            POSTGRES_DB: tiktok_clone
+        ports:
+            - "5432:5432"
+        volumes:
+            - db:/var/lib/postgresql
+        networks:
+            - tiktok_network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d tiktok_clone"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    api:
+        build:
+            context: back/
+            dockerfile: .dockerfile
+        container_name: api
+        environment:
+            ASPNETCORE_ENVIRONMENT: Development
+            ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=tiktok_clone;Username=postgres;Password=mypassword"
+            RabbitMQ__HostName: "rabbitMQ"
+            RabbitMQ__UserName: guest
+            RabbitMQ__Password: guest
+            Jwt__Key: 672ffa71-4bba-4ba5-b07c-8aaf7bb9410b
+            Google__ClientId: ${GOOGLE_CLIENT_ID}
+            Google__ClientSecret: ${GOOGLE_CLIENT_SECRET}
+            SMTP__Password: ${SMTP_PASSWORD}
+            Redis__ConnectionString: "redis:6379, password=localredispass"
+            LocalStorage__RootPath: "/app/local-storage"
+        ports:
+            - "8080:8080"
+        volumes:
+          - api_uploads:/app/local-storage
+        networks:
+            - tiktok_network
+        depends_on:
+            db:
+                condition: service_healthy
+            rabbitMQ:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 15s
+        restart: unless-stopped
+
+    video_processor:
+        build:
+            context: back/
+            dockerfile: VideoProcessor/.dockerfile
+        container_name: video_processor
+        environment:
+            DOTNET_ENVIRONMENT: Development
+            RabbitMQ__HostName: "rabbitMQ"
+            RabbitMQ__UserName: guest
+            RabbitMQ__Password: guest
+            LocalStorage__RootPath: "/app/local-storage"
+        networks:
+            - tiktok_network
+        volumes:
+            - api_uploads:/app/local-storage
+        depends_on:
+            db:
+                condition: service_healthy
+            rabbitMQ:
+                condition: service_healthy
+        restart: unless-stopped    
+
+    rabbitMQ:
+        image: rabbitmq:3-management
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        networks:
+            - tiktok_network
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
+        healthcheck:
+            test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+
+    redis:
+        image: redis:latest
+        command: redis-server --requirepass localredispass
+        healthcheck:
+            test: ["CMD", "redis-cli", "-a", "localredispass", "ping"]
+            interval: 5s
+            timeout: 3s
+            retries: 5
+        volumes:
+            - redis_data:/data
+        ports:
+            - "6379:6379"
+        networks:
+            - tiktok_network
+        restart: unless-stopped
+
+networks:
+    tiktok_network:
+        name: "tiktok_network_local"
+
+volumes:
+    db:
+        driver: local
+        name: "db_local"
+    api_uploads:
+        driver: local
+        name: "api_uploads_local"
+    rabbitmq_data:
+        driver: local
+        name: "rabbitmq_data_local"
+    redis_data:
+        driver: local
+        name: "redis_data_local"

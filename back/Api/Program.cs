@@ -90,6 +90,14 @@ try
                 }
             }
         });
+        
+        var avatarsRoot = Path.Combine(absoluteRoot, "avatars");
+        Directory.CreateDirectory(avatarsRoot);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(avatarsRoot),
+            RequestPath = "/avatars"
+        });
     }
 
     app.UseAuthentication();
@@ -98,10 +106,8 @@ try
     app.MapControllers();
     app.MapHub<ChatHub>("/hubs/chat");
     app.MapHub<VideoProcessingHub>("/hubs/video-process-status");
-
-    // also auto-migrates
+    
     await app.SeedDataAsync();
-
     app.Run();
 }
 catch (Exception ex)

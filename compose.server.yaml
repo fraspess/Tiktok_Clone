@@ -3,6 +3,7 @@ services:
         build:
           context: front/
           args:
+            NGINX_ENV: server
             VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
         ports:
             - "80:80"
@@ -15,6 +16,7 @@ services:
         volumes:
             - ./certbot/conf:/etc/letsencrypt:ro
             - ./certbot/www:/var/www/certbot:ro
+        restart: unless-stopped
 
     db:
         image: postgres
@@ -23,7 +25,7 @@ services:
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             POSTGRES_DB: ${POSTGRES_DB}
         expose:
-          - "5432"
+            - "5432"
         volumes:
             - db:/var/lib/postgresql
         networks:
@@ -33,12 +35,15 @@ services:
             interval: 5s
             timeout: 5s
             retries: 10
+        restart: unless-stopped
+
     api:
         build:
             context: back/
             dockerfile: .dockerfile
         container_name: api
         environment:
+            ASPNETCORE_ENVIRONMENT: Production
             ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
             RabbitMQ__HostName: "rabbitMQ"
             RabbitMQ__UserName: ${RABBITMQ_USERNAME}
@@ -49,8 +54,8 @@ services:
             SMTP__Password: ${SMTP_PASSWORD}
             AWS__S3__AccessKey: ${AWS_S3_ACCESS_KEY}
             AWS__S3__SecretKey: ${AWS_S3_SECRET_KEY}
-            Redis__ConnectionString: "redis:6379, password=${REDIS_PASSWORD}" 
-        expose: 
+            Redis__ConnectionString: "redis:6379, password=${REDIS_PASSWORD}"
+        expose:
             - "8080"
         volumes:
             - api_logs:/app/logs
@@ -69,6 +74,7 @@ services:
             retries: 5
             start_period: 15s
         restart: unless-stopped
+
     video_processor:
         build:
             context: back/
@@ -84,7 +90,7 @@ services:
             - api_temp:/app/temp
             - api_uploads:/app/uploads
         depends_on:
-            db: 
+            db:
                 condition: service_healthy
             rabbitMQ:
                 condition: service_healthy
@@ -113,47 +119,48 @@ services:
             timeout: 5s
             retries: 5
             start_period: 30s
+        restart: unless-stopped
 
     redis:
-      image: redis:latest
-      command: redis-server --requirepass ${REDIS_PASSWORD}
-      healthcheck:
-        test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
-        interval: 5s
-        timeout: 3s
-        retries: 5
-      volumes:
-        - redis_data:/data
-      expose: 
-        - "6379"
-      networks:
-        - tiktok_network
-      restart: unless-stopped
+        image: redis:latest
+        command: redis-server --requirepass ${REDIS_PASSWORD}
+        healthcheck:
+            test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+            interval: 5s
+            timeout: 3s
+            retries: 5
+        volumes:
+            - redis_data:/data
+        expose:
+            - "6379"
+        networks:
+            - tiktok_network
+        restart: unless-stopped
 
     db-backup:
-      image: postgres
-      container_name: db-backup
-      environment:
-        POSTGRES_DB: ${POSTGRES_DB}
-        POSTGRES_USER: ${POSTGRES_USER}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      volumes:
-        - db:/var/lib/postgresql
-        - ./backups:/backups
-      networks:
-        - tiktok_network
-      depends_on:
-        db:
-          condition: service_healthy
-      entrypoint: >
-        sh -c "
-          while true; do
-            TIMESTAMP=$$(date +'%Y%m%d%H%M%S')
-            pg_dump -h db -U ${POSTGRES_USER} ${POSTGRES_DB} | gzip > /backups/db_$$TIMESTAMP.sql.gz
-          
-            sleep 86400
-          done
-        " 
+        image: postgres
+        container_name: db-backup
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+            - db:/var/lib/postgresql
+            - ./backups:/backups
+        networks:
+            - tiktok_network
+        depends_on:
+            db:
+                condition: service_healthy
+        entrypoint: >
+            sh -c "
+              while true; do
+                TIMESTAMP=$$(date +'%Y%m%d%H%M%S')
+                pg_dump -h db -U ${POSTGRES_USER} ${POSTGRES_DB} | gzip > /backups/db_$$TIMESTAMP.sql.gz
+                sleep 86400
+              done
+            "
+        restart: unless-stopped
 
 networks:
     tiktok_network:
@@ -169,9 +176,6 @@ volumes:
     api_temp:
         driver: local
         name: "api_temp"
-    api_images:
-        driver: local
-        name: "api_images"
     rabbitmq_data:
         driver: local
         name: "rabbitmq_data"
@@ -179,6 +183,5 @@ volumes:
         driver: local
         name: "api_logs"
     redis_data:
-      driver: local
-      name: "redis_data"
-  
+        driver: local
+        name: "redis_data"

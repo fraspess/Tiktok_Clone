@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState, type RefObject, useMemo, type MouseEvent} from "react";
+import {type MouseEvent, type RefObject, useEffect, useMemo, useRef, useState} from "react";
 import Hls from "hls.js";
 import {Pause, Play, Volume2, VolumeX} from "lucide-react";
 import {useIntersectionObserver} from "@/hooks/useIntersectionObserver.ts";
@@ -14,11 +14,11 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
-    const [isMuted, setIsMuted] = useState(true);
+    const [isMuted, setIsMuted] = useState(false);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState(0);
     const observerOptions = useMemo(
-        () => ({ root: containerRef, threshold: 0.6 }),
+        () => ({root: containerRef, threshold: 0.6}),
         [containerRef]
     );
     const isVisible = useIntersectionObserver(sectionRef, observerOptions);
@@ -144,7 +144,8 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
             ref={sectionRef}
             className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-neutral-100 px-4 dark:bg-neutral-950"
         >
-            <div className="relative h-[85%] max-h-[760px] aspect-[9/16] overflow-hidden rounded-2xl bg-black shadow-2xl">
+            <div
+                className="relative h-[85%] max-h-[760px] aspect-[9/16] overflow-hidden rounded-2xl bg-black shadow-2xl">
                 <video
                     ref={videoRef}
                     poster={video.thumbnailUrl || undefined}
