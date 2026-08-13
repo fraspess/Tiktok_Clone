@@ -3,3 +3,4 @@ backups/
 certbot/
 .env_server
 .env
+.idea
