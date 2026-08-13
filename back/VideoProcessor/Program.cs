@@ -37,6 +37,22 @@ builder.Services.AddOptions<AwsS3Options>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddOptions<LocalStorageOptions>()
+    .BindConfiguration("LocalStorage")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.Configure<LocalStorageOptions>(builder.Configuration.GetSection("LocalStorage"));
+    builder.Services.AddScoped<IVideoFileStorage, LocalVideoStorage>();
+}
+else
+{
+    builder.Services.Configure<AwsS3Options>(builder.Configuration.GetSection("AWS:S3"));
+    builder.Services.AddScoped<IVideoFileStorage, S3VideoFileStorage>();
+}
+
 builder.Services.AddSingleton<IAmazonS3>(sp =>
 {
     var aws = sp.GetRequiredService<IOptions<AwsS3Options>>().Value;

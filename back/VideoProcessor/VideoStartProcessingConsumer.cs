@@ -11,12 +11,11 @@ namespace VideoProcessor;
 internal class VideoStartProcessingConsumer(
     ILogger<VideoStartProcessingConsumer> logger,
     IOptions<FfmpegOptions> ffmpegOptions,
-    IPublishEndpoint publishEndpoint,
-    IAmazonS3 amazonS3,
-    IOptions<AwsS3Options> options) : IConsumer<VideoStartProcessingEvent>
+    IVideoFileStorage storage,
+    IPublishEndpoint publishEndpoint
+    ) : IConsumer<VideoStartProcessingEvent>
 {
     private readonly FfmpegOptions _opts = ffmpegOptions.Value;
-    private readonly AwsS3Options _awsS3Options = options.Value;
 
     public async Task Consume(ConsumeContext<VideoStartProcessingEvent> context)
     {
@@ -29,9 +28,7 @@ internal class VideoStartProcessingConsumer(
         try
         {
             Directory.CreateDirectory(tempPath);
-            using var transferUtility = new TransferUtility(amazonS3);
-            await transferUtility.DownloadAsync(inputPath, _awsS3Options.BucketName,
-                $"uploads/unprocessed/{context.Message.VideoId}/original");
+            await storage.DownloadOriginalAsync(videoId, inputPath);
 
             // if (!File.Exists(inputPath))
             // {
@@ -55,15 +52,8 @@ internal class VideoStartProcessingConsumer(
             if (File.Exists(normalizedPath))
                 File.Delete(normalizedPath);
 
-            await transferUtility.UploadDirectoryAsync(new TransferUtilityUploadDirectoryRequest
-            {
-                BucketName = _awsS3Options.BucketName,
-                Directory = outputDir,
-                KeyPrefix = $"uploads/processed/{videoId}",
-                SearchPattern = "*",
-                SearchOption = SearchOption.AllDirectories
-            });
-
+            await storage.UploadProcessedAsync(videoId, outputDir);
+            
             await publishEndpoint.Publish(new VideoProcessedEvent
                 { VideoId = context.Message.VideoId });
 
