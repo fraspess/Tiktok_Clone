@@ -1,4 +1,5 @@
-.env
+front/.env
 backups/
 certbot/
 .env_server
+.env

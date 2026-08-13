@@ -3,6 +3,7 @@ import Sidebar from "@/components/layout/Sidebar.tsx";
 import Topbar from "@/components/layout/Topbar.tsx";
 import {useState} from "react";
 import AuthModal from "@/components/modals/AuthModal";
+import MessagesDrawer from "@/components/chat/MessagesDrawer.tsx";
 
 
 interface MainLayoutProps {
@@ -11,10 +12,16 @@ interface MainLayoutProps {
 
 const MainLayout = ({children}: MainLayoutProps) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isMessagesOpen, setIsMessagesOpen] = useState(false);
 
     return (
         <div className="flex h-screen">
-            <Sidebar collapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}/>
+            <Sidebar
+                collapsed={isCollapsed}
+                onToggle={() => setIsCollapsed(!isCollapsed)}
+                isMessagesOpen={isMessagesOpen}
+                onMessagesClick={() => setIsMessagesOpen(true)}
+            />
             <div className="flex flex-col flex-1">
                 <Topbar/>
                 <main className="flex-1 overflow-hidden">
@@ -22,6 +29,7 @@ const MainLayout = ({children}: MainLayoutProps) => {
                 </main>
             </div>
             <AuthModal/>
+            <MessagesDrawer open={isMessagesOpen} onOpenChange={setIsMessagesOpen}/>
         </div>
     )
 }
