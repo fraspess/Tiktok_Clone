@@ -31,6 +31,7 @@ public class GetConversationMessagesQueryHandler(
         var messages = await appDbContext
             .Messages
             .Where(m => m.ConversationId == request.ConversationId)
+            .Include(c => c.Sender)
             .OrderByDescending(m => m.CreatedAt)
             .ToPagedResultAsync(request.Settings, cancellationToken);
 
