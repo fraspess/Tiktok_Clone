@@ -114,6 +114,7 @@ public class VideoController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<PagedResult<MyVideoDto>>.Success(videos));
     }
 
+    [Authorize]
     [HttpPost("{videoId}/like")]
     public async Task<IActionResult> ToggleLike(string videoId)
     {
@@ -121,6 +122,7 @@ public class VideoController(IMediator _mediator) : ControllerBase
         return Ok(ApiResponse<object>.Success(null!, null));
     }
 
+    [Authorize]
     [HttpDelete("{videoId}/like")]
     public async Task<IActionResult> Unlike(string videoId)
     {

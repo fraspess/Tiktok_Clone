@@ -3,18 +3,34 @@ import {useTranslation} from "react-i18next";
 import {useLazyGetUserVideosQuery} from "@/store/apis/videoApi.ts";
 import type {VideoDto} from "@/types/Video.ts";
 
-export function useInfiniteUserVideos(userId: string | undefined, pageSize: number = 12) {
+interface UseInfiniteUserVideosOptions {
+    seedVideos?: VideoDto[];
+    seedNextPage?: number;
+    seedHasNext?: boolean;
+}
+
+export function useInfiniteUserVideos(
+    userId: string | undefined,
+    pageSize: number = 12,
+    options?: UseInfiniteUserVideosOptions
+) {
     const {t} = useTranslation();
     const [trigger, {isFetching}] = useLazyGetUserVideosQuery();
-    const [videos, setVideos] = useState<VideoDto[]>([]);
-    const [hasNext, setHasNext] = useState<boolean>(true);
+    const [videos, setVideos] = useState<VideoDto[]>(() => options?.seedVideos ?? []);
+    const [hasNext, setHasNext] = useState<boolean>(options?.seedHasNext ?? true);
     const [error, setError] = useState<string | null>(null);
 
-    const nextPageRef = useRef(1);
-    const seenIdsRef = useRef<Set<string>>(new Set());
+    const nextPageRef = useRef(options?.seedNextPage ?? 1);
+    const seenIdsRef = useRef<Set<string>>(new Set((options?.seedVideos ?? []).map((v) => v.id)));
     const isLoadingRef = useRef(false);
+    const previousUserIdRef = useRef(userId);
+
 
     useEffect(() => {
+        if (previousUserIdRef.current === userId) {
+            return;
+        }
+        previousUserIdRef.current = userId;
         nextPageRef.current = 1;
         seenIdsRef.current = new Set();
         isLoadingRef.current = false;

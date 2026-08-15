@@ -1,4 +1,5 @@
 import {useEffect, useMemo, useRef} from "react";
+import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Play} from "lucide-react";
 import {useInfiniteUserVideos} from "@/hooks/useInfiniteUserVideos.ts";
@@ -7,10 +8,12 @@ import {formatCount} from "@/lib/utils.ts";
 
 interface ProfileVideoGridProps {
     userId: string | undefined;
+    username: string;
 }
 
-const ProfileVideoGrid = ({userId}: ProfileVideoGridProps) => {
+const ProfileVideoGrid = ({userId, username}: ProfileVideoGridProps) => {
     const {t} = useTranslation();
+    const navigate = useNavigate();
     const containerRef = useRef<HTMLDivElement>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
     const {videos, loadMore, hasNext, isFetching, error} = useInfiniteUserVideos(userId, 12);
@@ -63,7 +66,22 @@ const ProfileVideoGrid = ({userId}: ProfileVideoGridProps) => {
                 {videos.map((video) => (
                     <div
                         key={video.id}
-                        className="group relative aspect-[9/16] overflow-hidden rounded-md bg-neutral-800"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() =>
+                            navigate(`/@${username}/video/${video.id}`, {
+                                state: {userId},
+                            })
+                        }
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                navigate(`/@${username}/video/${video.id}`, {
+                                    state: {userId},
+                                });
+                            }
+                        }}
+                        className="group relative aspect-[9/16] cursor-pointer overflow-hidden rounded-md bg-neutral-800"
                     >
                         {video.thumbnailUrl ? (
                             <img

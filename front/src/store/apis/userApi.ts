@@ -8,11 +8,29 @@ interface FollowUserParams {
     username: string;
 }
 
+interface UpdateUserParams {
+    username: string;
+    formData: FormData;
+}
+
+interface ChangeUsernameParams {
+    currentUsername: string;
+    newUsername: string;
+}
+
 export const userApi = createApi({
     reducerPath: "userApi",
     baseQuery: baseQueryWithReauth,
     tagTypes: ["UserProfile"],
     endpoints: (build) => ({
+        getMe: build.query<ApiResponse<UserProfile>, void>({
+            query: () => ({
+                url: `api/users/me`,
+                method: "get",
+            }),
+            providesTags: (result) =>
+                result?.data ? [{type: "UserProfile", id: result.data.username}] : [],
+        }),
         getUserProfile: build.query<ApiResponse<UserProfile>, string>({
             query: (username) => ({
                 url: `api/users/${username}`,
@@ -27,7 +45,29 @@ export const userApi = createApi({
             }),
             invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
         }),
+        updateUser: build.mutation<ApiResponse<null>, UpdateUserParams>({
+            query: ({formData}) => ({
+                url: `api/users`,
+                method: "patch",
+                body: formData,
+            }),
+            invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
+        }),
+        changeUsername: build.mutation<ApiResponse<null>, ChangeUsernameParams>({
+            query: ({newUsername}) => ({
+                url: `api/users/change-username`,
+                method: "patch",
+                body: {newUsername},
+            }),
+            invalidatesTags: (_result, _error, {currentUsername}) => [{type: "UserProfile", id: currentUsername}],
+        }),
     }),
 });
 
-export const {useGetUserProfileQuery, useFollowUserMutation} = userApi;
+export const {
+    useGetMeQuery,
+    useGetUserProfileQuery,
+    useFollowUserMutation,
+    useUpdateUserMutation,
+    useChangeUsernameMutation,
+} = userApi;

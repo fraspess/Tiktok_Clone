@@ -5,6 +5,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {formatCount} from "@/lib/utils.ts";
 import {useFollowUserMutation} from "@/store/apis/userApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
+import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
 import type {UserProfile} from "@/types/User.ts";
 
 interface ProfileHeaderProps {
@@ -16,13 +17,16 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     const [followUser, {isLoading}] = useFollowUserMutation();
     const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
     const [followersCount, setFollowersCount] = useState(profile.followersCount);
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
+    // Keep local optimistic state in sync whenever we land on a (possibly different) profile.
     useEffect(() => {
         setIsFollowing(profile.isFollowing);
         setFollowersCount(profile.followersCount);
     }, [profile.id, profile.isFollowing, profile.followersCount]);
 
     const handleFollow = async () => {
+        // No unfollow endpoint on the backend, so once followed the action is a no-op.
         if (isFollowing || isLoading) return;
 
         setIsFollowing(true);
@@ -61,7 +65,11 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
             <div className="flex flex-1 flex-col items-center gap-3 sm:items-start">
                 <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-center">
                     <h1 className="text-xl font-semibold">@{profile.username}</h1>
-                    {!profile.isOwnProfile && (
+                    {profile.isOwnProfile ? (
+                        <Button type="button" variant="outline" onClick={() => setIsEditOpen(true)}>
+                            {t("profile.edit.trigger")}
+                        </Button>
+                    ) : (
                         <Button
                             type="button"
                             onClick={handleFollow}
@@ -82,12 +90,20 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                         <span className="font-semibold">{formatCount(profile.followingCount)}</span>{" "}
                         <span className="text-muted-foreground">{t("profile.following")}</span>
                     </span>
+                    <span title={t("profile.likesComingSoon")}>
+                        <span className="font-semibold text-muted-foreground">—</span>{" "}
+                        <span className="text-muted-foreground">{t("profile.likes")}</span>
+                    </span>
                 </div>
 
                 {profile.description && (
                     <p className="max-w-md text-sm text-muted-foreground">{profile.description}</p>
                 )}
             </div>
+
+            {profile.isOwnProfile && (
+                <ProfileEditDialog profile={profile} open={isEditOpen} onOpenChange={setIsEditOpen}/>
+            )}
         </div>
     );
 };

@@ -147,6 +147,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
     return (
         <section
             ref={sectionRef}
+            id={video.id}
             className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-neutral-100 px-4 dark:bg-neutral-950"
         >
             <div
