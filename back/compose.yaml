@@ -34,6 +34,7 @@ services:
       - Redis__ConnectionString=redis:6379
     volumes:
       - api_logs:/app/logs
+      - local_storage:/local-storage
     networks:
       - tiktok_network
     depends_on:
@@ -56,6 +57,8 @@ services:
       - DOTNET_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitMQ
       - AWS__S3__ServiceUrl=http://localstack:4566
+    volumes:
+      - local_storage:/local-storage
     networks: 
       - tiktok_network
     depends_on:
@@ -136,6 +139,9 @@ volumes:
   api_logs:
     driver: local
     name: "api_logs"
+  local_storage:
+    driver: local
+    name: "local_storage"
   localstack_data:
     driver: local
     name: "localstack_data"

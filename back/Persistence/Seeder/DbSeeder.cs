@@ -133,7 +133,12 @@ public static class DbSeeder
 
     private static async Task SeedVideosAsync(AppDbContext context, IWebHostEnvironment environment, LocalStorageOptions localStorageOptions, UserManager<UserEntity> userManager)
     {
-        var seedVideoFolder = Path.Combine(environment.ContentRootPath, "SeedVideos");
+    if (await context.Videos.IgnoreQueryFilters().AnyAsync())
+    	{
+        	Log.Information("Videos already exist in database, skipping seeding");
+        	return;
+    	}
+	var seedVideoFolder = Path.Combine(environment.ContentRootPath, "SeedVideos");
         var outputFolder = Path.Combine(localStorageOptions.RootPath, "uploads", "processed");
         Directory.CreateDirectory(seedVideoFolder);
         var userIds = userManager.Users.Select(u => u.Id).ToArray();

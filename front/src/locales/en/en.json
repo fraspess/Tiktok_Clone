@@ -79,7 +79,9 @@
       "cancel": "Cancel",
       "save": "Save",
       "success": "Profile updated",
-      "error": "Couldn't update the profile. Please try again"
+      "error": "Couldn't update the profile. Please try again",
+      "usernameCooldown": "You can only change your username once every 7 days",
+      "usernameInvalid": "Invalid username. Please check the format and try again"
     }
   },
   "report": {

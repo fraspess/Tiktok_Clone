@@ -25,6 +25,8 @@ const Topbar = () => {
         try {
             await logout(undefined).unwrap();
         } catch {
+            // Even if the server call fails (e.g. session already expired),
+            // still clear the local session so the UI stays consistent.
             toast.error(t("auth.logoutError"));
         } finally {
             dispatch(logoutAction());
@@ -41,7 +43,7 @@ const Topbar = () => {
                 <>
                     {username && (
                         <Button asChild variant="ghost" className="gap-2">
-                            <Link to={`/${username}`}>
+                            <Link to={`/@${username}`}>
                                 <User className="h-4 w-4"/>
                                 {t("profile.myProfile")}
                             </Link>

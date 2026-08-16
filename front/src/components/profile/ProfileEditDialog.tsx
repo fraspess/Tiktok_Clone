@@ -6,7 +6,7 @@ import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, Di
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Label} from "@/components/ui/label.tsx";
-import {useChangeUsernameMutation, useUpdateUserMutation} from "@/store/apis/userApi.ts";
+import {useChangeUsernameMutation, useGetMeQuery, useUpdateUserMutation} from "@/store/apis/userApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import type {UserProfile} from "@/types/User.ts";
 
@@ -17,6 +17,14 @@ interface ProfileEditDialogProps {
 }
 
 const BIO_MAX_LENGTH = 160;
+
+function extractErrorCode(err: unknown): string | null {
+    if (isFetchBaseQueryError(err) && typeof err.data === "object" && err.data && "code" in err.data) {
+        const code = (err.data as { code?: string | null }).code;
+        return code || null;
+    }
+    return null;
+}
 
 function extractErrorMessage(err: unknown): string | null {
     if (isFetchBaseQueryError(err) && typeof err.data === "object" && err.data && "message" in err.data) {
@@ -31,6 +39,7 @@ const ProfileEditDialog = ({profile, open, onOpenChange}: ProfileEditDialogProps
     const navigate = useNavigate();
     const [updateUser, {isLoading: isUpdatingProfile}] = useUpdateUserMutation();
     const [changeUsername, {isLoading: isChangingUsername}] = useChangeUsernameMutation();
+    const {refetch: refetchMe} = useGetMeQuery();
 
     const [username, setUsername] = useState(profile.username);
     const [bio, setBio] = useState(profile.description ?? "");
@@ -112,10 +121,23 @@ const ProfileEditDialog = ({profile, open, onOpenChange}: ProfileEditDialogProps
             onOpenChange(false);
 
             if (usernameChanged) {
+                // Make sure the cached "current user" (used e.g. by the "My profile" link
+                // in the top bar) reflects the new username before we navigate away —
+                // otherwise it can briefly still point at the old, now-nonexistent username.
+                await refetchMe();
                 navigate(`/@${trimmedUsername}`, {replace: true});
             }
         } catch (err) {
-            toast.error(extractErrorMessage(err) ?? t("profile.edit.error"));
+            const code = extractErrorCode(err);
+            if (code === "CooldownOnChangeUsername") {
+                toast.error(t("profile.edit.usernameCooldown"));
+            } else if (code === "AlreadyExists") {
+                setFormError(t("auth.usernameAlreadyTaken"));
+            } else if (code === "InvalidUsername") {
+                setFormError(t("profile.edit.usernameInvalid"));
+            } else {
+                toast.error(extractErrorMessage(err) ?? t("profile.edit.error"));
+            }
         }
     };
 
