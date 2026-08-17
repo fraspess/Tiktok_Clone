@@ -18,9 +18,15 @@ public class GetUserByUsernameQueryHandler(
     ICurrentUser currentUser,
     ICacheService cache) : IRequestHandler<GetUserByUsernameQuery, UserDto>
 {
-    public async Task<UserDto> Handle(GetUserByUsernameQuery request, CancellationToken cancellationToken)
-    {
-        var cacheKey = $"user:username:{request.Username}";
+
+public async Task<UserDto> Handle(GetUserByUsernameQuery request, CancellationToken cancellationToken){
+        // IMPORTANT: the DTO below is personalized per viewer (IsOwnProfile, IsFollowing
+        // depend on currentUser.Id), so the cache key MUST include the viewer's identity.
+        // Caching only by username would let whichever user hits the DB first "poison"
+        // the cache for every other visitor of that profile with their own personal state
+        // (e.g. someone else seeing an "Edit profile" button, or a wrong follow status).
+        var viewerKey = currentUser.Id?.ToString() ?? "anon";
+        var cacheKey = $"user:username:{request.Username}:viewer:{viewerKey}";
         var cached = await cache.GetAsync<UserDto>(cacheKey);
         if (cached is not null) return cached;
         var user = await userManager.Users.ToProjectionDto(currentUser.Id)
@@ -29,5 +35,5 @@ public class GetUserByUsernameQueryHandler(
         var dto = userMapper.ToDto(user);
         await cache.SetAsync(cacheKey, dto);
         return dto;
-    }
+	}
 }

@@ -36,6 +36,7 @@ export const userApi = createApi({
                 url: `api/users/${username}`,
                 method: "get",
             }),
+            refetchOnMountOrArgChange: true,
             providesTags: (_result, _error, username) => [{type: "UserProfile", id: username}],
         }),
         followUser: build.mutation<ApiResponse<null>, FollowUserParams>({

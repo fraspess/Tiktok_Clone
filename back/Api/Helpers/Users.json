@@ -34,7 +34,7 @@
   },
   {
     "Email": "maria.k@example.com",
-    "Username": "maria.k",
+    "Username": "maria.k3",
     "FirstName": "Марія",
     "LastName": "Коваль",
     "Image": "https://randomuser.me/api/portraits/women/2.jpg",
@@ -56,7 +56,7 @@
   },
   {
     "Email": "natalia.z@example.com",
-    "Username": "natalia.z",
+    "Username": "natalia.z2",
     "FirstName": "Наталія",
     "LastName": "Заріцька",
     "Image": "https://randomuser.me/api/portraits/women/3.jpg",

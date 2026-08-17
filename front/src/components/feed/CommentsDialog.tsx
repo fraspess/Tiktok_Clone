@@ -254,10 +254,10 @@ const CommentsDialog = ({videoId, open, onOpenChange, onCommentsCountChange}: Co
     }, [open]);
 
     useEffect(() => {
-        if (!data) return;
+        if (!open || !data) return;
         setItems((prev) => (page === 1 ? data.data.items : [...prev, ...data.data.items]));
         setHasMore(data.data.metadata.hasNext);
-    }, [data, page]);
+    }, [data, page, open]);
 
     const handleDeleted = (commentId: string) => {
         setItems((prev) => prev.filter((c) => c.id !== commentId));

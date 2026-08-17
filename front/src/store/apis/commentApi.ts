@@ -32,6 +32,7 @@ export const commentApi = createApi({
                 url: `api/comments/${videoId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
                 method: "get",
             }),
+            refetchOnMountOrArgChange: true,
             providesTags: (result, _err, {videoId}) =>
                 result
                     ? [
