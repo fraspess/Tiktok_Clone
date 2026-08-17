@@ -24,7 +24,8 @@ public static class VideoQueryExtensions
             Author = new UserAuthorDto
             {
                 Id = v.Author.Id,
-                Username = v.Author.UserName
+                Username = v.Author.UserName,
+                IsFollowing = v.Author.Followers.Any(f => f.FollowerId == currentUserId)
             },
             IsFavorited = v.Favorites.Any(f => f.UserId == currentUserId),
             IsLiked = v.Likes.Any(l => l.UserId == currentUserId),

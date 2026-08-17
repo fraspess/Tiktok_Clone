@@ -34,6 +34,7 @@ const Topbar = () => {
             dispatch(videoApi.util.resetApiState());
             dispatch(userApi.util.resetApiState());
             dispatch(commentApi.util.resetApiState());
+            window.location.href = "/";
         }
     };
 

@@ -4,6 +4,8 @@ import {Link} from "react-router-dom";
 import {Pause, Play, Volume2, VolumeX} from "lucide-react";
 import {useIntersectionObserver} from "@/hooks/useIntersectionObserver.ts";
 import VideoActionsSidebar from "@/components/feed/VideoActionsSidebar.tsx";
+import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
+import {setMuted} from "@/store/slices/playerSlice.ts";
 import type {VideoDto} from "@/types/Video.ts";
 
 interface VideoCardProps {
@@ -15,7 +17,8 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
-    const [isMuted, setIsMuted] = useState(false);
+    const dispatch = useAppDispatch();
+    const isMuted = useAppSelector((state) => state.player.isMuted);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState(0);
     const observerOptions = useMemo(
@@ -33,6 +36,22 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
         retryCountRef.current = 0;
 
         let hls: Hls | null = null;
+
+        const attemptPlay = () => {
+            videoEl.play().catch(() => {
+                // Browser blocked autoplay with the current sound setting — the only thing
+                // it always allows is muted autoplay, so fall back to that instead of
+                // staying paused. Reverting the shared state (not a local one) keeps every
+                // video in the feed consistent with what the browser actually allows.
+                if (!videoEl.muted) {
+                    videoEl.muted = true;
+                    dispatch(setMuted(true));
+                }
+                videoEl.play().catch((err) => {
+                    console.warn("Video autoplay blocked or interrupted:", err);
+                });
+            });
+        };
 
         if (!isVisible) {
             videoEl.pause();
@@ -67,15 +86,18 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                 }
             });
 
+            // Autoplay must wait until HLS.js has actually parsed the manifest — calling
+            // play() right after attachMedia() races the async load and silently fails.
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                attemptPlay();
+            });
+
             hls.loadSource(video.videoUrl);
             hls.attachMedia(videoEl);
         } else {
             videoEl.src = video.videoUrl;
+            attemptPlay();
         }
-
-        videoEl.play().catch((err) => {
-            console.warn("Video autoplay blocked or interrupted:", err);
-        });
 
         return () => {
             if (hls) hls.destroy();
@@ -158,6 +180,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                     className="h-full w-full object-cover"
                     loop
                     muted={isMuted}
+                    autoPlay
                     playsInline
                     preload="metadata"
                     onClick={togglePlayPause}
@@ -172,7 +195,12 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
 
                 <button
                     type="button"
-                    onClick={() => setIsMuted((prev) => !prev)}
+                    onClick={() => {
+                        const videoEl = videoRef.current;
+                        const next = !isMuted;
+                        if (videoEl) videoEl.muted = next;
+                        dispatch(setMuted(next));
+                    }}
                     className="absolute right-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
                     {isMuted ? <VolumeX size={26}/> : <Volume2 size={26}/>}

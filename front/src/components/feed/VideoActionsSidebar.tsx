@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {Link} from "react-router-dom";
 import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {toast} from "sonner";
@@ -8,6 +9,7 @@ import CommentsDialog from "@/components/feed/CommentsDialog.tsx";
 import {formatCount} from "@/lib/utils.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
+import {useFollowUserMutation, useGetMeQuery} from "@/store/apis/userApi.ts";
 import {
     useFavoriteVideoMutation,
     useLikeVideoMutation,
@@ -29,6 +31,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     const [isSaved, setIsSaved] = useState(video.isFavorited);
     const [saveCount, setSaveCount] = useState(video.favoriteCount);
     const [commentsCount, setCommentsCount] = useState(video.commentsCount);
+    const [isFollowing, setIsFollowing] = useState(video.author?.isFollowing ?? false);
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
@@ -36,6 +39,9 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     const [unlikeVideo] = useUnlikeVideoMutation();
     const [favoriteVideo] = useFavoriteVideoMutation();
     const [unfavoriteVideo] = useUnfavoriteVideoMutation();
+    const [followUser] = useFollowUserMutation();
+    const {data: me} = useGetMeQuery(undefined, {skip: !isAuth});
+    const isOwnVideo = Boolean(me?.data.id && video.author?.id && me.data.id === video.author.id);
 
     const requireAuth = () => {
         if (isAuth) return true;
@@ -83,11 +89,29 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
         }
     };
 
+    const toggleFollow = async () => {
+        if (!requireAuth()) return;
+        if (!video.author?.id) return;
+
+        const nextFollowing = !isFollowing;
+        setIsFollowing(nextFollowing);
+
+        try {
+            await followUser({followingId: video.author.id, username: video.author.username}).unwrap();
+        } catch {
+            setIsFollowing(!nextFollowing);
+            toast.error(t("feed.followError"));
+        }
+    };
+
     return (
         <div className="flex flex-col items-center gap-5">
 
             <div className="relative mb-1">
-                <div className="h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-neutral-700">
+                <Link
+                    to={video.author?.username ? `/@${video.author.username}` : "#"}
+                    className="block h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-neutral-700"
+                >
                     {video.author?.avatar?.small ? (
                         <img
                             src={video.author.avatar.small}
@@ -99,13 +123,16 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                             {video.author?.username?.[0]?.toUpperCase() ?? "?"}
                         </div>
                     )}
-                </div>
-                <button
-                    type="button"
-                    className="absolute -bottom-1.5 left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full bg-red-500 text-white"
-                >
-                    <Plus size={12} strokeWidth={3}/>
-                </button>
+                </Link>
+                {!isOwnVideo && !isFollowing && (
+                    <button
+                        type="button"
+                        onClick={toggleFollow}
+                        className="absolute -bottom-1.5 left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full bg-red-500 text-white"
+                    >
+                        <Plus size={12} strokeWidth={3}/>
+                    </button>
+                )}
             </div>
 
             <button
