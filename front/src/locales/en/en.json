@@ -48,6 +48,8 @@
     "empty": "No videos yet",
     "loadError": "Failed to load videos",
     "share": "Share",
+    "shareSuccess": "Link copied",
+    "shareError": "Couldn't copy the link",
     "likeError": "Couldn't like this video. Please try again",
     "saveError": "Couldn't save this video. Please try again",
     "followError": "Couldn't follow this user. Please try again"

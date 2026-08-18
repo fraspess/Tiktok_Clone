@@ -104,6 +104,18 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
         }
     };
 
+    const handleShare = async () => {
+        const username = video.author?.username ?? "";
+        const shareUrl = `${window.location.origin}/@${username}/video/${video.id}`;
+
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            toast.success(t("feed.shareSuccess"));
+        } catch {
+            toast.error(t("feed.shareError"));
+        }
+    };
+
     return (
         <div className="flex flex-col items-center gap-5">
 
@@ -168,7 +180,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 <span className="text-xs font-medium text-black dark:text-white">{formatCount(saveCount)}</span>
             </button>
 
-            <button type="button" className="flex flex-col items-center gap-1 text-white">
+            <button type="button" onClick={handleShare} className="flex flex-col items-center gap-1 text-white">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
                     <Share2 size={24}/>
                 </span>
