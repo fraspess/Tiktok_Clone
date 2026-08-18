@@ -10,7 +10,7 @@ namespace Application.Features.User.ChangeUsername;
 
 internal class ChangeUsernameCommandHandler(
     UserManager<UserEntity> userManager,
-    ICurrentUser currentUser,) : IRequestHandler<ChangeUsernameCommand, Unit>
+    ICurrentUser currentUser) : IRequestHandler<ChangeUsernameCommand, Unit>
 {
     public async Task<Unit> Handle(ChangeUsernameCommand request, CancellationToken cancellationToken)
     {

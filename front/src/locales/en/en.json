@@ -43,6 +43,38 @@
     "logoutError": "Couldn't log out. Please try again"
   },
   "collapseSidebar": "Collapse sidebar",
+  "nav": {
+    "home": "For You",
+    "messages": "Messages"
+  },
+  "chat": {
+    "inbox": "Inbox",
+    "loading": "Loading conversations...",
+    "emptyTitle": "No messages yet",
+    "empty": "When you start chatting, your conversations will appear here",
+    "loadError": "Failed to load conversations",
+    "signInPrompt": "Sign in to view your messages",
+    "noMessages": "No messages yet",
+    "loadingMessages": "Loading messages...",
+    "loadMessagesError": "Failed to load messages",
+    "selectConversation": "Select a conversation to start messaging",
+    "unnamedConversation": "Conversation",
+    "messagePlaceholder": "Write a message...",
+    "send": "Send",
+    "connecting": "Connecting to chat...",
+    "newConversation": "New message",
+    "newConversationDescription": "Choose an account to start a conversation.",
+    "searchUsers": "Search accounts...",
+    "noUsersFound": "No accounts found",
+    "usersLoadError": "Unable to load accounts. Your account may not have permission to view the directory.",
+    "createError": "Unable to create the conversation. Please try again.",
+    "youPrefix": "You: {{message}}",
+    "groupPrefix": "{{username}}: {{message}}",
+    "time": {
+      "now": "now",
+      "yesterday": "Yesterday"
+    }
+  },
   "feed": {
     "loading": "Loading videos...",
     "empty": "No videos yet",

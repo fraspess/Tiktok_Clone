@@ -15,7 +15,7 @@ public class GetUserByUsernameQueryHandler(
     IUserService service,
     UserManager<UserEntity> userManager,
     UserMapper userMapper,
-    ICurrentUser currentUser,) : IRequestHandler<GetUserByUsernameQuery, UserDto>
+    ICurrentUser currentUser) : IRequestHandler<GetUserByUsernameQuery, UserDto>
 {
 
 public async Task<UserDto> Handle(GetUserByUsernameQuery request, CancellationToken cancellationToken){

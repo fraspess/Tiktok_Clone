@@ -12,18 +12,28 @@ function AuthBootstrap({children}: { children: React.ReactNode }) {
     const [refreshToken] = useRefreshTokenMutation();
 
     useEffect(() => {
+        let cancelled = false;
         dispatch(setIsLoading(true));
+
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         refreshToken()
             .unwrap()
             .then((data) => {
-                const response = data as ApiResponse<{ accessToken: string }>
-                console.log(data)
-                dispatch(setAccessToken(response.data.accessToken))
+                if (cancelled) return;
+                const response = data as ApiResponse<{ accessToken: string }>;
+                dispatch(setAccessToken(response.data.accessToken));
             })
-            .catch(() => dispatch(logout()));
-    }, [])
+            .catch(() => {
+                if (!cancelled) dispatch(logout());
+            });
+
+        // React Strict Mode remounts once; ignore the abandoned first run.
+        return () => {
+            cancelled = true;
+        };
+    }, [dispatch, refreshToken]);
+
     if (status) {
         return <FullPageSpinner/>
     }

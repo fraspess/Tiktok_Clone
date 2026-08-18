@@ -1,5 +1,11 @@
 import {createApi} from "@reduxjs/toolkit/query/react";
 import {baseQuery, baseQueryWithReauth} from "@/store/baseQueryWithReauth.ts";
+import type {ApiResponse} from "@/types/ApiResponse.ts";
+
+interface CurrentUserDto {
+    id: string;
+    username: string;
+}
 
 export const authApi = createApi({
     reducerPath: 'authApi',
@@ -22,6 +28,9 @@ export const authApi = createApi({
                 return baseQuery({url: "api/users/refresh", method: "post"}, api, extraOptions);
             }
         }),
+        getCurrentUser: build.query<ApiResponse<CurrentUserDto>, void>({
+            query: () => ({url: "api/users/me", method: "get"}),
+        }),
         googleAuth: build.mutation({
             query: (token) => ({url: "api/users/google", method: "post", body: token})
         }),
@@ -37,6 +46,7 @@ export const {
     useConfirmEmailMutation,
     useResendConfirmationCodeMutation,
     useRefreshTokenMutation,
+    useGetCurrentUserQuery,
     useGoogleAuthMutation,
     useLogoutMutation,
 } = authApi;
