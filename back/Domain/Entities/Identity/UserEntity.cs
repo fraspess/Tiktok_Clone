@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Domain.Constants;
 using Domain.Entities.Comment;
 using Domain.Entities.Conversation;
 using Domain.Entities.Favorite;
@@ -48,4 +49,6 @@ public class UserEntity : IdentityUser<Guid>
     public DateTime? BannedAt { get; set; }
     public UserReportReasons? BanReason { get; set; }
     public bool IsBanned { get; set; }
+
+    public MessagePrivacy MessagePrivacy { get; set; } = MessagePrivacy.Everyone;
 }

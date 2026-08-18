@@ -32,7 +32,6 @@ public static class DbSeeder
         var localStorageOptions = scope.ServiceProvider.GetRequiredService<IOptions<LocalStorageOptions>>();
         
         var _options = localStorageOptions.Value;
-        await context.Database.MigrateAsync();
         await SeedRolesAsync(roleManager);
         await SeedUsersAsync(userManager, imageService, environment);
 

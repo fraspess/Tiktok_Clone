@@ -1,9 +1,9 @@
 ﻿using Application.Dtos.Conversation;
 using Application.Interfaces;
 using Application.Mapper;
+using Domain.Constants;
 using Domain.Entities.Conversation;
 using Domain.Entities.Identity;
-using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -21,35 +21,89 @@ public class CreateConversationCommandHandler(
     public async Task<ConversationDto> Handle(CreateConversationCommand request,
         CancellationToken cancellationToken)
     {
-        var participants = request.UsersIds;
+        var participant = request.UsersId;
         var currentUserId = currentUser.Id!.Value;
 
-        if (!participants.Contains(currentUserId)) participants.Add(currentUserId);
-
-        var existingConversation = await appDbContext
-            .Conversations
+        ConversationDto conversation = null!;
+        var existingConversation = await appDbContext.Conversations
             .Include(c => c.Participants)
-            .Where(c => c.Participants.Count == participants.Count &&
-                        c.Participants.All(p => participants.Contains(p.UserId)))
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(
+                c => c.Participants.Any(p => p.UserId == currentUserId) &&
+                     c.Participants.Any(p => p.UserId == participant),
+                cancellationToken);
 
         if (existingConversation is not null) return mapper.ToDto(existingConversation);
-
-        foreach (var participant in participants)
-            if (!await userManager.Users.AnyAsync(u => u.Id == participant, cancellationToken))
-                throw new NotFoundException(ErrorCodes.UserNotFound);
-
-        var conversation = new ConversationEntity
+        
+        var participantPrivacy = await userManager.Users.Where(u=>u.Id == participant).Select(u => u.MessagePrivacy).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        switch (participantPrivacy)
         {
-            Participants = participants.Select(id => new ConversationParticipant
+            case MessagePrivacy.Nobody:
             {
-                UserId = id
-            }).ToList()
-        };
-
-        await appDbContext.Conversations.AddAsync(conversation, cancellationToken);
+                throw new NotAllowedException(ErrorCodes.Forbidden);
+            }
+            case MessagePrivacy.Everyone:
+            {
+                conversation = await CreateConversationAsync(participant);
+                break;
+            }
+            case MessagePrivacy.MutualFollowers:
+            {
+                var areFriends = await appDbContext.UserFollows
+                    .AnyAsync(u =>
+                            u.FollowerId == currentUserId &&
+                            u.FollowingId == participant &&
+                            appDbContext.UserFollows.Any(reverse =>
+                                reverse.FollowerId == participant &&
+                                reverse.FollowingId == currentUserId),
+                        cancellationToken);
+                if(!areFriends) throw new NotAllowedException(ErrorCodes.Forbidden);
+                
+                conversation = await CreateConversationAsync(participant);
+                break;
+            }
+            case MessagePrivacy.Followers:
+            {
+                var isFollower = await appDbContext.UserFollows.Where(u => u.FollowerId == currentUserId && u.FollowingId == participant).AnyAsync(cancellationToken: cancellationToken);
+                if(!isFollower) throw new NotAllowedException(ErrorCodes.Forbidden);
+                conversation = await CreateConversationAsync(participant);
+                break;
+            }
+            case MessagePrivacy.Following:
+            {
+                var isFollowing = await appDbContext.UserFollows
+                    .AnyAsync(u =>
+                            u.FollowerId == currentUserId &&
+                            u.FollowingId == participant,
+                        cancellationToken);
+                if(!isFollowing) throw new NotAllowedException(ErrorCodes.Forbidden);
+                conversation = await CreateConversationAsync(participant);
+                break;
+            }
+        }
+        
         await appDbContext.SaveChangesAsync(cancellationToken);
 
+        return conversation;
+    }
+
+    async Task<ConversationDto> CreateConversationAsync(Guid otherId)
+    {
+        var conversation = new ConversationEntity()
+        {
+            Participants = new List<ConversationParticipant>()
+            {
+                new()
+                {
+                    UserId = otherId,
+                },
+                new()
+                {
+                    UserId = currentUser.Id!.Value
+                }
+            }
+        };
+        
+        await appDbContext.Conversations.AddAsync(conversation);
         return mapper.ToDto(conversation);
     }
 }

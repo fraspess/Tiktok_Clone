@@ -1,9 +1,12 @@
 ﻿using Application.Dtos.Conversation;
+using Application.Dtos.User;
 using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
 using Application.Pagination;
+using Domain.Entities.Identity;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.GetAll;
@@ -11,6 +14,7 @@ namespace Application.Features.Conversation.GetAll;
 public class GetConversationsQueryHandler(
     IAppDbContext appDbContext,
     ICurrentUser user,
+    IStorageService storageService,
     ConversationMapper conversationMapper)
     : IRequestHandler<GetConversationsQuery, PagedResult<ConversationDto>>
 {
@@ -19,14 +23,35 @@ public class GetConversationsQueryHandler(
     {
         var convo = await appDbContext
             .Conversations
-            .AsSplitQuery()
-            .Include(c => c.Participants)
-            .ThenInclude(f => f.User)
             .Where(c => c.Participants.Any(p => p.UserId == user.Id))
             .OrderByDescending(x => x.CreatedAt)
+            .Select(c => new ConversationDto()
+            {
+                Id = c.Id,
+                LastMessage = appDbContext.Messages.Where(m => m.ConversationId == c.Id).OrderByDescending(m => m.CreatedAt).Select(m => m.Content).FirstOrDefault(),
+                Participants = c.Participants
+                    .Select(p => new SimpleUserDto()
+                    {
+                        Id = p.UserId,
+                        Username = p.User.UserName
+                    }).ToList()
+            })
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 
-        var result = convo.MapItems(conversationMapper.ToDto);
-        return result;
+        var mapped = convo.MapItems(item =>
+        {
+            return new ConversationDto()
+            {
+                Id = item.Id,
+                LastMessage = item.LastMessage,
+                Participants = item.Participants.Select(u => new SimpleUserDto()
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Avatar = storageService.GetUserAvatar(u.Id)
+                }).ToList()
+            };
+        });
+        return mapped;
     }
 }

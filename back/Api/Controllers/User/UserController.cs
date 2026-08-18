@@ -17,6 +17,8 @@ using Application.Features.User.RefreshTokens;
 using Application.Features.User.Register;
 using Application.Features.User.ResendConfirmationEmail;
 using Application.Features.User.ResetPassword;
+using Application.Features.User.Settings.ChangeMessagePrivacy;
+using Application.Features.User.Settings.GetMessagePrivacy;
 using Application.Features.User.Update;
 using Application.Pagination;
 using Domain.Constants;
@@ -176,6 +178,20 @@ public class UserController(IMediator _mediator) : ControllerBase
         var following = await _mediator.Send(new GetUserFollowingCommand(username,
             new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
         return Ok(ApiResponse<object>.Success(following));
+    }
+
+    [HttpPost("settings/message-privacy")]
+    public async Task<IActionResult> ChangeMessagePrivacy(MessagePrivacy newPrivacy)
+    {
+        await _mediator.Send(new ChangeMessagePrivacyCommand(newPrivacy));
+        return Ok(ApiResponse<object?>.Success(null));
+    }
+
+    [HttpGet("settings/message-privacy")]
+    public async Task<IActionResult> GetMessagePrivacy()
+    {
+        var privacy = await _mediator.Send(new GetMessagePrivacyCommand());
+        return Ok(ApiResponse<object>.Success(privacy));
     }
 
     private void AppendRefreshTokenCookie(string refreshToken)
