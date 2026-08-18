@@ -1,8 +1,11 @@
 import {type MouseEvent, type RefObject, useEffect, useMemo, useRef, useState} from "react";
 import Hls from "hls.js";
+import {Link} from "react-router-dom";
 import {Pause, Play, Volume2, VolumeX} from "lucide-react";
 import {useIntersectionObserver} from "@/hooks/useIntersectionObserver.ts";
 import VideoActionsSidebar from "@/components/feed/VideoActionsSidebar.tsx";
+import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
+import {setMuted} from "@/store/slices/playerSlice.ts";
 import type {VideoDto} from "@/types/Video.ts";
 
 interface VideoCardProps {
@@ -14,7 +17,8 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
-    const [isMuted, setIsMuted] = useState(false);
+    const dispatch = useAppDispatch();
+    const isMuted = useAppSelector((state) => state.player.isMuted);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState(0);
     const observerOptions = useMemo(
@@ -32,6 +36,22 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
         retryCountRef.current = 0;
 
         let hls: Hls | null = null;
+
+        const attemptPlay = () => {
+            videoEl.play().catch(() => {
+                // Browser blocked autoplay with the current sound setting — the only thing
+                // it always allows is muted autoplay, so fall back to that instead of
+                // staying paused. Reverting the shared state (not a local one) keeps every
+                // video in the feed consistent with what the browser actually allows.
+                if (!videoEl.muted) {
+                    videoEl.muted = true;
+                    dispatch(setMuted(true));
+                }
+                videoEl.play().catch((err) => {
+                    console.warn("Video autoplay blocked or interrupted:", err);
+                });
+            });
+        };
 
         if (!isVisible) {
             videoEl.pause();
@@ -66,15 +86,18 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                 }
             });
 
+            // Autoplay must wait until HLS.js has actually parsed the manifest — calling
+            // play() right after attachMedia() races the async load and silently fails.
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                attemptPlay();
+            });
+
             hls.loadSource(video.videoUrl);
             hls.attachMedia(videoEl);
         } else {
             videoEl.src = video.videoUrl;
+            attemptPlay();
         }
-
-        videoEl.play().catch((err) => {
-            console.warn("Video autoplay blocked or interrupted:", err);
-        });
 
         return () => {
             if (hls) hls.destroy();
@@ -89,14 +112,18 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
         const videoEl = videoRef.current;
         if (!videoEl) return;
 
-        const handleTimeUpdate = () => {
+        let rafId: number;
+
+        const updateProgress = () => {
             if (videoEl.duration) {
                 setProgress((videoEl.currentTime / videoEl.duration) * 100);
             }
+            rafId = requestAnimationFrame(updateProgress);
         };
 
-        videoEl.addEventListener("timeupdate", handleTimeUpdate);
-        return () => videoEl.removeEventListener("timeupdate", handleTimeUpdate);
+        rafId = requestAnimationFrame(updateProgress);
+
+        return () => cancelAnimationFrame(rafId);
     }, []);
 
     useEffect(() => {
@@ -142,39 +169,55 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
     return (
         <section
             ref={sectionRef}
+            id={video.id}
             className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-neutral-100 px-4 dark:bg-neutral-950"
         >
             <div
-                className="relative h-[85%] max-h-[760px] aspect-[9/16] overflow-hidden rounded-2xl bg-black shadow-2xl">
+                className="relative aspect-[9/16] h-full max-h-full max-w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
                 <video
                     ref={videoRef}
                     poster={video.thumbnailUrl || undefined}
                     className="h-full w-full object-cover"
                     loop
                     muted={isMuted}
+                    autoPlay
                     playsInline
                     preload="metadata"
                     onClick={togglePlayPause}
                 />
-
                 <button
                     type="button"
                     onClick={togglePlayPause}
-                    className="absolute left-3 top-3 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm"
+                    className="absolute left-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
-                    {isPlaying ? <Pause size={18}/> : <Play size={18}/>}
+                    {isPlaying ? <Pause size={26}/> : <Play size={26}/>}
                 </button>
 
                 <button
                     type="button"
-                    onClick={() => setIsMuted((prev) => !prev)}
-                    className="absolute right-3 top-3 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm"
+                    onClick={() => {
+                        const videoEl = videoRef.current;
+                        const next = !isMuted;
+                        if (videoEl) videoEl.muted = next;
+                        dispatch(setMuted(next));
+                    }}
+                    className="absolute right-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
-                    {isMuted ? <VolumeX size={18}/> : <Volume2 size={18}/>}
+                    {isMuted ? <VolumeX size={26}/> : <Volume2 size={26}/>}
                 </button>
 
                 <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <p className="font-semibold">@{video.author?.username ?? "unknown"}</p>
+                    {video.author?.username ? (
+                        <Link
+                            to={`/@${video.author.username}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-semibold hover:underline"
+                        >
+                            @{video.author.username}
+                        </Link>
+                    ) : (
+                        <p className="font-semibold">@unknown</p>
+                    )}
                     {video.description && (
                         <p className="mt-1 line-clamp-2 text-sm text-white/90">{video.description}</p>
                     )}
@@ -187,7 +230,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                 >
                     <div className="h-1 w-full bg-white/30">
                         <div
-                            className="h-full bg-white transition-[width] duration-150 ease-linear"
+                            className="h-full bg-white"
                             style={{width: `${progress}%`}}
                         />
                     </div>

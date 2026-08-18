@@ -38,7 +38,9 @@
     },
     "confirmEmailTitle": "Confirm email",
     "usernameAlreadyTaken": "Username is already taken",
-    "emailAlreadyTaken": "This email is already taken"
+    "emailAlreadyTaken": "This email is already taken",
+    "logout": "Log out",
+    "logoutError": "Couldn't log out. Please try again"
   },
   "collapseSidebar": "Collapse sidebar",
   "nav": {
@@ -77,7 +79,45 @@
     "loading": "Loading videos...",
     "empty": "No videos yet",
     "loadError": "Failed to load videos",
-    "share": "Share"
+    "share": "Share",
+    "shareSuccess": "Link copied",
+    "shareError": "Couldn't copy the link",
+    "likeError": "Couldn't like this video. Please try again",
+    "saveError": "Couldn't save this video. Please try again",
+    "followError": "Couldn't follow this user. Please try again"
+  },
+  "profile": {
+    "myProfile": "My profile",
+    "followers": "Followers",
+    "following": "Following",
+    "follow": "Follow",
+    "followingStatus": "Following",
+    "followError": "Couldn't follow this user. Please try again",
+    "notFound": "User not found",
+    "loadError": "Failed to load profile",
+    "loadingVideos": "Loading videos...",
+    "emptyVideos": "No videos yet",
+    "videosLoadError": "Failed to load videos",
+    "backToFeed": "Back to feed",
+    "backToProfile": "Back to profile",
+    "likes": "Likes",
+    "likesComingSoon": "Coming soon",
+    "edit": {
+      "trigger": "Edit profile",
+      "title": "Edit profile",
+      "description": "Update your avatar, username and bio.",
+      "changeAvatar": "Change photo",
+      "usernameLabel": "Username",
+      "usernameRequired": "Username can't be empty",
+      "bioLabel": "Bio",
+      "bioTooLong": "Bio can't be longer than 160 characters",
+      "cancel": "Cancel",
+      "save": "Save",
+      "success": "Profile updated",
+      "error": "Couldn't update the profile. Please try again",
+      "usernameCooldown": "You can only change your username once every 7 days",
+      "usernameInvalid": "Invalid username. Please check the format and try again"
+    }
   },
   "report": {
     "reportButton": "Report",
@@ -98,5 +138,23 @@
     "cancel": "Cancel",
     "success": "Report submitted successfully",
     "error": "Failed to submit the report. Please try again"
+  },
+  "comments": {
+    "title": "Comments",
+    "empty": "No comments yet. Be the first!",
+    "loadError": "Failed to load comments",
+    "loadMore": "Load more",
+    "placeholder": "Add a comment...",
+    "signInToComment": "Sign in to leave a comment",
+    "sendSuccess": "Comment added",
+    "sendError": "Couldn't send the comment. Please try again",
+    "deleteError": "Couldn't delete the comment. Please try again",
+    "likeError": "Couldn't like this comment. Please try again",
+    "reply": "Reply",
+    "replyPlaceholder": "Reply to {{username}}...",
+    "showReplies": "Show replies ({{count}})",
+    "hideReplies": "Hide replies",
+    "loadMoreReplies": "Show more replies",
+    "delete": "Delete"
   }
 }

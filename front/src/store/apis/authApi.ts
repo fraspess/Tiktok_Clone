@@ -33,6 +33,9 @@ export const authApi = createApi({
         }),
         googleAuth: build.mutation({
             query: (token) => ({url: "api/users/google", method: "post", body: token})
+        }),
+        logout: build.mutation({
+            query: () => ({url: "api/users/logout", method: "post"})
         })
     })
 });
@@ -45,5 +48,6 @@ export const {
     useRefreshTokenMutation,
     useGetCurrentUserQuery,
     useGoogleAuthMutation,
+    useLogoutMutation,
 } = authApi;
 

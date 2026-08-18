@@ -14,6 +14,7 @@ internal class UpdateUserCommandHandler(
     UserManager<UserEntity> userManager,
     IImageService imageService,
     ICurrentUser currentUser,
+    ICacheService cache,
     IStorageService storageService) : IRequestHandler<UpdateUserCommand, Unit>
 {
     public async Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -36,6 +37,9 @@ internal class UpdateUserCommandHandler(
         if (!result.Succeeded)
             throw new BadRequestException(
                 ErrorCodes.ValidationError);
+
+        await cache.RemoveAsync($"user:{user.Id}");
+        await cache.RemoveAsync($"user:username:{user.UserName}");
 
         return Unit.Value;
     }

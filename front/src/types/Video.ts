@@ -8,6 +8,7 @@ export interface VideoAuthor {
     id: string;
     username: string;
     avatar: VideoAuthorAvatar | null;
+    isFollowing: boolean;
 }
 
 export interface VideoDto {

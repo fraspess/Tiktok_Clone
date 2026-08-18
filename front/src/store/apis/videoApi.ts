@@ -9,6 +9,12 @@ interface FypParams {
     pageSize: number;
 }
 
+interface UserVideosParams {
+    userId: string;
+    pageNumber: number;
+    pageSize: number;
+}
+
 export interface ReportVideoParams {
     contentId: string;
     reason?: number;
@@ -25,6 +31,12 @@ export const videoApi = createApi({
                 method: "get",
             }),
         }),
+        getUserVideos: build.query<ApiResponse<PagedResult<VideoDto>>, UserVideosParams>({
+            query: ({userId, pageNumber, pageSize}) => ({
+                url: `api/videos/user/${userId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
         reportVideo: build.mutation<ApiResponse<null>, ReportVideoParams>({
             query: ({contentId, reason, customReason}) => ({
                 url: "api/reports",
@@ -37,7 +49,39 @@ export const videoApi = createApi({
                 },
             }),
         }),
+        likeVideo: build.mutation<ApiResponse<null>, string>({
+            query: (videoId) => ({
+                url: `api/videos/${videoId}/like`,
+                method: "post",
+            }),
+        }),
+        unlikeVideo: build.mutation<ApiResponse<null>, string>({
+            query: (videoId) => ({
+                url: `api/videos/${videoId}/like`,
+                method: "delete",
+            }),
+        }),
+        favoriteVideo: build.mutation<ApiResponse<null>, string>({
+            query: (videoId) => ({
+                url: `api/videos/${videoId}/favorite`,
+                method: "post",
+            }),
+        }),
+        unfavoriteVideo: build.mutation<ApiResponse<null>, string>({
+            query: (videoId) => ({
+                url: `api/videos/${videoId}/favorite`,
+                method: "delete",
+            }),
+        }),
     }),
 });
 
-export const {useLazyGetFypQuery, useReportVideoMutation} = videoApi;
+export const {
+    useLazyGetFypQuery,
+    useLazyGetUserVideosQuery,
+    useReportVideoMutation,
+    useLikeVideoMutation,
+    useUnlikeVideoMutation,
+    useFavoriteVideoMutation,
+    useUnfavoriteVideoMutation,
+} = videoApi;

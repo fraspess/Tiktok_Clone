@@ -26,5 +26,8 @@ public class CommentConfiguration : IEntityTypeConfiguration<CommentEntity>
             .WithMany(v => v.Comments)
             .HasForeignKey(c => c.VideoId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasQueryFilter(c => !c.IsDeleted);
     }
 }
