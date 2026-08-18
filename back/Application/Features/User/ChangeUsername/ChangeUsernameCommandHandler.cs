@@ -10,8 +10,7 @@ namespace Application.Features.User.ChangeUsername;
 
 internal class ChangeUsernameCommandHandler(
     UserManager<UserEntity> userManager,
-    ICurrentUser currentUser,
-    ICacheService cache) : IRequestHandler<ChangeUsernameCommand, Unit>
+    ICurrentUser currentUser,) : IRequestHandler<ChangeUsernameCommand, Unit>
 {
     public async Task<Unit> Handle(ChangeUsernameCommand request, CancellationToken cancellationToken)
     {
@@ -20,8 +19,6 @@ internal class ChangeUsernameCommandHandler(
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken)
                    ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
-	var oldUsernameCacheKey = $"user:username:{user.UserName}";
-        await cache.RemoveAsync(oldUsernameCacheKey);
         if (user.LastUsernameChangedAt.HasValue && DateTime.Now <= user.LastUsernameChangedAt.Value.AddDays(7))
             throw new BadRequestException(ErrorCodes.CooldownOnChangeUsername);
 
@@ -34,8 +31,6 @@ internal class ChangeUsernameCommandHandler(
             throw new BadRequestException(ErrorCodes.InvalidUsername);
 
 
-        await cache.RemoveAsync($"user:{user.Id}");
-        await cache.RemoveAsync($"user:username:{request.newUsername}");
 
         return Unit.Value;
     }
