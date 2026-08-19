@@ -15,7 +15,7 @@ import AuthBootstrap from "@/components/auth/AuthBootstrap.tsx";
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <Provider store={store}>
-            <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange enableSystem>
+            <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange enableSystem>
                 <TooltipProvider>
                     <BrowserRouter>
                         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>

@@ -8,7 +8,7 @@ import type {PagedResult} from "@/types/Pagination.ts";
 export interface ChatUserDto {
     id: string;
     username: string;
-    avatar?: {small?: string; medium?: string; large?: string} | string | null;
+    avatar?: { small?: string; medium?: string; large?: string } | string | null;
 }
 
 interface PaginationParams {
@@ -26,19 +26,13 @@ export const conversationApi = createApi({
                 method: "get",
             }),
         }),
-        getMessages: build.query<ApiResponse<PagedResult<MessageDto>>, PaginationParams & {conversationId: string}>({
+        getMessages: build.query<ApiResponse<PagedResult<MessageDto>>, PaginationParams & { conversationId: string }>({
             query: ({conversationId, pageNumber, pageSize}) => ({
                 url: `api/conversations/messages?conversationId=${conversationId}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
                 method: "get",
             }),
         }),
-        getChatUsers: build.query<ApiResponse<PagedResult<ChatUserDto>>, PaginationParams>({
-            query: ({pageNumber, pageSize}) => ({
-                url: `api/admin-panel/users?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
-            }),
-        }),
-        createConversation: build.mutation<ApiResponse<ConversationDto>, {userIds: string[]}>({
+        createConversation: build.mutation<ApiResponse<ConversationDto>, { userIds: string[] }>({
             query: (body) => ({url: "api/conversations", method: "post", body}),
         }),
     }),
@@ -47,6 +41,5 @@ export const conversationApi = createApi({
 export const {
     useLazyGetConversationsQuery,
     useLazyGetMessagesQuery,
-    useLazyGetChatUsersQuery,
     useCreateConversationMutation,
 } = conversationApi;
