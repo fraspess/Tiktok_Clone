@@ -7,6 +7,7 @@ import {useFollowUserMutation} from "@/store/apis/userApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
 import type {UserProfile} from "@/types/User.ts";
+import {Send} from "lucide-react";
 
 interface ProfileHeaderProps {
     profile: UserProfile;
@@ -79,6 +80,14 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                             {isFollowing ? t("profile.followingStatus") : t("profile.follow")}
                         </Button>
                     )}
+
+                    <Button
+                        type="button"
+                        disabled={isFollowing || isLoading}
+                        variant={isFollowing ? "outline" : "default"}
+                    >
+                        <Send/>{"Написати"}
+                    </Button>
                 </div>
 
                 <div className="flex items-center gap-4 text-sm">

@@ -3,6 +3,7 @@ using Application;
 using Application.Dtos.Conversation;
 using Application.Dtos.Message;
 using Application.Features.Conversation.Create;
+using Application.Features.Conversation.FindByUsername;
 using Application.Features.Conversation.Get;
 using Application.Features.Conversation.GetAll;
 using Application.Features.Conversation.GetMessages;
@@ -49,5 +50,13 @@ public class ConversationController(IMediator _mediator) : ControllerBase
         var messages = await _mediator.Send(new GetConversationMessagesQuery(conversationId,
             new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize }));
         return Ok(ApiResponse<PagedResult<MessageDto>>.Success(messages));
+    }
+
+    [HttpGet("search")]
+    [Authorize]
+    public async Task<IActionResult> GetConversationByQuery([FromQuery]string query, [FromQuery]int pageNumber = 1, [FromQuery]int pageSize = 10)
+    {
+        var convo = await _mediator.Send(new FindConversationByUsernameCommand(query, new PaginationSettings{PageNumber = pageNumber, PageSize = pageSize}));
+        return Ok(ApiResponse<object>.Success(convo));
     }
 }
