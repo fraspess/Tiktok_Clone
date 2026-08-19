@@ -6,8 +6,10 @@ using Application.Options;
 using Infrastructure.DependencyInjection;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using Persistence;
 using Persistence.DependencyInjection;
 using Persistence.Seeder;
 using Serilog;
@@ -93,6 +95,12 @@ try
     if (app.Environment.IsDevelopment())
     {
         await app.SeedDataAsync();
+    }
+    else
+    {
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await context.Database.MigrateAsync();
     }
     app.Run();
 }
