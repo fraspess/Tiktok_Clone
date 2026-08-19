@@ -4,6 +4,7 @@ using Application.Extensions;
 using Application.Interfaces;
 using Application.Pagination;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Conversation.FindByUsername;
 
@@ -11,9 +12,13 @@ public class FindConversationByUsernameCommandHandler(IAppDbContext appDbContext
 {
     public async Task<PagedResult<ConversationDto>> Handle(FindConversationByUsernameCommand request, CancellationToken cancellationToken)
     {
+        var query = request.query.TrimStart("@").ToString();
         var conversations = await appDbContext
             .Conversations
+            .Include(x => x.Participants)
+            .ThenInclude(x => x.User)
             .Where(c => c.Participants.Any(c => c.UserId == currentUser.Id!.Value))
+            .Where(c => c.Participants.Any(c => c.User.UserName.Contains(query)))
             .ToConversationDto()
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 

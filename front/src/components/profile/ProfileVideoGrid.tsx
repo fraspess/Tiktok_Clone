@@ -62,7 +62,9 @@ const ProfileVideoGrid = ({userId, username}: ProfileVideoGridProps) => {
 
     return (
         <div ref={containerRef} className="h-full w-full overflow-y-auto px-4 pb-8">
-            <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            <div
+                className="grid gap-2 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+            >
                 {videos.map((video) => (
                     <div
                         key={video.id}
@@ -81,7 +83,7 @@ const ProfileVideoGrid = ({userId, username}: ProfileVideoGridProps) => {
                                 });
                             }
                         }}
-                        className="group relative aspect-[9/16] cursor-pointer overflow-hidden rounded-md bg-neutral-800"
+                        className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-md bg-neutral-800"
                     >
                         {video.thumbnailUrl ? (
                             <img
@@ -94,7 +96,8 @@ const ProfileVideoGrid = ({userId, username}: ProfileVideoGridProps) => {
                                 <Play size={28}/>
                             </div>
                         )}
-                        <div className="absolute inset-x-0 bottom-0 flex items-center gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5 text-xs font-medium text-white">
+                        <div
+                            className="absolute inset-x-0 bottom-0 flex items-center gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5 text-xs font-medium text-white">
                             <Play size={12} className="fill-white"/>
                             {formatCount(video.viewCount)}
                         </div>
