@@ -1,5 +1,5 @@
-import {useEffect, useRef, useState} from "react";
 import type {FormEvent} from "react";
+import {useEffect, useRef, useState} from "react";
 import {Loader2, Send} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button.tsx";
@@ -15,15 +15,29 @@ interface ConversationWindowProps {
     error: string | null;
     isConnected: boolean;
     onSend: (content: string) => Promise<void>;
-    currentUser?: {id: string; username: string};
+    currentUser?: { id: string; username: string };
 }
 
-const getConversationName = (conversation: ConversationDto, fallback: string, currentUser?: {id: string; username: string}) =>
-    conversation.participants.map((participant) =>
-        participant.username || (participant.id === currentUser?.id ? currentUser.username : "")
-    ).filter(Boolean).join(", ") || fallback;
+const getConversationName = (conversation: ConversationDto, fallback: string, currentUser?: {
+    id: string;
+    username: string
+}) =>
+    conversation.participants
+        .filter((participant) => participant.id !== currentUser?.id)
+        .map((participant) => participant.username)
+        .filter(Boolean)
+        .map((username) => `@${username}`)
+        .join(", ") || fallback;
 
-const ConversationWindow = ({conversation, messages, isLoading, error, isConnected, onSend, currentUser}: ConversationWindowProps) => {
+const ConversationWindow = ({
+                                conversation,
+                                messages,
+                                isLoading,
+                                error,
+                                isConnected,
+                                onSend,
+                                currentUser
+                            }: ConversationWindowProps) => {
     const {t} = useTranslation();
     const [content, setContent] = useState("");
     const [isSending, setIsSending] = useState(false);
@@ -60,18 +74,22 @@ const ConversationWindow = ({conversation, messages, isLoading, error, isConnect
                         <Loader2 className="mr-2 h-5 w-5 animate-spin"/>{t("chat.loadingMessages")}
                     </div>
                 ) : error ? (
-                    <div className="flex h-full items-center justify-center text-center text-sm text-white/60">{error}</div>
+                    <div
+                        className="flex h-full items-center justify-center text-center text-sm text-white/60">{error}</div>
                 ) : messages.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-center text-sm text-white/60">{t("chat.noMessages")}</div>
+                    <div
+                        className="flex h-full items-center justify-center text-center text-sm text-white/60">{t("chat.noMessages")}</div>
                 ) : (
                     <div className="space-y-3">
                         {messages.map((message) => (
-                            <div key={message.id} className={cn("flex", message.isOwn ? "justify-end" : "justify-start")}>
+                            <div key={message.id}
+                                 className={cn("flex", message.isOwn ? "justify-end" : "justify-start")}>
                                 <div className={cn(
                                     "max-w-[80%] rounded-2xl px-3 py-2 text-sm",
                                     message.isOwn ? "rounded-br-md bg-[#fe2c55] text-white" : "rounded-bl-md bg-white/10 text-white"
                                 )}>
-                                    {!message.isOwn && <p className="mb-1 text-xs font-medium text-white/60">{message.senderUsername}</p>}
+                                    {!message.isOwn &&
+                                        <p className="mb-1 text-xs font-medium text-white/60">{message.senderUsername}</p>}
                                     <p className="whitespace-pre-wrap break-words">{message.content}</p>
                                 </div>
                             </div>
@@ -88,7 +106,8 @@ const ConversationWindow = ({conversation, messages, isLoading, error, isConnect
                     disabled={!isConnected || isSending}
                     className="border-white/10 bg-white/5 text-white placeholder:text-white/40"
                 />
-                <Button type="submit" size="icon" disabled={!content.trim() || !isConnected || isSending} aria-label={t("chat.send")}>
+                <Button type="submit" size="icon" disabled={!content.trim() || !isConnected || isSending}
+                        aria-label={t("chat.send")}>
                     {isSending ? <Loader2 className="h-4 w-4 animate-spin"/> : <Send className="h-4 w-4"/>}
                 </Button>
             </form>

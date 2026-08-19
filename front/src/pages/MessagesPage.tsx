@@ -1,19 +1,18 @@
-import {MessageCircle, Plus} from "lucide-react";
+import {MessageCircle, Search} from "lucide-react";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button.tsx";
-import ConversationList from "@/components/chat/ConversationList.tsx";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
 import {useLazyGetMessagesQuery} from "@/store/apis/conversationApi.ts";
 import type {ConversationDto} from "@/types/Conversation.ts";
 import type {MessageDto} from "@/types/Message.ts";
-import ConversationWindow from "@/components/chat/ConversationWindow.tsx";
 import {useChatConnection} from "@/hooks/useChatConnection.ts";
 import {useGetCurrentUserQuery} from "@/store/apis/authApi.ts";
 import {getCachedMessages, saveCachedMessages} from "@/lib/chatMessagesCache.ts";
 import {saveUserProfile} from "@/lib/userProfileCache.ts";
-import NewConversationDialog from "@/components/chat/NewConversationDialog.tsx";
+import ConversationList from "@/components/chat/ConversationList.tsx";
+import ConversationWindow from "@/components/chat/ConversationWindow.tsx";
 
 function mergeMessages(serverHistory: MessageDto[], currentMessages: MessageDto[], currentUserId?: string): MessageDto[] {
     const serverIds = new Set(serverHistory.map((m) => m.id));
@@ -209,7 +208,8 @@ const MessagesPage = () => {
     if (!isAuth) {
         return (
             <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
+                <div
+                    className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
                     <MessageCircle className="h-8 w-8 text-muted-foreground"/>
                 </div>
                 <div className="space-y-1">
@@ -226,13 +226,15 @@ const MessagesPage = () => {
     return (
         <div className="flex h-full min-h-0 w-full bg-[#121212] text-white">
             <div className="flex w-full max-w-[420px] shrink-0 flex-col border-r border-white/10">
-            <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-5">
-                <h1 className="text-[24px] font-bold tracking-[-0.03em]">{t("chat.inbox")}</h1>
-                <Button size="icon-sm" variant="ghost" onClick={() => setIsNewConversationOpen(true)} aria-label={t("chat.newConversation")}>
-                    <Plus className="h-5 w-5"/>
-                </Button>
-            </header>
-            <ConversationList selectedConversationId={selectedConversation?.id ?? null} onSelect={handleSelectConversation} currentUser={currentUser}/>
+                <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-5">
+                    <h1 className="text-[24px] font-bold tracking-[-0.03em]">{t("chat.inbox")}</h1>
+                    <Button size="icon-sm" variant="ghost" onClick={() => setIsNewConversationOpen(true)}
+                            aria-label={t("chat.newConversation")}>
+                        <Search className="h-5 w-5"/>
+                    </Button>
+                </header>
+                <ConversationList selectedConversationId={selectedConversation?.id ?? null}
+                                  onSelect={handleSelectConversation} currentUser={currentUser}/>
             </div>
             {selectedConversation ? (
                 <ConversationWindow
@@ -249,12 +251,6 @@ const MessagesPage = () => {
                     {t("chat.selectConversation")}
                 </div>
             )}
-            <NewConversationDialog
-                open={isNewConversationOpen}
-                onOpenChange={setIsNewConversationOpen}
-                currentUserId={currentUser?.id}
-                onConversationCreated={handleSelectConversation}
-            />
         </div>
     );
 };

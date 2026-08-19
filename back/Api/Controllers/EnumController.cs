@@ -22,6 +22,8 @@ public class EnumController : ControllerBase
         GetEnumValuesWithDescription<CommentReportReasons>();
 
     private static readonly IEnumerable<object> _userReportReasons = GetEnumValuesWithDescription<UserReportReasons>();
+    
+    private static readonly IEnumerable<object> _messagePrivacySettings = GetEnumValues<MessagePrivacy>();
 
     private static IEnumerable<object> GetEnumValues<T>()
         where T : struct, Enum
@@ -61,5 +63,11 @@ public class EnumController : ControllerBase
             ContentTypes.Video => _videoReportReasons,
             _ => throw new BadRequestException("Невідомий contentType")
         }));
+    }
+
+    [HttpGet("message-privacy")]
+    public IActionResult GetMessagePrivacySettings()
+    {
+        return Ok(ApiResponse<object>.Success(_messagePrivacySettings));
     }
 }

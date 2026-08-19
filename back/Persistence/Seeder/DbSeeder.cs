@@ -29,17 +29,14 @@ public static class DbSeeder
         var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
         var imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await context.Database.MigrateAsync();
         var localStorageOptions = scope.ServiceProvider.GetRequiredService<IOptions<LocalStorageOptions>>();
         
         var _options = localStorageOptions.Value;
-        await context.Database.MigrateAsync();
         await SeedRolesAsync(roleManager);
         await SeedUsersAsync(userManager, imageService, environment);
+        await SeedVideosAsync(context, environment, _options, userManager);
 
-        if (environment.IsDevelopment())
-        {
-            await SeedVideosAsync(context, environment, _options, userManager);
-        }
     }
 
     private static async Task SeedRolesAsync(RoleManager<RoleEntity> roleManager)

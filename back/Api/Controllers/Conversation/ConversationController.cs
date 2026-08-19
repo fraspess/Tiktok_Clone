@@ -38,7 +38,7 @@ public class ConversationController(IMediator _mediator) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateConversation([FromBody] CreateConversationDto dto)
     {
-        var conversation = await _mediator.Send(new CreateConversationCommand(dto.UserIds));
+        var conversation = await _mediator.Send(new CreateConversationCommand(dto.UserId));
         return Ok(ApiResponse<ConversationDto>.Success(conversation));
     }
 

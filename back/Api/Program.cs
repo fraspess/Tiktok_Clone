@@ -50,23 +50,6 @@ try
     app.UseSerilogRequestLogging();
 
     app.UseCors();
-
-    /*var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
-    Directory.CreateDirectory(uploadsPath);
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        RequestPath = "/uploads",
-        FileProvider = new PhysicalFileProvider(uploadsPath),
-        ServeUnknownFileTypes = true,
-        ContentTypeProvider = new FileExtensionContentTypeProvider
-        {
-            Mappings =
-            {
-                [".m3u8"] = "application/vnd.apple.mpegurl",
-                [".ts"] = "video/mp2t"
-            }
-        }
-    });*/
     
 
     var localStorageOptions = app.Configuration.GetSection("LocalStorage").Get<LocalStorageOptions>();
@@ -106,8 +89,11 @@ try
     app.MapControllers();
     app.MapHub<ChatHub>("/hubs/chat");
     app.MapHub<VideoProcessingHub>("/hubs/video-process-status");
-    
-    await app.SeedDataAsync();
+
+    if (app.Environment.IsDevelopment())
+    {
+        await app.SeedDataAsync();
+    }
     app.Run();
 }
 catch (Exception ex)
