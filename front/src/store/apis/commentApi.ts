@@ -32,7 +32,6 @@ export const commentApi = createApi({
                 url: `api/comments/${videoId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
                 method: "get",
             }),
-            refetchOnMountOrArgChange: true,
             providesTags: (result, _err, {videoId}) =>
                 result
                     ? [
@@ -59,7 +58,11 @@ export const commentApi = createApi({
                     ? [{type: "Replies" as const, id: parentCommentId}, {type: "Comments" as const, id: videoId}]
                     : [{type: "Comments" as const, id: videoId}],
         }),
-        deleteComment: build.mutation<ApiResponse<null>, {commentId: string; videoId: string; parentCommentId?: string}>({
+        deleteComment: build.mutation<ApiResponse<null>, {
+            commentId: string;
+            videoId: string;
+            parentCommentId?: string
+        }>({
             query: ({commentId}) => ({
                 url: `api/comments?commentId=${commentId}`,
                 method: "delete",
@@ -69,7 +72,7 @@ export const commentApi = createApi({
                     ? [{type: "Replies" as const, id: parentCommentId}, {type: "Comments" as const, id: videoId}]
                     : [{type: "Comments" as const, id: videoId}],
         }),
-        likeComment: build.mutation<ApiResponse<null>, {commentId: string}>({
+        likeComment: build.mutation<ApiResponse<null>, { commentId: string }>({
             query: ({commentId}) => ({
                 url: `api/comments/like?commentId=${commentId}`,
                 method: "post",

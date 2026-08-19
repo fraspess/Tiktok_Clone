@@ -21,7 +21,13 @@ export const store = configureStore({
         [commentApi.reducerPath]: commentApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(authApi.middleware, videoApi.middleware),
+        getDefaultMiddleware().concat(
+            authApi.middleware,
+            conversationApi.middleware,
+            videoApi.middleware,
+            userApi.middleware,
+            commentApi.middleware,
+        ),
 })
 
 setupListeners(store.dispatch)
