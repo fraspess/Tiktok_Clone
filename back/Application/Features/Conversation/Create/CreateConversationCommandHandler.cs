@@ -1,4 +1,6 @@
 ﻿using Application.Dtos.Conversation;
+using Application.Dtos.User;
+using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
 using Domain.Constants;
@@ -15,7 +17,8 @@ public class CreateConversationCommandHandler(
     IAppDbContext appDbContext,
     ConversationMapper mapper,
     UserManager<UserEntity> userManager,
-    ICurrentUser currentUser)
+    ICurrentUser currentUser,
+    IStorageService storageService)
     : IRequestHandler<CreateConversationCommand, ConversationDto>
 {
     public async Task<ConversationDto> Handle(CreateConversationCommand request,
@@ -26,13 +29,19 @@ public class CreateConversationCommandHandler(
 
         ConversationDto conversation = null!;
         var existingConversation = await appDbContext.Conversations
-            .Include(c => c.Participants)
-            .FirstOrDefaultAsync(
-                c => c.Participants.Any(p => p.UserId == currentUserId) &&
-                     c.Participants.Any(p => p.UserId == participant),
-                cancellationToken);
+            .Where(c => c.Participants.Any(p => p.UserId == currentUserId) &&
+                        c.Participants.Any(p => p.UserId == participant))
+            .ToConversationDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (existingConversation is not null) return mapper.ToDto(existingConversation);
+        if (existingConversation is not null)
+        {
+            foreach (var user in existingConversation.Participants)
+            {
+                user.Avatar = storageService.GetUserAvatar(user.Id);
+            }
+            return existingConversation;
+        }
         
         var participantPrivacy = await userManager.Users.Where(u=>u.Id == participant).Select(u => u.MessagePrivacy).FirstOrDefaultAsync(cancellationToken: cancellationToken);
         switch (participantPrivacy)
@@ -82,7 +91,7 @@ public class CreateConversationCommandHandler(
         }
         
         await appDbContext.SaveChangesAsync(cancellationToken);
-
+        
         return conversation;
     }
 
@@ -102,8 +111,32 @@ public class CreateConversationCommandHandler(
                 }
             }
         };
-        
         await appDbContext.Conversations.AddAsync(conversation);
-        return mapper.ToDto(conversation);
+       var convo = mapper.ToDto(conversation);
+        
+       var userIds = convo.Participants.Select(p => p.Id).ToList();
+
+       var users = await userManager.Users
+           .Where(u => userIds.Contains(u.Id))
+           .Select(u => new
+           {
+               u.Id,
+               u.UserName
+           })
+           .ToListAsync();
+       
+       convo.Participants = convo.Participants.Select(p =>
+       {
+           var user = users.FirstOrDefault(u => u.Id == p.Id);
+
+           return new SimpleUserDto
+           {
+               Id = p.Id,
+               Username = user?.UserName!,
+               Avatar = p.Avatar
+           };
+       }).ToList();
+       
+       return convo;
     }
 }

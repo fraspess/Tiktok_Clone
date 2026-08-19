@@ -22,24 +22,7 @@ internal class GetConversationQueryHandler(
         var convo = await appDbContext
             .Conversations
             .Where(c => c.Id == request.ConversationId)
-            .Select(c => new ConversationDto
-            {
-                Id = c.Id,
-
-                LastMessage = appDbContext.Messages
-                    .Where(m => m.ConversationId == c.Id)
-                    .OrderByDescending(m => m.CreatedAt)
-                    .Select(m => m.Content)
-                    .FirstOrDefault(),
-
-                Participants = c.Participants
-                    .Select(p => new SimpleUserDto
-                    {
-                        Id = p.UserId,
-                        Username = p.User.UserName
-                    })
-                    .ToList()
-            })
+            .ToConversationDto()
             .FirstOrDefaultAsync(cancellationToken);
 
         if (convo == null) throw new NotFoundException(ErrorCodes.ResourceNotFound);
