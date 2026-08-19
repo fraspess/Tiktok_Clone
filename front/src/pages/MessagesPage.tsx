@@ -75,7 +75,6 @@ const MessagesPage = () => {
     const [messages, setMessages] = useState<MessageDto[]>([]);
     const [messagesError, setMessagesError] = useState<string | null>(null);
     const [isMessagesLoading, setIsMessagesLoading] = useState(false);
-    const [isNewConversationOpen, setIsNewConversationOpen] = useState(false);
     const [getMessages] = useLazyGetMessagesQuery();
     const {data: currentUserResponse} = useGetCurrentUserQuery(undefined, {skip: !isAuth});
     const currentUser = currentUserResponse?.data;
@@ -228,7 +227,7 @@ const MessagesPage = () => {
             <div className="flex w-full max-w-[420px] shrink-0 flex-col border-r border-white/10">
                 <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-5">
                     <h1 className="text-[24px] font-bold tracking-[-0.03em]">{t("chat.inbox")}</h1>
-                    <Button size="icon-sm" variant="ghost" onClick={() => setIsNewConversationOpen(true)}
+                    <Button size="icon-sm" variant="ghost"
                             aria-label={t("chat.newConversation")}>
                         <Search className="h-5 w-5"/>
                     </Button>
