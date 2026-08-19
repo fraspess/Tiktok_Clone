@@ -16,12 +16,15 @@ const MainLayout = ({children}: MainLayoutProps) => {
 
     return (
         <div className="flex h-screen">
-            <Sidebar
-                collapsed={isCollapsed}
-                onToggle={() => setIsCollapsed(!isCollapsed)}
-                isMessagesOpen={isMessagesOpen}
-                onMessagesClick={() => setIsMessagesOpen(true)}
-            />
+            <div>
+                <Sidebar
+                    collapsed={isCollapsed}
+                    onToggle={() => setIsCollapsed(!isCollapsed)}
+                    isMessagesOpen={isMessagesOpen}
+                    onMessagesClick={() => setIsMessagesOpen(true)}
+                />
+
+            </div>
             <div className="flex flex-col flex-1">
                 <Topbar/>
                 <main className="flex-1 overflow-hidden">

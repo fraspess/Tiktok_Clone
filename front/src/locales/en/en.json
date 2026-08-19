@@ -156,5 +156,22 @@
     "hideReplies": "Hide replies",
     "loadMoreReplies": "Show more replies",
     "delete": "Delete"
+  },
+  "uploads": {
+    "title": "Upload",
+    "dragDropText": "Drag & drop a video here",
+    "selectVideo": "Select video",
+    "formatTitle": "File formats",
+    "formatDesc": "Recommended: \".mp4\". Other major formats are supported.",
+    "resolutionTitle": "Video resolutions",
+    "resolutionDesc": "High-resolution recommended: 1080p, 1440p, 4K.",
+    "aspectRatioTitle": "Aspect ratios",
+    "aspectRatioDesc": "Recommended: 16:9 for landscape, 9:16 for vertical.",
+    "upload": "Post"
+  },
+  "details": {
+    "description": "Description",
+    "descriptionPlaceholder": "Your description here",
+    "hashtags": "hashtag"
   }
 }
