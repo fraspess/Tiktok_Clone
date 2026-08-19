@@ -20,7 +20,7 @@ public class GetForYouPageVideosQueryHandler(
     {
         var videos = await appDbContext
             .Videos
-            .OrderBy(v => Guid.NewGuid())
+            .OrderBy(v => v.Id)
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 

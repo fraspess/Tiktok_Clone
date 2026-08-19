@@ -19,7 +19,7 @@ public class LikeCommentCommandHandler(IAppDbContext appDbContext, ICurrentUser 
 
         var isExists =
             await appDbContext.CommentLikes.FirstOrDefaultAsync(
-                c => c.UserId == currentUser.Id || c.CommentId == request.CommentId, cancellationToken);
+                c => c.UserId == currentUser.Id && c.CommentId == request.CommentId, cancellationToken);
 
         if (isExists is null)
         {

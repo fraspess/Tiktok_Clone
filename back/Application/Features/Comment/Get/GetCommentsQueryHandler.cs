@@ -15,7 +15,7 @@ public class GetCommentsQueryHandler(CommentMapper mapper, ICurrentUser currentU
         var videoId = await dbContext.Videos.GetIdFromShortIdAsync(request.VideoId, ct: cancellationToken);
         var comments = await dbContext
             .Comments
-            .Where(c => c.VideoId == videoId)
+	    .Where(c => c.VideoId == videoId && c.ParentCommentId == null)
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 

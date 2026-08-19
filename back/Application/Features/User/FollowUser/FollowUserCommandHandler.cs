@@ -15,31 +15,29 @@ public class FollowUserCommandHandler(
 {
     public async Task<Unit> Handle(FollowUserCommand request, CancellationToken cancellationToken)
     {
+        if (request.FollowingId == currentUser.Id) throw new NotAllowedException(ErrorCodes.Forbidden);
+
         var followingUserExists = await userManager.Users.AnyAsync(u => u.Id == request.FollowingId, cancellationToken);
         if (!followingUserExists) throw new NotFoundException(ErrorCodes.UserNotFound);
 
-        appDbContext.UserFollows.Add(new UserFollowEntity
+        var existingFollow = await appDbContext.UserFollows.FirstOrDefaultAsync(
+            f => f.FollowerId == currentUser.Id && f.FollowingId == request.FollowingId,
+            cancellationToken);
+
+        if (existingFollow is not null)
         {
-            FollowingId = request.FollowingId,
-            FollowerId = currentUser.Id!.Value
-        });
+            appDbContext.UserFollows.Remove(existingFollow);
+        }
+        else
+        {
+            appDbContext.UserFollows.Add(new UserFollowEntity
+            {
+                FollowingId = request.FollowingId,
+                FollowerId = currentUser.Id!.Value
+            });
+        }
+
         await appDbContext.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }
-
-/*var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == follower)
-       ?? throw new UnauthorizedException("Користувача не знайдено");
-var isAlreadyFollw
-var isAlreadyFollowing = await uow.Follows.GetFollowAsync(follower, following);
-
-if (isAlreadyFollowing is null)
-{
-user.Following.Add(new UserFollowEntity { FollowerId = follower, FollowingId = following });
-}
-else
-{
-user.Following.Remove(isAlreadyFollowing);
-}
-
-await userManager.UpdateAsync(user);*/
