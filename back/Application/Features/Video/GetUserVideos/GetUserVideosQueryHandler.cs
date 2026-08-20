@@ -15,7 +15,7 @@ public class GetUserVideosQueryHandler(IAppDbContext appDbContext, VideoMapper v
         var videos = await appDbContext
             .Videos
             .Where(v => v.UserId == request.UserId)
-            .OrderBy(v => v.CreatedAt)
+            .OrderByDescending(v => v.CreatedAt)
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.Settings, cancellationToken: cancellationToken);
 

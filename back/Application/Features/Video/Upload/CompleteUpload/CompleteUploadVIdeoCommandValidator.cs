@@ -8,6 +8,6 @@ public class CompleteUploadVideoCommandValidator : AbstractValidator<CompleteUpl
     public CompleteUploadVideoCommandValidator()
     {
         RuleFor(x => x.Description)
-            .MaximumLength(500).WithErrorCode(ErrorCodes.TooLong);
+            .MaximumLength(4000).WithErrorCode(ErrorCodes.TooLong);
     }
 }
