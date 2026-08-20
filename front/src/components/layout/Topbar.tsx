@@ -8,7 +8,7 @@ import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
 import {authApi, useLogoutMutation} from "@/store/apis/authApi.ts";
 import {videoApi} from "@/store/apis/videoApi.ts";
-import {userApi, useGetMeQuery} from "@/store/apis/userApi.ts";
+import {useGetMeQuery, userApi} from "@/store/apis/userApi.ts";
 import {commentApi} from "@/store/apis/commentApi.ts";
 import {logout as logoutAction} from "@/store/slices/authSlice.ts";
 
@@ -25,8 +25,6 @@ const Topbar = () => {
         try {
             await logout(undefined).unwrap();
         } catch {
-            // Even if the server call fails (e.g. session already expired),
-            // still clear the local session so the UI stays consistent.
             toast.error(t("auth.logoutError"));
         } finally {
             dispatch(logoutAction());
@@ -39,7 +37,7 @@ const Topbar = () => {
     };
 
     return (
-        <header className="h-16 shrink-0 px-4 flex items-center justify-end gap-2">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
             {isAuth ? (
                 <>
                     {username && (
@@ -66,20 +64,15 @@ const Topbar = () => {
                 </Button>
             )}
             {theme == "dark" ? (
-                <Button onClick={() => {
-                    setTheme("white")
-                }} variant="ghost" size="icon">
+                <Button onClick={() => setTheme("white")} variant="ghost" size="icon">
                     <Moon className="h-4 w-4"/>
                 </Button>
-
             ) : (
-                <Button onClick={() => {
-                    setTheme("dark")
-                }} variant="ghost" size="icon">
+                <Button onClick={() => setTheme("dark")} variant="ghost" size="icon">
                     <Sun className="h-4 w-4"/>
                 </Button>
             )}
-        </header>
+        </div>
     )
 }
 

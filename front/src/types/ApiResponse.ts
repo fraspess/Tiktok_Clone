@@ -6,3 +6,4 @@ export interface ApiResponse<T> {
     fieldErrors: Record<string, string[]> | null,
     isSuccess: boolean,
 }
+

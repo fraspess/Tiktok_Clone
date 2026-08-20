@@ -8,7 +8,7 @@ namespace Domain.Entities.Video;
 public class VideoEntity : BannableSoftDeletableEntity
 {
     public string ShortId { get; set; } = string.Empty;
-    [MaxLength(500)] public string? Description { get; set; }
+    [MaxLength(4000)] public string? Description { get; set; }
 
     public required Guid UserId { get; set; }
 

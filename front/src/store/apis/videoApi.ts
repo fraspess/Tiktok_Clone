@@ -1,8 +1,9 @@
 import {createApi} from "@reduxjs/toolkit/query/react";
 import {baseQueryWithReauth} from "@/store/baseQueryWithReauth.ts";
-import type {ApiResponse} from "@/types/ApiResponse.ts";
 import type {PagedResult} from "@/types/Pagination.ts";
 import type {VideoDto} from "@/types/Video.ts";
+import type {CompleteUploadData, InitUploadData, InitUploadRequest} from "@/types/types.ts";
+import type {ApiResponse} from "@/types/ApiResponse.ts";
 
 interface FypParams {
     pageNumber: number;
@@ -73,6 +74,29 @@ export const videoApi = createApi({
                 method: "delete",
             }),
         }),
+        initUpload: build.mutation<InitUploadData, InitUploadRequest>({
+            query: (body) => ({
+                url: "api/videos",
+                method: "POST",
+                body,
+            }),
+            transformResponse: (response: ApiResponse<InitUploadData>) => {
+                if (!response.isSuccess || !response.data) {
+                    throw response;
+                }
+                return response.data;
+            },
+            transformErrorResponse: (response) => response.data as ApiResponse<InitUploadData>,
+
+        }),
+        confirmUpload: build.mutation<null, CompleteUploadData>({
+            query: (body) => ({
+                url: "api/videos/upload-complete",
+                method: "POST",
+                body
+            }),
+        }),
+
     }),
 });
 
@@ -84,4 +108,6 @@ export const {
     useUnlikeVideoMutation,
     useFavoriteVideoMutation,
     useUnfavoriteVideoMutation,
+    useInitUploadMutation,
+    useConfirmUploadMutation,
 } = videoApi;
