@@ -173,7 +173,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
             className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-neutral-100 px-4 dark:bg-neutral-950"
         >
             <div
-                className="relative aspect-[9/16] h-full max-h-full max-w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
+                className="relative aspect-[9/16] h-full max-h-[85vh] max-w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
                 <video
                     ref={videoRef}
                     poster={video.thumbnailUrl || undefined}

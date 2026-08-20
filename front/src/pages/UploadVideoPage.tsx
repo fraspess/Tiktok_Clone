@@ -25,10 +25,11 @@ const UploadVideoPage = () => {
     const [initUpload] = useInitUploadMutation();
     const [confirmUpload] = useConfirmUploadMutation();
     const navigate = useNavigate();
+    const errorText = useRef<HTMLParagraphElement | null>(null);
     const onConfirm = async () => {
         try {
             const response = await initUpload({contentType: file!.type}).unwrap();
-
+            console.log(response);
             await fetch(response.url, {
                 method: "PUT",
                 headers: {
@@ -36,9 +37,12 @@ const UploadVideoPage = () => {
                 },
                 body: file
             })
-            await confirmUpload({token: response.uploadToken, description: description.trim()});
+            await confirmUpload({token: response.uploadToken, description: description.trim()}).unwrap();
             navigate("/");
         } catch (err) {
+            if (errorText.current) {
+                errorText.current.textContent = t("uploads.error");
+            }
             console.error(err);
         }
 
@@ -204,6 +208,7 @@ const UploadVideoPage = () => {
                                 {description.length}/{MAX_DESCRIPTION_LENGTH}
                             </span>
                         </div>
+                        <p ref={errorText} className="text-red-500 text-center"/>
                     </div>
 
                     <div className="flex justify-end mt-3">

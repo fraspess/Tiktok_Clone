@@ -167,7 +167,8 @@
     "resolutionDesc": "High-resolution recommended: 1080p, 1440p, 4K.",
     "aspectRatioTitle": "Aspect ratios",
     "aspectRatioDesc": "Recommended: 16:9 for landscape, 9:16 for vertical.",
-    "upload": "Post"
+    "upload": "Post",
+    "error": "Internal server error. Please try again later."
   },
   "details": {
     "description": "Description",
