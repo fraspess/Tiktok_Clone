@@ -84,6 +84,8 @@ services:
             RabbitMQ__HostName: "rabbitMQ"
             RabbitMQ__UserName: ${RABBITMQ_USERNAME}
             RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+            AWS__S3__AccessKey: ${AWS_S3_ACCESS_KEY}
+            AWS__S3__SecretKey: ${AWS_S3_SECRET_KEY}
         networks:
             - tiktok_network
         volumes:
