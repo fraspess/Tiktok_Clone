@@ -55,15 +55,6 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
             ContentType = contentType
         });
 
-        var uri = new Uri(url);
-        var publicUrl = new Uri(_options.CdnBaseUrl);
-        var result = new UriBuilder(uri)
-        {
-            Scheme = publicUrl.Scheme,
-            Host = publicUrl.Host,
-            Port = publicUrl.IsDefaultPort ? -1 : publicUrl.Port
-        }.Uri.ToString();
-
-        return Task.FromResult(result);
+        return Task.FromResult(url);
     }
 }

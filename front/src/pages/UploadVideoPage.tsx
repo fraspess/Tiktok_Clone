@@ -45,7 +45,6 @@ const UploadVideoPage = () => {
             }
             console.error(err);
         }
-
     }
     const onFileSelected = (selected: File) => {
         setFile(selected);
