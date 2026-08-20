@@ -4,6 +4,8 @@ import Topbar from "@/components/layout/Topbar.tsx";
 import {useState} from "react";
 import AuthModal from "@/components/modals/AuthModal";
 import MessagesDrawer from "@/components/chat/MessagesDrawer.tsx";
+import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
+import {closeMessages, openMessages} from "@/store/slices/messagesSlice.ts";
 
 
 interface MainLayoutProps {
@@ -12,7 +14,8 @@ interface MainLayoutProps {
 
 const MainLayout = ({children}: MainLayoutProps) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const isMessagesOpen = useAppSelector((state) => state.messages.isOpen);
 
     return (
         <div className="flex h-screen">
@@ -20,7 +23,7 @@ const MainLayout = ({children}: MainLayoutProps) => {
                 collapsed={isCollapsed}
                 onToggle={() => setIsCollapsed(!isCollapsed)}
                 isMessagesOpen={isMessagesOpen}
-                onMessagesClick={() => setIsMessagesOpen(true)}
+                onMessagesClick={() => dispatch(openMessages())}
             />
             <div className="flex flex-col flex-1">
                 <Topbar/>
@@ -29,7 +32,7 @@ const MainLayout = ({children}: MainLayoutProps) => {
                 </main>
             </div>
             <AuthModal/>
-            <MessagesDrawer open={isMessagesOpen} onOpenChange={setIsMessagesOpen}/>
+            <MessagesDrawer open={isMessagesOpen} onOpenChange={(open) => dispatch(open ? openMessages() : closeMessages())}/>
         </div>
     )
 }

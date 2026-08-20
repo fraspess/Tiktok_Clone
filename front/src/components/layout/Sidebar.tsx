@@ -3,7 +3,7 @@ import {cn} from "@/lib/utils.ts";
 import {Button} from "@/components/ui/button.tsx";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {useTranslation} from "react-i18next";
-import {Book, Home, MessageCircle} from "lucide-react";
+import {Book, MessageCircle} from "lucide-react";
 
 interface SidebarProps {
     collapsed: boolean;
@@ -24,7 +24,7 @@ const Sidebar = ({collapsed, onToggle, isMessagesOpen, onMessagesClick}: Sidebar
     const {t} = useTranslation();
 
     const navItems = [
-        {to: "/", label: t("nav.home"), icon: Home, end: true},
+        {to: "/", label: t("nav.home"), icon: Book, end: true},
     ];
 
     return (

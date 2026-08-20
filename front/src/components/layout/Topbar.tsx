@@ -25,8 +25,6 @@ const Topbar = () => {
         try {
             await logout(undefined).unwrap();
         } catch {
-            // Even if the server call fails (e.g. session already expired),
-            // still clear the local session so the UI stays consistent.
             toast.error(t("auth.logoutError"));
         } finally {
             dispatch(logoutAction());
