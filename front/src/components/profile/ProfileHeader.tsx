@@ -4,9 +4,13 @@ import {toast} from "sonner";
 import {Button} from "@/components/ui/button.tsx";
 import {formatCount} from "@/lib/utils.ts";
 import {useFollowUserMutation} from "@/store/apis/userApi.ts";
+import {useCreateConversationMutation} from "@/store/apis/conversationApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
 import type {UserProfile} from "@/types/User.ts";
+import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
+import {openModal} from "@/store/slices/authModalSlice.ts";
+import {openDrawer} from "@/store/slices/messagesDrawerSlice.ts";
 import {Send} from "lucide-react";
 
 interface ProfileHeaderProps {
@@ -15,7 +19,10 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     const {t} = useTranslation();
+    const dispatch = useAppDispatch();
+    const isAuth = useAppSelector((s) => s.auth.isAuth);
     const [followUser, {isLoading}] = useFollowUserMutation();
+    const [createConversation] = useCreateConversationMutation();
     const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
     const [followersCount, setFollowersCount] = useState(profile.followersCount);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -44,6 +51,24 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                     ? String((err.data as { message?: string }).message)
                     : t("profile.followError");
             toast.error(message || t("profile.followError"));
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!isAuth) {
+            dispatch(openModal());
+            return;
+        }
+
+        try {
+            await createConversation({userId: profile.id}).unwrap();
+            dispatch(openDrawer());
+        } catch (err) {
+            const message =
+                isFetchBaseQueryError(err) && typeof err.data === "object" && err.data && "message" in err.data
+                    ? String((err.data as { message?: string }).message)
+                    : t("profile.sendMessageError");
+            toast.error(message || t("profile.sendMessageError"));
         }
     };
 
@@ -83,10 +108,10 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
 
                     <Button
                         type="button"
-                        disabled={isFollowing || isLoading}
-                        variant={isFollowing ? "outline" : "default"}
+                        onClick={handleSendMessage}
+                        variant="outline"
                     >
-                        <Send/>{"Написати"}
+                        <Send/>{t("profile.sendMessage")}
                     </Button>
                 </div>
 

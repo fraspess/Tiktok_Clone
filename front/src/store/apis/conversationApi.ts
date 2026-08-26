@@ -32,7 +32,7 @@ export const conversationApi = createApi({
                 method: "get",
             }),
         }),
-        createConversation: build.mutation<ApiResponse<ConversationDto>, { userIds: string[] }>({
+        createConversation: build.mutation<ApiResponse<ConversationDto>, { userId: string }>({
             query: (body) => ({url: "api/conversations", method: "post", body}),
         }),
     }),
