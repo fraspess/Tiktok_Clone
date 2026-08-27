@@ -30,5 +30,7 @@ public class VideoEntity : BannableSoftDeletableEntity
     public ICollection<FavoriteEntity> Favorites { get; set; } = new List<FavoriteEntity>();
     public int FavoriteCount { get; set; }
     
+    public ICollection<VideoRepostEntity>  Reposts { get; set; } = new List<VideoRepostEntity>();
+    
     public int ViewCount { get; set; }
 }

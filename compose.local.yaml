@@ -53,6 +53,7 @@ services:
             - "8080:8080"
         volumes:
           - api_uploads:/app/local-storage
+          - ./back/Api/SeedVideos:/app/SeedVideos
         networks:
             - tiktok_network
         depends_on:
