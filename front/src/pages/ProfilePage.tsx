@@ -5,7 +5,7 @@ import {useGetUserProfileQuery} from "@/store/apis/userApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileHeader from "@/components/profile/ProfileHeader.tsx";
 import ProfileVideoGrid from "@/components/profile/ProfileVideoGrid.tsx";
-
+// import ProfileVideoTabs from "@/components/profile/ProfileVideoTabs.tsx"; те що вище закоментувати
 const ProfilePage = () => {
     const {username: rawUsername} = useParams<{ username: string }>();
     const username = rawUsername?.startsWith("@") ? rawUsername.slice(1) : rawUsername;
@@ -65,6 +65,7 @@ const ProfilePage = () => {
             <ProfileHeader profile={profile}/>
             <div className="min-h-0 flex-1">
                 <ProfileVideoGrid userId={profile.id} username={profile.username}/>
+                {/*<ProfileVideoTabs userId={profile.id} username={profile.username} isOwnProfile={profile.isOwnProfile}/>*/}
             </div>
         </div>
     );

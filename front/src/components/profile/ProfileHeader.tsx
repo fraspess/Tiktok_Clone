@@ -99,10 +99,6 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                         <span className="font-semibold">{formatCount(profile.followingCount)}</span>{" "}
                         <span className="text-muted-foreground">{t("profile.following")}</span>
                     </span>
-                    <span title={t("profile.likesComingSoon")}>
-                        <span className="font-semibold text-muted-foreground">—</span>{" "}
-                        <span className="text-muted-foreground">{t("profile.likes")}</span>
-                    </span>
                 </div>
 
                 {profile.description && (
