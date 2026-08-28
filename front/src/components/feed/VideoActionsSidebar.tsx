@@ -9,6 +9,7 @@ import CommentsDialog from "@/components/feed/CommentsDialog.tsx";
 import {formatCount} from "@/lib/utils.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
+import {updateVideo} from "@/store/slices/videosCacheSlice.ts";
 import {useFollowUserMutation, useGetMeQuery} from "@/store/apis/userApi.ts";
 import {
     useFavoriteVideoMutation,
@@ -55,6 +56,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
         const nextLiked = !isLiked;
         setIsLiked(nextLiked);
         setLikeCount((prev) => (nextLiked ? prev + 1 : prev - 1));
+        dispatch(updateVideo({id: video.id, changes: {isLiked: nextLiked, likeCount: nextLiked ? video.likeCount + 1 : video.likeCount - 1}}));
 
         try {
             if (nextLiked) {
@@ -65,6 +67,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
         } catch {
             setIsLiked(!nextLiked);
             setLikeCount((prev) => (nextLiked ? prev - 1 : prev + 1));
+            dispatch(updateVideo({id: video.id, changes: {isLiked: !nextLiked, likeCount: nextLiked ? video.likeCount : video.likeCount}}));
             toast.error(t("feed.likeError"));
         }
     };
@@ -75,6 +78,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
         const nextSaved = !isSaved;
         setIsSaved(nextSaved);
         setSaveCount((prev) => (nextSaved ? prev + 1 : prev - 1));
+        dispatch(updateVideo({id: video.id, changes: {isFavorited: nextSaved, favoriteCount: nextSaved ? video.favoriteCount + 1 : video.favoriteCount - 1}}));
 
         try {
             if (nextSaved) {
@@ -85,6 +89,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
         } catch {
             setIsSaved(!nextSaved);
             setSaveCount((prev) => (nextSaved ? prev - 1 : prev + 1));
+            dispatch(updateVideo({id: video.id, changes: {isFavorited: !nextSaved, favoriteCount: nextSaved ? video.favoriteCount : video.favoriteCount}}));
             toast.error(t("feed.saveError"));
         }
     };

@@ -97,7 +97,7 @@ internal class UserService(
             throw new BadRequestException(ErrorCodes.CantResetPasswordExternal);
 
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
-        var resetLink = $"{configuration["Frontend:Url"]}/reset-password?token={token}&email={email}";
+        var resetLink = $"{configuration["Frontend:Url"]}/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
         var body = GetHtmlTemplate("ResetPassword.html");
         body = body.Replace("{resetLink}", resetLink);
 

@@ -1,10 +1,13 @@
 import {useCallback, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useLazyGetFypQuery} from "@/store/apis/videoApi.ts";
+import {useAppDispatch} from "@/store/hooks.ts";
+import {cacheVideos} from "@/store/slices/videosCacheSlice.ts";
 import type {VideoDto} from "@/types/Video.ts";
 
 export function useInfiniteFyp(pageSize: number = 5) {
     const {t} = useTranslation();
+    const dispatch = useAppDispatch();
     const [trigger, {isFetching}] = useLazyGetFypQuery();
     const [videos, setVideos] = useState<VideoDto[]>([]);
     const [hasNext, setHasNext] = useState<boolean>(true);
@@ -29,6 +32,7 @@ export function useInfiniteFyp(pageSize: number = 5) {
             const newItems = items.filter((video) => !seenIdsRef.current.has(video.id));
             newItems.forEach((video) => seenIdsRef.current.add(video.id));
 
+            dispatch(cacheVideos(newItems));
             setVideos((prev) => [...prev, ...newItems]);
             setHasNext(metadata.hasNext);
             nextPageRef.current += 1;
@@ -37,7 +41,7 @@ export function useInfiniteFyp(pageSize: number = 5) {
         } finally {
             isLoadingRef.current = false;
         }
-    }, [trigger, pageSize, hasNext, t]);
+    }, [trigger, pageSize, hasNext, t, dispatch]);
 
     return {videos, loadMore, hasNext, isFetching, error};
 }

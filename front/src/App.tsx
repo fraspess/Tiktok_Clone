@@ -5,6 +5,7 @@ import ProfileVideoFeedPage from "@/pages/ProfileVideoFeedPage.tsx";
 import MainLayout from "@/components/layout/MainLayout.tsx";
 import UploadVideoPage from "@/pages/UploadVideoPage.tsx";
 import ProtectedRoute from "@/routes/ProtectedRoute.tsx";
+import ResetPasswordPage from "@/pages/ResetPasswordPage.tsx";
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
                     <Route index element={<HomePage/>}/>
                     <Route path=":username" element={<ProfilePage/>}/>
                     <Route path=":username/video/:videoId" element={<ProfileVideoFeedPage/>}/>
+                    <Route path="reset-password" element={<ResetPasswordPage/>}/>
 
                     <Route element={<ProtectedRoute/>}>
                         <Route path="upload" element={<UploadVideoPage/>}/>
