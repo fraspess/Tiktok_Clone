@@ -12,6 +12,7 @@ import type {VideoDto} from "@/types/Video.ts";
 
 type ProfileTab = "videos" | "liked" | "saved";
 
+// import ProfileVideoTabs from "@/components/profile/ProfileVideoTabs.tsx"; те що вище закоментувати
 const ProfilePage = () => {
     const {username: rawUsername} = useParams<{ username: string }>();
     const username = rawUsername?.startsWith("@") ? rawUsername.slice(1) : rawUsername;
@@ -134,6 +135,8 @@ const ProfilePage = () => {
                 {activeTab === "saved" && profile.isOwnProfile && (
                     <CachedVideoGrid filter={isSaved} username={profile.username}/>
                 )}
+                <ProfileVideoGrid userId={profile.id} username={profile.username}/>
+                {/*<ProfileVideoTabs userId={profile.id} username={profile.username} isOwnProfile={profile.isOwnProfile}/>*/}
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import type {FormEvent} from "react";
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {Loader2, Send} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button.tsx";
@@ -15,39 +15,41 @@ interface ConversationWindowProps {
     error: string | null;
     isConnected: boolean;
     onSend: (content: string) => Promise<void>;
-    currentUser?: { id: string; username: string };
+    currentUser?: {id: string; username: string};
 }
 
-const getConversationName = (conversation: ConversationDto, fallback: string, currentUser?: {
-    id: string;
-    username: string
-}) =>
+const getConversationName = (
+    conversation: ConversationDto,
+    fallback: string,
+    currentUser?: {id: string; username: string}
+) =>
     conversation.participants
-        .filter((participant) => participant.id !== currentUser?.id)
-        .map((participant) => participant.username)
+        .filter((p) => p.id !== currentUser?.id)
+        .map((p) => p.username)
         .filter(Boolean)
-        .map((username) => `@${username}`)
+        .map((u) => `@${u}`)
         .join(", ") || fallback;
 
 const ConversationWindow = ({
-                                conversation,
-                                messages,
-                                isLoading,
-                                error,
-                                isConnected,
-                                onSend,
-                                currentUser
-                            }: ConversationWindowProps) => {
+    conversation,
+    messages,
+    isLoading,
+    error,
+    isConnected,
+    onSend,
+    currentUser,
+}: ConversationWindowProps) => {
     const {t} = useTranslation();
     const [content, setContent] = useState("");
     const [isSending, setIsSending] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({block: "end"});
     }, [messages]);
 
-    const submit = async (event: FormEvent<HTMLFormElement>) => {
+    const submit = useCallback(async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const message = content.trim();
         if (!message || isSending) return;
@@ -56,10 +58,11 @@ const ConversationWindow = ({
         try {
             await onSend(message);
             setContent("");
+            requestAnimationFrame(() => inputRef.current?.focus());
         } finally {
             setIsSending(false);
         }
-    };
+    }, [content, isSending, onSend]);
 
     return (
         <section className="flex min-w-0 flex-1 flex-col bg-[#121212]">
@@ -68,28 +71,31 @@ const ConversationWindow = ({
                     {getConversationName(conversation, t("chat.unnamedConversation"), currentUser)}
                 </h2>
             </header>
+
             <div className="flex-1 overflow-y-auto px-5 py-4">
                 {isLoading ? (
                     <div className="flex h-full items-center justify-center text-white/60">
                         <Loader2 className="mr-2 h-5 w-5 animate-spin"/>{t("chat.loadingMessages")}
                     </div>
                 ) : error ? (
-                    <div
-                        className="flex h-full items-center justify-center text-center text-sm text-white/60">{error}</div>
+                    <div className="flex h-full items-center justify-center text-center text-sm text-white/60">
+                        {error}
+                    </div>
                 ) : messages.length === 0 ? (
-                    <div
-                        className="flex h-full items-center justify-center text-center text-sm text-white/60">{t("chat.noMessages")}</div>
+                    <div className="flex h-full items-center justify-center text-center text-sm text-white/60">
+                        {t("chat.noMessages")}
+                    </div>
                 ) : (
                     <div className="space-y-3">
                         {messages.map((message) => (
-                            <div key={message.id}
-                                 className={cn("flex", message.isOwn ? "justify-end" : "justify-start")}>
+                            <div key={message.id} className={cn("flex", message.isOwn ? "justify-end" : "justify-start")}>
                                 <div className={cn(
                                     "max-w-[80%] rounded-2xl px-3 py-2 text-sm",
                                     message.isOwn ? "rounded-br-md bg-[#fe2c55] text-white" : "rounded-bl-md bg-white/10 text-white"
                                 )}>
-                                    {!message.isOwn &&
-                                        <p className="mb-1 text-xs font-medium text-white/60">{message.senderUsername}</p>}
+                                    {!message.isOwn && (
+                                        <p className="mb-1 text-xs font-medium text-white/60">{message.senderUsername}</p>
+                                    )}
                                     <p className="whitespace-pre-wrap break-words">{message.content}</p>
                                 </div>
                             </div>
@@ -98,10 +104,12 @@ const ConversationWindow = ({
                     </div>
                 )}
             </div>
+
             <form onSubmit={submit} className="flex gap-2 border-t border-white/10 p-4">
                 <Input
+                    ref={inputRef}
                     value={content}
-                    onChange={(event) => setContent(event.target.value)}
+                    onChange={(e) => setContent(e.target.value)}
                     placeholder={t("chat.messagePlaceholder")}
                     disabled={!isConnected || isSending}
                     className="border-white/10 bg-white/5 text-white placeholder:text-white/40"

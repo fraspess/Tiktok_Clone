@@ -6,6 +6,7 @@ import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, Di
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Label} from "@/components/ui/label.tsx";
+import {Camera} from "lucide-react";
 import {useChangeUsernameMutation, useGetMeQuery, useUpdateUserMutation} from "@/store/apis/userApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import type {UserProfile} from "@/types/User.ts";
@@ -150,19 +151,25 @@ const ProfileEditDialog = ({profile, open, onOpenChange}: ProfileEditDialogProps
                 </DialogHeader>
 
                 <div className="flex flex-col items-center gap-3">
-                    <div className="h-24 w-24 overflow-hidden rounded-full bg-neutral-700">
-                        {avatarPreviewUrl ? (
-                            <img src={avatarPreviewUrl} alt={username} className="h-full w-full object-cover"/>
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-white">
-                                {username[0]?.toUpperCase() ?? "?"}
-                            </div>
-                        )}
+                    <div className="relative h-24 w-24">
+                        <div className="h-24 w-24 overflow-hidden rounded-full bg-neutral-700">
+                            {avatarPreviewUrl ? (
+                                <img src={avatarPreviewUrl} alt={username} className="h-full w-full object-cover"/>
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-white">
+                                    {username[0]?.toUpperCase() ?? "?"}
+                                </div>
+                            )}
+                        </div>
+
+                        <label
+                            className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
+                            aria-label={t("profile.edit.changeAvatar")}
+                        >
+                            <Camera className="h-4 w-4"/>
+                            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange}/>
+                        </label>
                     </div>
-                    <label className="cursor-pointer text-sm font-medium text-primary hover:underline">
-                        {t("profile.edit.changeAvatar")}
-                        <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange}/>
-                    </label>
                 </div>
 
                 <div className="flex flex-col gap-1.5">

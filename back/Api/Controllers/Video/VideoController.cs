@@ -5,13 +5,16 @@ using Application.Features.Video.Delete;
 using Application.Features.Video.Favorite;
 using Application.Features.Video.GetById;
 using Application.Features.Video.GetBySomeQuery;
+using Application.Features.Video.GetFavorites;
 using Application.Features.Video.GetFollowingFyp;
 using Application.Features.Video.GetFyp;
 using Application.Features.Video.GetUserVideos;
 using Application.Features.Video.Like;
 using Application.Features.Video.MyVideos;
+using Application.Features.Video.Repost;
 using Application.Features.Video.Unfavorite;
 using Application.Features.Video.Unlike;
+using Application.Features.Video.UnRepost;
 using Application.Features.Video.Upload;
 using Application.Features.Video.Upload.CompleteUpload;
 using Application.Features.Video.View;
@@ -150,6 +153,22 @@ public class VideoController(IMediator _mediator) : ControllerBase
     public async Task<IActionResult> Unfavorite(string videoId)
     {
         await _mediator.Send(new UnfavoriteCommand(videoId));
+        return Ok(ApiResponse<object>.Success(null!));
+    }
+
+    [HttpPost("{videoId}/repost")]
+    [Authorize]
+    public async Task<IActionResult> Repost(Guid videoId)
+    {
+        await _mediator.Send(new RepostVideoCommand(videoId));
+        return Ok(ApiResponse<object>.Success(null!));
+    }
+
+    [HttpDelete("{videoId}/repost")]
+    [Authorize]
+    public async Task<IActionResult> Unrepost(Guid videoId)
+    {
+        await _mediator.Send(new UnRepostVideoCommand(videoId));
         return Ok(ApiResponse<object>.Success(null!));
     }
 }

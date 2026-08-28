@@ -25,6 +25,8 @@ public interface IAppDbContext
     public DbSet<VideoHashTagEntity> VideoHashTags { get; set; }
     public DbSet<HashTagEntity> HashTags { get; set; }
     public DbSet<ConversationEntity> Conversations { get; set; }
+    
+    public DbSet<VideoRepostEntity> VideoReposts { get; set; }
 
     public DbSet<FavoriteEntity> Favorites { get; set; }
 

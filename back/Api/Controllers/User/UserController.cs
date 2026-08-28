@@ -20,6 +20,8 @@ using Application.Features.User.ResetPassword;
 using Application.Features.User.Settings.ChangeMessagePrivacy;
 using Application.Features.User.Settings.GetMessagePrivacy;
 using Application.Features.User.Update;
+using Application.Features.Video.GetFavorites;
+using Application.Features.Video.GetRepostedVideos;
 using Application.Pagination;
 using Domain.Constants;
 using Domain.Exceptions;
@@ -192,6 +194,22 @@ public class UserController(IMediator _mediator) : ControllerBase
     {
         var privacy = await _mediator.Send(new GetMessagePrivacyCommand());
         return Ok(ApiResponse<object>.Success(privacy));
+    }
+    
+    [HttpGet("{userId}/favorites")]
+    public async Task<IActionResult> GetFavorites(Guid userId,  [FromQuery ] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var command = new GetFavoritesCommand(userId, new PaginationSettings{PageNumber = pageNumber, PageSize = pageSize});
+        var result = await _mediator.Send(command);
+        return Ok(ApiResponse<object>.Success(result));
+    }
+
+    [HttpGet("{userId}/reposts")]
+    public async Task<IActionResult> GetReposts(Guid userId, [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var result = await _mediator.Send(new GetRepostedVideosCommand(userId, new PaginationSettings{PageNumber = pageNumber, PageSize = pageSize}));
+        return Ok(ApiResponse<object>.Success(result));
     }
 
     private void AppendRefreshTokenCookie(string refreshToken)

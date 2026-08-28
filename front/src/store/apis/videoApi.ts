@@ -22,6 +22,11 @@ export interface ReportVideoParams {
     customReason?: string;
 }
 
+/* interface FavoriteVideosParams {
+    pageNumber: number;
+    pageSize: number;
+} */
+
 export const videoApi = createApi({
     reducerPath: "videoApi",
     baseQuery: baseQueryWithReauth,
@@ -89,6 +94,13 @@ export const videoApi = createApi({
             transformErrorResponse: (response) => response.data as ApiResponse<InitUploadData>,
 
         }),
+       /* getFavoriteVideos: build.query<ApiResponse<PagedResult<VideoDto>>, FavoriteVideosParams>({
+            query: ({pageNumber, pageSize}) => ({
+            // поставиш шлях
+                url: `api/videos/my/favorites?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }), */
         confirmUpload: build.mutation<null, CompleteUploadData>({
             query: (body) => ({
                 url: "api/videos/upload-complete",
@@ -110,4 +122,5 @@ export const {
     useUnfavoriteVideoMutation,
     useInitUploadMutation,
     useConfirmUploadMutation,
+   // useLazyGetFavoriteVideosQuery,
 } = videoApi;

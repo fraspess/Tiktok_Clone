@@ -95,6 +95,9 @@ internal class VideoStartProcessingConsumer(
 
         if (mediaInfo.Duration > TimeSpan.FromHours(3))
             throw new Exception("Відео не може бути довше ніж 3 години");
+        
+        if (mediaInfo.AudioStreams.Count == 0)
+            throw new Exception("Відео не має аудіопотоку");
     }
 
     private async Task NormalizeVideoAsync(string input, string output, TimeSpan duration, Guid videoid)
