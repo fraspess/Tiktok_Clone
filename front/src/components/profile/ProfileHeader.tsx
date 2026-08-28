@@ -5,7 +5,6 @@ import {Button} from "@/components/ui/button.tsx";
 import {formatCount} from "@/lib/utils.ts";
 import {useFollowUserMutation} from "@/store/apis/userApi.ts";
 import {useCreateConversationMutation} from "@/store/apis/conversationApi.ts";
-import {useAppDispatch} from "@/store/hooks.ts";
 import {openMessagesWith} from "@/store/slices/messagesSlice.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
@@ -22,9 +21,12 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
+
     const isAuth = useAppSelector((s) => s.auth.isAuth);
+
     const [followUser, {isLoading}] = useFollowUserMutation();
     const [createConversation] = useCreateConversationMutation();
+
     const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
     const [followersCount, setFollowersCount] = useState(profile.followersCount);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -41,15 +43,22 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
         setFollowersCount((prev) => prev + 1);
 
         try {
-            await followUser({followingId: profile.id, username: profile.username}).unwrap();
+            await followUser({
+                followingId: profile.id,
+                username: profile.username
+            }).unwrap();
         } catch (err) {
             setIsFollowing(false);
             setFollowersCount((prev) => prev - 1);
 
             const message =
-                isFetchBaseQueryError(err) && typeof err.data === "object" && err.data && "message" in err.data
+                isFetchBaseQueryError(err) &&
+                typeof err.data === "object" &&
+                err.data &&
+                "message" in err.data
                     ? String((err.data as { message?: string }).message)
                     : t("profile.followError");
+
             toast.error(message || t("profile.followError"));
         }
     };
@@ -61,21 +70,35 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
         }
 
         try {
-            await createConversation({userId: profile.id}).unwrap();
+            await createConversation({
+                userId: profile.id
+            }).unwrap();
+
+            dispatch(
+                openMessagesWith({
+                    username: profile.username,
+                    userId: profile.id
+                })
+            );
+
             dispatch(openDrawer());
         } catch (err) {
             const message =
-                isFetchBaseQueryError(err) && typeof err.data === "object" && err.data && "message" in err.data
+                isFetchBaseQueryError(err) &&
+                typeof err.data === "object" &&
+                err.data &&
+                "message" in err.data
                     ? String((err.data as { message?: string }).message)
                     : t("profile.sendMessageError");
+
             toast.error(message || t("profile.sendMessageError"));
         }
-    const handleMessage = () => {
-        dispatch(openMessagesWith({username: profile.username, userId: profile.id}));
     };
 
     return (
-        <div className="flex flex-col items-center gap-4 px-4 py-8 text-center sm:flex-row sm:items-start sm:text-left">
+        <div
+            className="flex flex-col items-center gap-4 px-4 py-8 text-center sm:flex-row sm:items-start sm:text-left"
+        >
             <div className="h-28 w-28 shrink-0 overflow-hidden rounded-full bg-neutral-700">
                 {profile.avatar?.large ? (
                     <img
@@ -84,7 +107,9 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                         className="h-full w-full object-cover"
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-white">
+                    <div
+                        className="flex h-full w-full items-center justify-center text-3xl font-semibold text-white"
+                    >
                         {profile.username[0]?.toUpperCase() ?? "?"}
                     </div>
                 )}
@@ -92,9 +117,16 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
 
             <div className="flex flex-1 flex-col items-center gap-3 sm:items-start">
                 <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-center">
-                    <h1 className="text-xl font-semibold">@{profile.username}</h1>
+                    <h1 className="text-xl font-semibold">
+                        @{profile.username}
+                    </h1>
+
                     {profile.isOwnProfile ? (
-                        <Button type="button" variant="outline" onClick={() => setIsEditOpen(true)}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsEditOpen(true)}
+                        >
                             {t("profile.edit.trigger")}
                         </Button>
                     ) : (
@@ -105,42 +137,56 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                                 disabled={isFollowing || isLoading}
                                 variant={isFollowing ? "outline" : "default"}
                             >
-                                {isFollowing ? t("profile.followingStatus") : t("profile.follow")}
+                                {isFollowing
+                                    ? t("profile.followingStatus")
+                                    : t("profile.follow")}
                             </Button>
-                            <Button type="button" variant="outline" onClick={handleMessage}>
-                                <Send className="h-4 w-4"/>
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleSendMessage}
+                            >
+                                <Send className="mr-2 h-4 w-4"/>
                                 {t("profile.message")}
                             </Button>
                         </>
                     )}
-
-                    <Button
-                        type="button"
-                        onClick={handleSendMessage}
-                        variant="outline"
-                    >
-                        <Send/>{t("profile.sendMessage")}
-                    </Button>
                 </div>
 
                 <div className="flex items-center gap-4 text-sm">
                     <span>
-                        <span className="font-semibold">{formatCount(followersCount)}</span>{" "}
-                        <span className="text-muted-foreground">{t("profile.followers")}</span>
+                        <span className="font-semibold">
+                            {formatCount(followersCount)}
+                        </span>{" "}
+                        <span className="text-muted-foreground">
+                            {t("profile.followers")}
+                        </span>
                     </span>
+
                     <span>
-                        <span className="font-semibold">{formatCount(profile.followingCount)}</span>{" "}
-                        <span className="text-muted-foreground">{t("profile.following")}</span>
+                        <span className="font-semibold">
+                            {formatCount(profile.followingCount)}
+                        </span>{" "}
+                        <span className="text-muted-foreground">
+                            {t("profile.following")}
+                        </span>
                     </span>
                 </div>
 
                 {profile.description && (
-                    <p className="max-w-md text-sm text-muted-foreground">{profile.description}</p>
+                    <p className="max-w-md text-sm text-muted-foreground">
+                        {profile.description}
+                    </p>
                 )}
             </div>
 
             {profile.isOwnProfile && (
-                <ProfileEditDialog profile={profile} open={isEditOpen} onOpenChange={setIsEditOpen}/>
+                <ProfileEditDialog
+                    profile={profile}
+                    open={isEditOpen}
+                    onOpenChange={setIsEditOpen}
+                />
             )}
         </div>
     );

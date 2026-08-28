@@ -81,7 +81,7 @@ const ProfilePage = () => {
             {backToFeedButton}
             <ProfileHeader profile={profile}/>
 
-            <div className="flex items-center justify-center border-b px-4">
+            <div className="flex items-center justify-center border-b ">
                 <button
                     type="button"
                     onClick={() => setActiveTab("videos")}
@@ -125,7 +125,7 @@ const ProfilePage = () => {
                 )}
             </div>
 
-            <div className="min-h-0 flex-1">
+            <div className="min-h-0 flex-1 pt-4">
                 {activeTab === "videos" && (
                     <ProfileVideoGrid userId={profile.id} username={profile.username}/>
                 )}
