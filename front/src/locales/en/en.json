@@ -93,6 +93,7 @@
     "follow": "Follow",
     "followingStatus": "Following",
     "followError": "Couldn't follow this user. Please try again",
+    "message": "Message",
     "notFound": "User not found",
     "loadError": "Failed to load profile",
     "loadingVideos": "Loading videos...",

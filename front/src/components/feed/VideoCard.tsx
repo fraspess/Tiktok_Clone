@@ -29,6 +29,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
 
 
     const retryCountRef = useRef(0);
+    const userUnmutedRef = useRef(false);
 
     useEffect(() => {
         const videoEl = videoRef.current;
@@ -39,11 +40,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
 
         const attemptPlay = () => {
             videoEl.play().catch(() => {
-                // Browser blocked autoplay with the current sound setting — the only thing
-                // it always allows is muted autoplay, so fall back to that instead of
-                // staying paused. Reverting the shared state (not a local one) keeps every
-                // video in the feed consistent with what the browser actually allows.
-                if (!videoEl.muted) {
+                if (!videoEl.muted && !userUnmutedRef.current) {
                     videoEl.muted = true;
                     dispatch(setMuted(true));
                 }
@@ -86,8 +83,6 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                 }
             });
 
-            // Autoplay must wait until HLS.js has actually parsed the manifest — calling
-            // play() right after attachMedia() races the async load and silently fails.
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 attemptPlay();
             });
@@ -197,8 +192,15 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                     type="button"
                     onClick={() => {
                         const videoEl = videoRef.current;
+                        if (!videoEl) return;
                         const next = !isMuted;
-                        if (videoEl) videoEl.muted = next;
+                        videoEl.muted = next;
+                        if (!next) {
+                            userUnmutedRef.current = true;
+                            videoEl.play().catch(() => {});
+                        } else {
+                            userUnmutedRef.current = false;
+                        }
                         dispatch(setMuted(next));
                     }}
                     className="absolute right-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"

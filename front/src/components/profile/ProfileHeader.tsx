@@ -4,6 +4,8 @@ import {toast} from "sonner";
 import {Button} from "@/components/ui/button.tsx";
 import {formatCount} from "@/lib/utils.ts";
 import {useFollowUserMutation} from "@/store/apis/userApi.ts";
+import {useAppDispatch} from "@/store/hooks.ts";
+import {openMessagesWith} from "@/store/slices/messagesSlice.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
 import type {UserProfile} from "@/types/User.ts";
@@ -15,19 +17,18 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     const {t} = useTranslation();
+    const dispatch = useAppDispatch();
     const [followUser, {isLoading}] = useFollowUserMutation();
     const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
     const [followersCount, setFollowersCount] = useState(profile.followersCount);
     const [isEditOpen, setIsEditOpen] = useState(false);
 
-    // Keep local optimistic state in sync whenever we land on a (possibly different) profile.
     useEffect(() => {
         setIsFollowing(profile.isFollowing);
         setFollowersCount(profile.followersCount);
     }, [profile.id, profile.isFollowing, profile.followersCount]);
 
     const handleFollow = async () => {
-        // No unfollow endpoint on the backend, so once followed the action is a no-op.
         if (isFollowing || isLoading) return;
 
         setIsFollowing(true);
@@ -45,6 +46,10 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                     : t("profile.followError");
             toast.error(message || t("profile.followError"));
         }
+    };
+
+    const handleMessage = () => {
+        dispatch(openMessagesWith({username: profile.username, userId: profile.id}));
     };
 
     return (
@@ -71,23 +76,21 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                             {t("profile.edit.trigger")}
                         </Button>
                     ) : (
-                        <Button
-                            type="button"
-                            onClick={handleFollow}
-                            disabled={isFollowing || isLoading}
-                            variant={isFollowing ? "outline" : "default"}
-                        >
-                            {isFollowing ? t("profile.followingStatus") : t("profile.follow")}
-                        </Button>
+                        <>
+                            <Button
+                                type="button"
+                                onClick={handleFollow}
+                                disabled={isFollowing || isLoading}
+                                variant={isFollowing ? "outline" : "default"}
+                            >
+                                {isFollowing ? t("profile.followingStatus") : t("profile.follow")}
+                            </Button>
+                            <Button type="button" variant="outline" onClick={handleMessage}>
+                                <Send className="h-4 w-4"/>
+                                {t("profile.message")}
+                            </Button>
+                        </>
                     )}
-
-                    <Button
-                        type="button"
-                        disabled={isFollowing || isLoading}
-                        variant={isFollowing ? "outline" : "default"}
-                    >
-                        <Send/>{"Написати"}
-                    </Button>
                 </div>
 
                 <div className="flex items-center gap-4 text-sm">
