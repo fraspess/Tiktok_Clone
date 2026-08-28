@@ -6,6 +6,7 @@ import SignInForm from "@/components/modals/AuthModal/SignInForm.tsx";
 import {closeModal} from "@/store/slices/authModalSlice.ts";
 import SignUpForm from "@/components/modals/AuthModal/SignUpForm.tsx";
 import ConfirmEmailForm from "@/components/modals/AuthModal/ConfirmEmailForm.tsx";
+import ForgotPasswordForm from "@/components/modals/AuthModal/ForgotPasswordForm.tsx";
 
 const AuthModal = () => {
     const [step, setStep] = useState<string>("signIn");
@@ -26,6 +27,10 @@ const AuthModal = () => {
         setStep("signIn");
     }
 
+    const onSwitchToForgotPassword = () => {
+        setStep("forgotPassword");
+    }
+
     const onUnConfirmedEmail = (email: string) => {
         setCurrentConfirmEmail(email);
         setStep("confirmEmail");
@@ -41,11 +46,13 @@ const AuthModal = () => {
                         {step === "signIn" && t("auth.signInTitle")}
                         {step === "signUp" && t("auth.signUpTitle")}
                         {step === "confirmEmail" && t("auth.confirmEmailTitle")}
+                        {step === "forgotPassword" && t("auth.forgotPassword.title")}
                     </DialogTitle>
                 </DialogHeader>
 
                 {step === "signIn" && (
-                    <SignInForm onSwitchToSignUp={onSwitchToSignUp} onUnConfirmedEmail={onUnConfirmedEmail}
+                    <SignInForm onSwitchToSignUp={onSwitchToSignUp} onSwitchToForgotPassword={onSwitchToForgotPassword}
+                                onUnConfirmedEmail={onUnConfirmedEmail}
                                 onSuccess={() => {
                                     dispatch(closeModal())
                                 }}/>
@@ -57,7 +64,13 @@ const AuthModal = () => {
                     }}/>
                 )}
                 {step === "confirmEmail" && (
-                    <ConfirmEmailForm onSuccess={onSwitchToSignIn} email={currentConfirmEmail}/>
+                    <ConfirmEmailForm onSuccess={onSwitchToSignIn} onSwitchToForgotPassword={onSwitchToForgotPassword}
+                                      email={currentConfirmEmail}/>
+                )}
+                {step === "forgotPassword" && (
+                    <ForgotPasswordForm onSwitchToSignIn={onSwitchToSignIn} onSuccess={() => {
+                        dispatch(closeModal());
+                    }}/>
                 )}
             </DialogContent>
         </Dialog>

@@ -22,9 +22,10 @@ interface ConfirmEmailFormData {
 interface ConfirmEmailFormProps {
     email: string;
     onSuccess: () => void;
+    onSwitchToForgotPassword: () => void;
 }
 
-export function ConfirmEmailForm({email, onSuccess}: ConfirmEmailFormProps) {
+export function ConfirmEmailForm({email, onSuccess, onSwitchToForgotPassword}: ConfirmEmailFormProps) {
     const {t} = useTranslation();
     const [confirmEmail, {isLoading}] = useConfirmEmailMutation();
     const [resendConfirmationCode, {isLoading: isConfirmCodeLoading}] = useResendConfirmationCodeMutation();
@@ -193,12 +194,13 @@ export function ConfirmEmailForm({email, onSuccess}: ConfirmEmailFormProps) {
                             {t("auth.email.verify")}
                         </Button>
                         <div className="text-sm text-muted-foreground text-center">
-                            <a
-                                href="#"
+                            <button
+                                type="button"
+                                onClick={onSwitchToForgotPassword}
                                 className="underline underline-offset-4 transition-colors hover:text-primary"
                             >
-                                {t("auth.email.resetPassword")}
-                            </a>
+                                {t("auth.forgotPassword.forgotPasswordPrompt")}
+                            </button>
                         </div>
                     </Field>
                 </FieldGroup>

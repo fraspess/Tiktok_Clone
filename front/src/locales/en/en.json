@@ -40,7 +40,31 @@
     "usernameAlreadyTaken": "Username is already taken",
     "emailAlreadyTaken": "This email is already taken",
     "logout": "Log out",
-    "logoutError": "Couldn't log out. Please try again"
+    "logoutError": "Couldn't log out. Please try again",
+    "forgotPassword": {
+      "title": "Reset password",
+      "description": "Enter the email address associated with your account and we'll send you a link to reset your password.",
+      "emailPlaceholder": "Enter your email",
+      "submit": "Send reset link",
+      "backToSignIn": "Back to sign in",
+      "successTitle": "Check your email",
+      "successDescription": "We've sent a password reset link to your email address. Please check your inbox.",
+      "forgotPasswordPrompt": "Forgot password?",
+      "cantResetExternal": "This account was registered via an external provider. Password reset is not available.",
+      "externalAccountTitle": "External account detected",
+      "externalAccountDescription": "This account was registered via Google. Please sign in with Google instead."
+    },
+    "resetPassword": {
+      "title": "Create new password",
+      "description": "Your new password must be at least 8 characters long and contain at least 1 uppercase letter, 1 number, and 1 special character.",
+      "submit": "Reset password",
+      "successTitle": "Password reset successfully",
+      "successDescription": "Your password has been reset. You can now sign in with your new password.",
+      "goToHome": "Go to home page",
+      "invalidLinkTitle": "Invalid reset link",
+      "invalidLinkDescription": "This password reset link is invalid or has expired. Please request a new one.",
+      "invalidToken": "This reset link is invalid or has expired"
+    }
   },
   "collapseSidebar": "Collapse sidebar",
   "nav": {

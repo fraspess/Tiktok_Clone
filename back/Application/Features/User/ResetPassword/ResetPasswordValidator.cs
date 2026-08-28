@@ -13,6 +13,6 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordCommand>
 
         RuleFor(x => x.NewPassword)
             .NotEmpty().WithErrorCode(ErrorCodes.PasswordRequired)
-            .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$").WithErrorCode(ErrorCodes.InvalidPassword);
+            .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$").WithErrorCode(ErrorCodes.InvalidPassword);
     }
 }
