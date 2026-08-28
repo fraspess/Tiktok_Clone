@@ -6,6 +6,7 @@ import AuthModal from "@/components/modals/AuthModal";
 import MessagesDrawer from "@/components/chat/MessagesDrawer.tsx";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openDrawer, closeDrawer} from "@/store/slices/messagesDrawerSlice.ts";
+import {closeMessages, openMessages} from "@/store/slices/messagesSlice.ts";
 
 
 interface MainLayoutProps {
@@ -28,14 +29,25 @@ const MainLayout = ({children}: MainLayoutProps) => {
                 />
 
             </div>
+    const isMessagesOpen = useAppSelector((state) => state.messages.isOpen);
+
+    return (
+        <div className="flex h-screen">
+            <Sidebar
+                collapsed={isCollapsed}
+                onToggle={() => setIsCollapsed(!isCollapsed)}
+                isMessagesOpen={isMessagesOpen}
+                onMessagesClick={() => dispatch(openMessages())}
+            />
             <div className="flex flex-col flex-1">
-                <main className="flex-1 overflow-hidden pt-16">
+                <Topbar/>
+                <main className="flex-1 overflow-hidden">
                     {children ?? <Outlet/>}
                 </main>
             </div>
-            <Topbar/>
             <AuthModal/>
             <MessagesDrawer open={isMessagesOpen} onOpenChange={(open) => open ? dispatch(openDrawer()) : dispatch(closeDrawer())}/>
+            <MessagesDrawer open={isMessagesOpen} onOpenChange={(open) => dispatch(open ? openMessages() : closeMessages())}/>
         </div>
     )
 }

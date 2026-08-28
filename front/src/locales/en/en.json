@@ -117,6 +117,7 @@
     "follow": "Follow",
     "followingStatus": "Following",
     "followError": "Couldn't follow this user. Please try again",
+    "message": "Message",
     "notFound": "User not found",
     "loadError": "Failed to load profile",
     "loadingVideos": "Loading videos...",
@@ -141,7 +142,13 @@
       "error": "Couldn't update the profile. Please try again",
       "usernameCooldown": "You can only change your username once every 7 days",
       "usernameInvalid": "Invalid username. Please check the format and try again"
-    }
+    },
+    "tabs": {
+      "uploaded": "Uploaded",
+      "saved": "Saved"
+    },
+    "emptyFavorites": "There is nothing here yet",
+    "favoritesLoadError": "Failed to load saved videos"
   },
   "report": {
     "reportButton": "Report",

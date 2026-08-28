@@ -35,6 +35,12 @@ export const conversationApi = createApi({
         createConversation: build.mutation<ApiResponse<ConversationDto>, { userId: string }>({
             query: (body) => ({url: "api/conversations", method: "post", body}),
         }),
+        searchConversations: build.query<ApiResponse<PagedResult<ConversationDto>>, PaginationParams & { query: string }>({
+            query: ({query, pageNumber, pageSize}) => ({
+                url: `api/conversations/search?query=${encodeURIComponent(query)}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
     }),
 });
 
@@ -42,4 +48,5 @@ export const {
     useLazyGetConversationsQuery,
     useLazyGetMessagesQuery,
     useCreateConversationMutation,
+    useLazySearchConversationsQuery,
 } = conversationApi;

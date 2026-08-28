@@ -44,6 +44,8 @@ public class UserEntity : IdentityUser<Guid>
     public ICollection<MessageEntity> SentMessages { get; set; } = [];
 
     public ICollection<CommentLikeEntity> LikedComments { get; set; } = new List<CommentLikeEntity>();
+    
+    public ICollection<VideoRepostEntity>  Reposts { get; set; } = new List<VideoRepostEntity>();
 
     public Guid? BannedBy { get; set; }
     public DateTime? BannedAt { get; set; }

@@ -1,5 +1,44 @@
+# .dockerignore
+
+# Dependencies
 node_modules
+npm-debug.log*
+# Build output
 dist
+build
+
+# Version control
 .git
+.gitignore
+
+# Environment files
 .env
-npm-debug.log
+.env.*
+!.env.example
+
+# Editor/IDE
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Testing/coverage
+coverage
+.nyc_output
+
+# Logs
+*.log
+logs
+
+# Misc
+README.md
+CHANGELOG.md
+LICENSE
+.eslintcache
+.editorconfig
