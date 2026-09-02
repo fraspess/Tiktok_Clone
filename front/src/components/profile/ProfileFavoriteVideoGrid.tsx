@@ -1,21 +1,33 @@
-/* import {useEffect, useMemo, useRef} from "react";
+import {useEffect, useMemo, useRef} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Play} from "lucide-react";
 import {useInfiniteFavoriteVideos} from "@/hooks/useInfiniteFavoriteVideos.ts";
 import {useIntersectionObserver} from "@/hooks/useIntersectionObserver.ts";
+import {useAppSelector} from "@/store/hooks.ts";
 import {formatCount} from "@/lib/utils.ts";
 
 interface ProfileFavoriteVideoGridProps {
+    userId: string;
     enabled: boolean;
 }
 
-const ProfileFavoriteVideoGrid = ({enabled}: ProfileFavoriteVideoGridProps) => {
+const ProfileFavoriteVideoGrid = ({userId, enabled}: ProfileFavoriteVideoGridProps) => {
     const {t} = useTranslation();
     const navigate = useNavigate();
     const containerRef = useRef<HTMLDivElement>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
-    const {videos, loadMore, hasNext, isFetching, error} = useInfiniteFavoriteVideos(enabled, 12);
+    const {videoIds, loadMore, hasNext, isFetching, error} = useInfiniteFavoriteVideos(userId, enabled, 12);
+
+    const cachedVideos = useAppSelector((s) => s.videosCache.videos);
+
+    const videos = useMemo(
+        () =>
+            videoIds
+                .map((id) => cachedVideos[id])
+                .filter((video) => video && video.isFavorited !== false),
+        [videoIds, cachedVideos]
+    );
 
     useEffect(() => {
         if (enabled) {
@@ -109,4 +121,4 @@ const ProfileFavoriteVideoGrid = ({enabled}: ProfileFavoriteVideoGridProps) => {
     );
 };
 
-export default ProfileFavoriteVideoGrid; */
+export default ProfileFavoriteVideoGrid;

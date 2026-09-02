@@ -69,6 +69,7 @@
   "collapseSidebar": "Collapse sidebar",
   "nav": {
     "home": "For You",
+    "following": "Following",
     "messages": "Messages"
   },
   "chat": {
@@ -100,6 +101,7 @@
     }
   },
   "feed": {
+    "emptyFollowing": "No videos yet from the people you follow.",
     "loading": "Loading videos...",
     "empty": "No videos yet",
     "loadError": "Failed to load videos",

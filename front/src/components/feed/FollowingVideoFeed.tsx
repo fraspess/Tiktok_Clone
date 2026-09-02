@@ -1,10 +1,10 @@
 import {useTranslation} from "react-i18next";
-import {useInfiniteFyp} from "@/hooks/useInfiniteFyp.ts";
+import {useInfiniteFypFollowing} from "@/hooks/useInfiniteFypFollowing.ts";
 import VideoFeedList from "@/components/feed/VideoFeedList.tsx";
 
-const VideoFeed = () => {
+const FollowingVideoFeed = () => {
     const {t} = useTranslation();
-    const {videos, loadMore, hasNext, isFetching, error} = useInfiniteFyp(5);
+    const {videos, loadMore, hasNext, isFetching, error} = useInfiniteFypFollowing(5);
 
     return (
         <VideoFeedList
@@ -13,10 +13,10 @@ const VideoFeed = () => {
             hasNext={hasNext}
             isFetching={isFetching}
             error={error}
-            emptyMessage={t("feed.empty")}
+            emptyMessage={t("feed.emptyFollowing")}
             loadingMessage={t("feed.loading")}
         />
     );
 };
 
-export default VideoFeed;
+export default FollowingVideoFeed;

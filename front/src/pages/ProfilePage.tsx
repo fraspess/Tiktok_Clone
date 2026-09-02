@@ -7,12 +7,12 @@ import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileHeader from "@/components/profile/ProfileHeader.tsx";
 import ProfileVideoGrid from "@/components/profile/ProfileVideoGrid.tsx";
 import CachedVideoGrid from "@/components/profile/CachedVideoGrid.tsx";
+import ProfileFavoriteVideoGrid from "@/components/profile/ProfileFavoriteVideoGrid.tsx";
 import {cn} from "@/lib/utils.ts";
 import type {VideoDto} from "@/types/Video.ts";
 
 type ProfileTab = "videos" | "liked" | "saved";
 
-// import ProfileVideoTabs from "@/components/profile/ProfileVideoTabs.tsx"; те що вище закоментувати
 const ProfilePage = () => {
     const {username: rawUsername} = useParams<{ username: string }>();
     const username = rawUsername?.startsWith("@") ? rawUsername.slice(1) : rawUsername;
@@ -23,14 +23,7 @@ const ProfilePage = () => {
     const [activeTab, setActiveTab] = useState<ProfileTab>("videos");
     const profile = data?.data;
 
-    const isLiked = useCallback(
-        (video: VideoDto) => video.isLiked,
-        []
-    );
-    const isSaved = useCallback(
-        (video: VideoDto) => video.isFavorited,
-        []
-    );
+    const isLiked = useCallback((video: VideoDto) => video.isLiked, []);
 
     const backToFeedButton = (
         <Link
@@ -81,7 +74,7 @@ const ProfilePage = () => {
             {backToFeedButton}
             <ProfileHeader profile={profile}/>
 
-            <div className="flex items-center justify-center border-b ">
+            <div className="flex items-center justify-center border-b">
                 <button
                     type="button"
                     onClick={() => setActiveTab("videos")}
@@ -133,10 +126,7 @@ const ProfilePage = () => {
                     <CachedVideoGrid filter={isLiked} username={profile.username}/>
                 )}
                 {activeTab === "saved" && profile.isOwnProfile && (
-                    <CachedVideoGrid filter={isSaved} username={profile.username}/>
-                )}
-                <ProfileVideoGrid userId={profile.id} username={profile.username}/>
-                {/*<ProfileVideoTabs userId={profile.id} username={profile.username} isOwnProfile={profile.isOwnProfile}/>*/}
+                    <ProfileFavoriteVideoGrid userId={profile.id} enabled={activeTab === "saved"}/>                )}
             </div>
         </div>
     );

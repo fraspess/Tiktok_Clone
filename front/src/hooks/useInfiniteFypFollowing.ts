@@ -1,14 +1,15 @@
 import {useCallback, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {useLazyGetFavoriteVideosQuery} from "@/store/apis/videoApi.ts";
+import {useLazyGetFypFollowingQuery} from "@/store/apis/videoApi.ts";
 import {useAppDispatch} from "@/store/hooks.ts";
 import {cacheVideos} from "@/store/slices/videosCacheSlice.ts";
+import type {VideoDto} from "@/types/Video.ts";
 
-export function useInfiniteFavoriteVideos(userId: string | undefined, enabled: boolean, pageSize: number = 12) {
+export function useInfiniteFypFollowing(pageSize: number = 5) {
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
-    const [trigger, {isFetching}] = useLazyGetFavoriteVideosQuery();
-    const [videoIds, setVideoIds] = useState<string[]>([]);
+    const [trigger, {isFetching}] = useLazyGetFypFollowingQuery();
+    const [videos, setVideos] = useState<VideoDto[]>([]);
     const [hasNext, setHasNext] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -17,13 +18,12 @@ export function useInfiniteFavoriteVideos(userId: string | undefined, enabled: b
     const isLoadingRef = useRef(false);
 
     const loadMore = useCallback(async () => {
-        if (!userId || !enabled || isLoadingRef.current || !hasNext) {
+        if (isLoadingRef.current || !hasNext) {
             return;
         }
         isLoadingRef.current = true;
         try {
             const response = await trigger({
-                userId,
                 pageNumber: nextPageRef.current,
                 pageSize,
             }).unwrap();
@@ -32,17 +32,16 @@ export function useInfiniteFavoriteVideos(userId: string | undefined, enabled: b
             const newItems = items.filter((video) => !seenIdsRef.current.has(video.id));
             newItems.forEach((video) => seenIdsRef.current.add(video.id));
 
-            dispatch(cacheVideos(items));
-
-            setVideoIds((prev) => [...prev, ...newItems.map((v) => v.id)]);
+            dispatch(cacheVideos(newItems));
+            setVideos((prev) => [...prev, ...newItems]);
             setHasNext(metadata.hasNext);
             nextPageRef.current += 1;
         } catch {
-            setError(t("profile.favoritesLoadError"));
+            setError(t("feed.loadError"));
         } finally {
             isLoadingRef.current = false;
         }
-    }, [trigger, userId, enabled, pageSize, hasNext, t, dispatch]);
+    }, [trigger, pageSize, hasNext, t, dispatch]);
 
-    return {videoIds, loadMore, hasNext, isFetching, error};
+    return {videos, loadMore, hasNext, isFetching, error};
 }

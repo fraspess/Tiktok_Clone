@@ -3,7 +3,8 @@ import {cn} from "@/lib/utils.ts";
 import {Button} from "@/components/ui/button.tsx";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {useTranslation} from "react-i18next";
-import {Book, Home, MessageCircle, Plus} from "lucide-react";
+import {Book, Home, MessageCircle, Plus, Users} from "lucide-react";
+import {useAppSelector} from "@/store/hooks.ts";
 
 interface SidebarProps {
     collapsed: boolean;
@@ -23,8 +24,11 @@ const navLinkClass = ({isActive}: { isActive: boolean }) =>
 const Sidebar = ({collapsed, onToggle, isMessagesOpen, onMessagesClick}: SidebarProps) => {
     const {t} = useTranslation();
     const navigate = useNavigate();
+    const isAuth = useAppSelector((s) => s.auth.isAuth);
+
     const navItems = [
         {to: "/", label: t("nav.home"), icon: Home, end: true},
+        ...(isAuth ? [{to: "/following", label: t("nav.following"), icon: Users, end: true}] : []),
         {to: "/upload", label: t("uploads.title"), icon: Plus}
     ];
 

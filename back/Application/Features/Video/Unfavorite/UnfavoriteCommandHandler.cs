@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Video.Unfavorite;
 
-internal class UnfavoriteCommandHandler(IAppDbContext appDbContext) : IRequestHandler<UnfavoriteCommand, Unit>
+internal class UnfavoriteCommandHandler(IAppDbContext appDbContext, ICurrentUser currentUser) : IRequestHandler<UnfavoriteCommand, Unit>
 {
     public async Task<Unit> Handle(UnfavoriteCommand request, CancellationToken cancellationToken)
     {
@@ -17,7 +17,7 @@ internal class UnfavoriteCommandHandler(IAppDbContext appDbContext) : IRequestHa
         
         var favorite = await appDbContext
             .Favorites
-            .Where(f => f.Id == videoId)
+            .Where(f => f.VideoId == videoId && f.UserId == currentUser.Id)
             .FirstOrDefaultAsync(cancellationToken);
         if (favorite is null) return Unit.Value;
         
