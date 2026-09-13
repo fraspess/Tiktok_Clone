@@ -28,6 +28,12 @@ interface FavoriteVideosParams {
     pageSize: number;
 }
 
+interface SearchVideosParams {
+    query: string;
+    pageNumber: number;
+    pageSize: number;
+}
+
 export const videoApi = createApi({
     reducerPath: "videoApi",
     baseQuery: baseQueryWithReauth,
@@ -108,6 +114,12 @@ export const videoApi = createApi({
                 body
             }),
         }),
+        searchVideos: build.query<ApiResponse<PagedResult<VideoDto>>, SearchVideosParams>({
+            query: ({query, pageNumber, pageSize}) => ({
+                url: `api/videos/search/${encodeURIComponent(query)}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
         getFypFollowing: build.query<ApiResponse<PagedResult<VideoDto>>, FypParams>({
             query: ({pageNumber, pageSize}) => ({
                 url: `api/videos/fyp/following?pageNumber=${pageNumber}&pageSize=${pageSize}`,
@@ -128,5 +140,6 @@ export const {
     useUnfavoriteVideoMutation,
     useInitUploadMutation,
     useConfirmUploadMutation,
-   useLazyGetFavoriteVideosQuery,
+    useLazyGetFavoriteVideosQuery,
+    useLazySearchVideosQuery,
 } = videoApi;

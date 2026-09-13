@@ -69,8 +69,18 @@
   "collapseSidebar": "Collapse sidebar",
   "nav": {
     "home": "For You",
+    "search": "Search",
     "following": "Following",
     "messages": "Messages"
+  },
+  "search": {
+    "placeholder": "Search for users and hashtags",
+    "typeToSearch": "Start typing to search",
+    "users": "Users",
+    "hashtags": "Hashtags",
+    "videos": "Videos",
+    "noResults": "No results found",
+    "loadError": "Error loading results"
   },
   "chat": {
     "inbox": "Inbox",
