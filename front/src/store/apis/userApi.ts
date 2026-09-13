@@ -45,6 +45,13 @@ export const userApi = createApi({
             }),
             invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
         }),
+        unfollowUser: build.mutation<ApiResponse<null>, FollowUserParams>({
+            query: ({followingId}) => ({
+                url: `api/users/follow?following=${followingId}`,
+                method: "delete",
+            }),
+            invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
+        }),
         updateUser: build.mutation<ApiResponse<null>, UpdateUserParams>({
             query: ({formData}) => ({
                 url: `api/users`,
@@ -68,6 +75,7 @@ export const {
     useGetMeQuery,
     useGetUserProfileQuery,
     useFollowUserMutation,
+    useUnfollowUserMutation,
     useUpdateUserMutation,
     useChangeUsernameMutation,
 } = userApi;

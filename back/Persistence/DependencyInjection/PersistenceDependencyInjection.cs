@@ -3,6 +3,7 @@ using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging; 
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Services;
 

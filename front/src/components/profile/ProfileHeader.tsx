@@ -1,18 +1,19 @@
 import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button.tsx";
 import {formatCount} from "@/lib/utils.ts";
-import {useFollowUserMutation} from "@/store/apis/userApi.ts";
+import {useFollowUserMutation, useUnfollowUserMutation} from "@/store/apis/userApi.ts";
 import {useCreateConversationMutation} from "@/store/apis/conversationApi.ts";
-import {openMessagesWith} from "@/store/slices/messagesSlice.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
 import type {UserProfile} from "@/types/User.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
-import {openDrawer} from "@/store/slices/messagesDrawerSlice.ts";
 import {Send} from "lucide-react";
+import {setFollowStatus} from "@/store/slices/followSlice.ts";
+
 
 interface ProfileHeaderProps {
     profile: UserProfile;
@@ -21,35 +22,42 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const isAuth = useAppSelector((s) => s.auth.isAuth);
 
     const [followUser, {isLoading}] = useFollowUserMutation();
+    const [unfollowUser, {isLoading: isUnfollowLoading}] = useUnfollowUserMutation();
     const [createConversation] = useCreateConversationMutation();
 
+    const followOverride = useAppSelector((s) => s.follow.overrides[profile.id]);
     const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
     const [followersCount, setFollowersCount] = useState(profile.followersCount);
     const [isEditOpen, setIsEditOpen] = useState(false);
 
     useEffect(() => {
-        setIsFollowing(profile.isFollowing);
+        setIsFollowing(followOverride !== undefined ? followOverride : profile.isFollowing);
         setFollowersCount(profile.followersCount);
-    }, [profile.id, profile.isFollowing, profile.followersCount]);
+    }, [profile.id, profile.isFollowing, profile.followersCount, followOverride]);
 
     const handleFollow = async () => {
-        if (isFollowing || isLoading) return;
+        if (isLoading || isUnfollowLoading) return;
 
-        setIsFollowing(true);
-        setFollowersCount((prev) => prev + 1);
+        const nextFollowing = !isFollowing;
+        setIsFollowing(nextFollowing);
+        setFollowersCount((prev) => nextFollowing ? prev + 1 : prev - 1);
+        dispatch(setFollowStatus({userId: profile.id, isFollowing: nextFollowing}));
 
         try {
-            await followUser({
-                followingId: profile.id,
-                username: profile.username
-            }).unwrap();
+            if (nextFollowing) {
+                await followUser({followingId: profile.id, username: profile.username}).unwrap();
+            } else {
+                await unfollowUser({followingId: profile.id, username: profile.username}).unwrap();
+            }
         } catch (err) {
-            setIsFollowing(false);
-            setFollowersCount((prev) => prev - 1);
+            setIsFollowing(!nextFollowing);
+            setFollowersCount((prev) => nextFollowing ? prev - 1 : prev + 1);
+            dispatch(setFollowStatus({userId: profile.id, isFollowing: !nextFollowing}));
 
             const message =
                 isFetchBaseQueryError(err) &&
@@ -70,18 +78,11 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
         }
 
         try {
-            await createConversation({
+            const result = await createConversation({
                 userId: profile.id
             }).unwrap();
 
-            dispatch(
-                openMessagesWith({
-                    username: profile.username,
-                    userId: profile.id
-                })
-            );
-
-            dispatch(openDrawer());
+            navigate("/messages", {state: {conversation: result.data}});
         } catch (err) {
             const message =
                 isFetchBaseQueryError(err) &&
@@ -134,7 +135,7 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                             <Button
                                 type="button"
                                 onClick={handleFollow}
-                                disabled={isFollowing || isLoading}
+                                disabled={isLoading || isUnfollowLoading}
                                 variant={isFollowing ? "outline" : "default"}
                             >
                                 {isFollowing

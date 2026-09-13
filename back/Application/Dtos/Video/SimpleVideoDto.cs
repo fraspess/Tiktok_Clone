@@ -12,6 +12,6 @@ public class SimpleVideoDto
     public List<string> HashTags { get; set; } = new();
     public UserAuthorDto? Author { get; set; }
     public DateTime CreatedAt { get; set; }
-    public int ViewCoun { get; set; }
+    public int ViewCount { get; set; }
     public string ThumbnailUrl { get; set; } = string.Empty;
 }

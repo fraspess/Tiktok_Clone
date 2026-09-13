@@ -15,7 +15,6 @@ export const baseQuery = fetchBaseQuery({
     },
 });
 
-// prevents multiple parallel refresh calls when several requests 401 at once
 const mutex = new Mutex();
 
 export const baseQueryWithReauth: BaseQueryFn<

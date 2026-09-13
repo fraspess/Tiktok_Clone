@@ -10,7 +10,8 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
     {
         get
         {
-            var id = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var id = httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value
+                     ?? httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (id == null) return null;
             return Guid.Parse(id);
         }

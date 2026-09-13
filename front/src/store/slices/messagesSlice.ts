@@ -1,12 +1,12 @@
 import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
+import type {ConversationDto} from "@/types/Conversation.ts";
 
 interface MessagesState {
     isOpen: boolean;
-    openWithUsername: string | null;
-    openWithUserId: string | null;
+    pendingConversation: ConversationDto | null;
 }
 
-const initialState: MessagesState = {isOpen: false, openWithUsername: null, openWithUserId: null};
+const initialState: MessagesState = {isOpen: false, pendingConversation: null};
 
 const messagesSlice = createSlice({
     name: "messages",
@@ -15,17 +15,15 @@ const messagesSlice = createSlice({
         openMessages(state) {
             state.isOpen = true;
         },
-        openMessagesWith(state, action: PayloadAction<{username: string; userId: string}>) {
+        openMessagesWith(state, action: PayloadAction<ConversationDto>) {
             state.isOpen = true;
-            state.openWithUsername = action.payload.username;
-            state.openWithUserId = action.payload.userId;
+            state.pendingConversation = action.payload;
         },
         closeMessages(state) {
             state.isOpen = false;
         },
         clearOpenWith(state) {
-            state.openWithUsername = null;
-            state.openWithUserId = null;
+            state.pendingConversation = null;
         },
     },
 });

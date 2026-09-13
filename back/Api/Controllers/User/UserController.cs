@@ -29,6 +29,7 @@ using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Application.Features.User.UnfollowUser;
 
 namespace Api.Controllers.User;
 
@@ -146,6 +147,14 @@ public class UserController(IMediator _mediator) : ControllerBase
     public async Task<IActionResult> Follow(Guid following)
     {
         await _mediator.Send(new FollowUserCommand(following));
+        return Ok(ApiResponse<object>.Success(null!));
+    }
+
+    [HttpDelete("follow")]
+    [Authorize]
+    public async Task<IActionResult> Unfollow(Guid following)
+    {
+        await _mediator.Send(new UnfollowUserCommand(following));
         return Ok(ApiResponse<object>.Success(null!));
     }
 

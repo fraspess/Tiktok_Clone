@@ -3,13 +3,12 @@ import {cn} from "@/lib/utils.ts";
 import {Button} from "@/components/ui/button.tsx";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {useTranslation} from "react-i18next";
-import {Book, Home, MessageCircle, Plus} from "lucide-react";
+import {Book, Home, MessageCircle, Plus, Search, Users} from "lucide-react";
+import {useAppSelector} from "@/store/hooks.ts";
 
 interface SidebarProps {
     collapsed: boolean;
     onToggle: () => void;
-    isMessagesOpen: boolean;
-    onMessagesClick: () => void;
 }
 
 const navLinkClass = ({isActive}: { isActive: boolean }) =>
@@ -20,11 +19,16 @@ const navLinkClass = ({isActive}: { isActive: boolean }) =>
             : "text-muted-foreground hover:bg-neutral-50 hover:text-foreground dark:hover:bg-neutral-900"
     );
 
-const Sidebar = ({collapsed, onToggle, isMessagesOpen, onMessagesClick}: SidebarProps) => {
+const Sidebar = ({collapsed, onToggle}: SidebarProps) => {
     const {t} = useTranslation();
     const navigate = useNavigate();
+    const isAuth = useAppSelector((s) => s.auth.isAuth);
+
     const navItems = [
         {to: "/", label: t("nav.home"), icon: Home, end: true},
+        {to: "/search", label: t("nav.search"), icon: Search, end: true},
+        ...(isAuth ? [{to: "/following", label: t("nav.following"), icon: Users, end: true}] : []),
+        ...(isAuth ? [{to: "/messages", label: t("nav.messages"), icon: MessageCircle, end: true}] : []),
         {to: "/upload", label: t("uploads.title"), icon: Plus}
     ];
 
@@ -33,9 +37,7 @@ const Sidebar = ({collapsed, onToggle, isMessagesOpen, onMessagesClick}: Sidebar
             "sticky top-0 flex h-screen flex-col border-r pr-3 transition-all duration-300 md:max-w-none max-w-[70%] dark:bg-neutral-900",
             collapsed ? "w-12" : "w-64"
         )}>
-            <div className={cn(
-                "flex items-center justify-between p-2"
-            )}>
+            <div className={cn("flex items-center justify-between p-2")}>
                 {!collapsed &&
                     <h1 className="text-lg font-bold hover:cursor-pointer" onClick={() => navigate("/")}>TikTok
                         Clone</h1>}
@@ -74,23 +76,6 @@ const Sidebar = ({collapsed, onToggle, isMessagesOpen, onMessagesClick}: Sidebar
                         </NavLink>
                     )
                 ))}
-                {collapsed ? (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <button type="button" onClick={onMessagesClick}
-                                    className={cn(navLinkClass({isActive: isMessagesOpen}), "w-full")}>
-                                <MessageCircle className="mx-auto h-5 w-5 shrink-0"/>
-                            </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right"><p>{t("nav.messages")}</p></TooltipContent>
-                    </Tooltip>
-                ) : (
-                    <button type="button" onClick={onMessagesClick}
-                            className={cn(navLinkClass({isActive: isMessagesOpen}), "w-full")}>
-                        <MessageCircle className="h-5 w-5 shrink-0"/>
-                        <span>{t("nav.messages")}</span>
-                    </button>
-                )}
             </nav>
         </aside>
     );

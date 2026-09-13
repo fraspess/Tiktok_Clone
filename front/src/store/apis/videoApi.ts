@@ -22,10 +22,17 @@ export interface ReportVideoParams {
     customReason?: string;
 }
 
-/* interface FavoriteVideosParams {
+interface FavoriteVideosParams {
+    userId: string;
     pageNumber: number;
     pageSize: number;
-} */
+}
+
+interface SearchVideosParams {
+    query: string;
+    pageNumber: number;
+    pageSize: number;
+}
 
 export const videoApi = createApi({
     reducerPath: "videoApi",
@@ -94,13 +101,12 @@ export const videoApi = createApi({
             transformErrorResponse: (response) => response.data as ApiResponse<InitUploadData>,
 
         }),
-       /* getFavoriteVideos: build.query<ApiResponse<PagedResult<VideoDto>>, FavoriteVideosParams>({
-            query: ({pageNumber, pageSize}) => ({
-            // поставиш шлях
-                url: `api/videos/my/favorites?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+        getFavoriteVideos: build.query<ApiResponse<PagedResult<VideoDto>>, FavoriteVideosParams>({
+            query: ({userId, pageNumber, pageSize}) => ({
+                url: `api/users/${userId}/favorites?pageNumber=${pageNumber}&pageSize=${pageSize}`,
                 method: "get",
             }),
-        }), */
+        }),
         confirmUpload: build.mutation<null, CompleteUploadData>({
             query: (body) => ({
                 url: "api/videos/upload-complete",
@@ -108,12 +114,24 @@ export const videoApi = createApi({
                 body
             }),
         }),
-
+        searchVideos: build.query<ApiResponse<PagedResult<VideoDto>>, SearchVideosParams>({
+            query: ({query, pageNumber, pageSize}) => ({
+                url: `api/videos/search/${encodeURIComponent(query)}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
+        getFypFollowing: build.query<ApiResponse<PagedResult<VideoDto>>, FypParams>({
+            query: ({pageNumber, pageSize}) => ({
+                url: `api/videos/fyp/following?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
     }),
 });
 
 export const {
     useLazyGetFypQuery,
+    useLazyGetFypFollowingQuery,
     useLazyGetUserVideosQuery,
     useReportVideoMutation,
     useLikeVideoMutation,
@@ -122,5 +140,6 @@ export const {
     useUnfavoriteVideoMutation,
     useInitUploadMutation,
     useConfirmUploadMutation,
-   // useLazyGetFavoriteVideosQuery,
+    useLazyGetFavoriteVideosQuery,
+    useLazySearchVideosQuery,
 } = videoApi;

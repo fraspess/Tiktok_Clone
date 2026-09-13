@@ -1,3 +1,4 @@
+import {Link} from "react-router-dom";
 import type {FormEvent} from "react";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {Loader2, Send} from "lucide-react";
@@ -18,32 +19,27 @@ interface ConversationWindowProps {
     currentUser?: {id: string; username: string};
 }
 
-const getConversationName = (
+const getOtherParticipants = (
     conversation: ConversationDto,
-    fallback: string,
     currentUser?: {id: string; username: string}
-) =>
-    conversation.participants
-        .filter((p) => p.id !== currentUser?.id)
-        .map((p) => p.username)
-        .filter(Boolean)
-        .map((u) => `@${u}`)
-        .join(", ") || fallback;
+) => conversation.participants.filter((p) => p.id !== currentUser?.id && p.username);
 
 const ConversationWindow = ({
-    conversation,
-    messages,
-    isLoading,
-    error,
-    isConnected,
-    onSend,
-    currentUser,
-}: ConversationWindowProps) => {
+                                conversation,
+                                messages,
+                                isLoading,
+                                error,
+                                isConnected,
+                                onSend,
+                                currentUser,
+                            }: ConversationWindowProps) => {
     const {t} = useTranslation();
     const [content, setContent] = useState("");
     const [isSending, setIsSending] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    const otherParticipants = getOtherParticipants(conversation, currentUser);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({block: "end"});
@@ -68,7 +64,18 @@ const ConversationWindow = ({
         <section className="flex min-w-0 flex-1 flex-col bg-[#121212]">
             <header className="border-b border-white/10 px-5 py-4">
                 <h2 className="truncate text-base font-semibold text-white">
-                    {getConversationName(conversation, t("chat.unnamedConversation"), currentUser)}
+                    {otherParticipants.length > 0 ? (
+                        otherParticipants.map((p, idx) => (
+                            <span key={p.id}>
+                                {idx > 0 && ", "}
+                                <Link to={`/@${p.username}`} className="hover:underline">
+                                    @{p.username}
+                                </Link>
+                            </span>
+                        ))
+                    ) : (
+                        t("chat.unnamedConversation")
+                    )}
                 </h2>
             </header>
 
@@ -94,7 +101,12 @@ const ConversationWindow = ({
                                     message.isOwn ? "rounded-br-md bg-[#fe2c55] text-white" : "rounded-bl-md bg-white/10 text-white"
                                 )}>
                                     {!message.isOwn && (
-                                        <p className="mb-1 text-xs font-medium text-white/60">{message.senderUsername}</p>
+                                        <Link
+                                            to={`/@${message.senderUsername}`}
+                                            className="mb-1 block text-xs font-medium text-white/60 hover:underline"
+                                        >
+                                            {message.senderUsername}
+                                        </Link>
                                     )}
                                     <p className="whitespace-pre-wrap break-words">{message.content}</p>
                                 </div>
