@@ -24,18 +24,13 @@ public class FollowUserCommandHandler(
             f => f.FollowerId == currentUser.Id && f.FollowingId == request.FollowingId,
             cancellationToken);
 
-        if (existingFollow is not null)
+        if (existingFollow is not null) return Unit.Value;
+
+        appDbContext.UserFollows.Add(new UserFollowEntity
         {
-            appDbContext.UserFollows.Remove(existingFollow);
-        }
-        else
-        {
-            appDbContext.UserFollows.Add(new UserFollowEntity
-            {
-                FollowingId = request.FollowingId,
-                FollowerId = currentUser.Id!.Value
-            });
-        }
+            FollowingId = request.FollowingId,
+            FollowerId = currentUser.Id!.Value
+        });
 
         await appDbContext.SaveChangesAsync(cancellationToken);
         return Unit.Value;

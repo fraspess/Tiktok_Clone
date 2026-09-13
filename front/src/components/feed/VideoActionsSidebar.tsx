@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {Link} from "react-router-dom";
 import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2} from "lucide-react";
 import {useTranslation} from "react-i18next";
@@ -10,7 +10,8 @@ import {formatCount} from "@/lib/utils.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
 import {updateVideo} from "@/store/slices/videosCacheSlice.ts";
-import {useFollowUserMutation, useGetMeQuery} from "@/store/apis/userApi.ts";
+import {useFollowUserMutation, useUnfollowUserMutation, useGetMeQuery} from "@/store/apis/userApi.ts";
+import {setFollowStatus} from "@/store/slices/followSlice.ts";
 import {
     useFavoriteVideoMutation,
     useLikeVideoMutation,
@@ -33,6 +34,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     const [saveCount, setSaveCount] = useState(video.favoriteCount);
     const [commentsCount, setCommentsCount] = useState(video.commentsCount);
     const [isFollowing, setIsFollowing] = useState(video.author?.isFollowing ?? false);
+    const followOverride = useAppSelector((s) => s.follow.overrides[video.author?.id ?? ""]);
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
@@ -41,8 +43,15 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     const [favoriteVideo] = useFavoriteVideoMutation();
     const [unfavoriteVideo] = useUnfavoriteVideoMutation();
     const [followUser] = useFollowUserMutation();
+    const [unfollowUser] = useUnfollowUserMutation();
     const {data: me} = useGetMeQuery(undefined, {skip: !isAuth});
     const isOwnVideo = Boolean(me?.data.id && video.author?.id && me.data.id === video.author.id);
+
+    useEffect(() => {
+        if (followOverride !== undefined) {
+            setIsFollowing(followOverride);
+        }
+    }, [followOverride]);
 
     const requireAuth = () => {
         if (isAuth) return true;
@@ -100,11 +109,17 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
 
         const nextFollowing = !isFollowing;
         setIsFollowing(nextFollowing);
+        dispatch(setFollowStatus({userId: video.author.id, isFollowing: nextFollowing})); // ← додати
 
         try {
-            await followUser({followingId: video.author.id, username: video.author.username}).unwrap();
+            if (nextFollowing) {
+                await followUser({followingId: video.author.id, username: video.author.username}).unwrap();
+            } else {
+                await unfollowUser({followingId: video.author.id, username: video.author.username}).unwrap();
+            }
         } catch {
             setIsFollowing(!nextFollowing);
+            dispatch(setFollowStatus({userId: video.author.id, isFollowing: !nextFollowing})); // ← додати
             toast.error(t("feed.followError"));
         }
     };
