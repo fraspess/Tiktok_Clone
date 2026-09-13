@@ -1,17 +1,16 @@
 import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button.tsx";
 import {formatCount} from "@/lib/utils.ts";
 import {useFollowUserMutation, useUnfollowUserMutation} from "@/store/apis/userApi.ts";
 import {useCreateConversationMutation} from "@/store/apis/conversationApi.ts";
-import {openMessagesWith} from "@/store/slices/messagesSlice.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
 import type {UserProfile} from "@/types/User.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
-import {openDrawer} from "@/store/slices/messagesDrawerSlice.ts";
 import {Send} from "lucide-react";
 import {setFollowStatus} from "@/store/slices/followSlice.ts";
 
@@ -23,6 +22,7 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const isAuth = useAppSelector((s) => s.auth.isAuth);
 
@@ -46,7 +46,7 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
         const nextFollowing = !isFollowing;
         setIsFollowing(nextFollowing);
         setFollowersCount((prev) => nextFollowing ? prev + 1 : prev - 1);
-        dispatch(setFollowStatus({userId: profile.id, isFollowing: nextFollowing})); // ← додати
+        dispatch(setFollowStatus({userId: profile.id, isFollowing: nextFollowing}));
 
         try {
             if (nextFollowing) {
@@ -78,18 +78,11 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
         }
 
         try {
-            await createConversation({
+            const result = await createConversation({
                 userId: profile.id
             }).unwrap();
 
-            dispatch(
-                openMessagesWith({
-                    username: profile.username,
-                    userId: profile.id
-                })
-            );
-
-            dispatch(openDrawer());
+            navigate("/messages", {state: {conversation: result.data}});
         } catch (err) {
             const message =
                 isFetchBaseQueryError(err) &&

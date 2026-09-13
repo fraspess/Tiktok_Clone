@@ -1,12 +1,12 @@
 import {MessageCircle, Search} from "lucide-react";
 import {useCallback, useEffect, useRef, useState} from "react";
+import {useLocation} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
-import {clearOpenWith} from "@/store/slices/messagesSlice.ts";
-import {useLazyGetMessagesQuery, useLazySearchConversationsQuery, useCreateConversationMutation} from "@/store/apis/conversationApi.ts";
+import {useLazyGetMessagesQuery, useLazySearchConversationsQuery} from "@/store/apis/conversationApi.ts";
 import type {ConversationDto} from "@/types/Conversation.ts";
 import type {MessageDto} from "@/types/Message.ts";
 import {useChatConnection} from "@/hooks/useChatConnection.ts";
@@ -58,10 +58,9 @@ function mergeMessages(serverHistory: MessageDto[], currentMessages: MessageDto[
 const MessagesPage = () => {
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
+    const location = useLocation();
     const isAuth = useAppSelector((state) => state.auth.isAuth);
     const accessToken = useAppSelector((state) => state.auth.accessToken);
-    const openWithUsername = useAppSelector((state) => state.messages.openWithUsername);
-    const openWithUserId = useAppSelector((state) => state.messages.openWithUserId);
     const [selectedConversation, setSelectedConversation] = useState<ConversationDto | null>(null);
     const [messages, setMessages] = useState<MessageDto[]>([]);
     const [messagesError, setMessagesError] = useState<string | null>(null);
@@ -71,7 +70,6 @@ const MessagesPage = () => {
     const [newConversation, setNewConversation] = useState<ConversationDto | null>(null);
     const [getMessages] = useLazyGetMessagesQuery();
     const [searchConversations] = useLazySearchConversationsQuery();
-    const [createConversation] = useCreateConversationMutation();
     const {data: currentUserResponse} = useGetCurrentUserQuery(undefined, {skip: !isAuth});
     const currentUser = currentUserResponse?.data;
 
@@ -128,14 +126,14 @@ const MessagesPage = () => {
         },
     });
 
-    const handleSelectConversation = (conversation: ConversationDto) => {
+    const handleSelectConversation = useCallback((conversation: ConversationDto) => {
         setSelectedConversation(conversation);
         setMessages([]);
         setMessagesError(null);
         setSearchQuery("");
         setIsNewConversationOpen(false);
         void loadMessages(conversation);
-    };
+    }, [loadMessages]);
 
     const handleSend = async (content: string) => {
         if (!selectedConversation) return;
@@ -169,41 +167,16 @@ const MessagesPage = () => {
         try {
             await searchConversations({query: query.trim(), pageNumber: 1, pageSize: 20}).unwrap();
         } catch {
-            // search errors are silent — list will stay unchanged
         }
     }, [searchConversations]);
 
-    const handleOpenConversationWithUser = useCallback(async (targetUsername: string, targetUserId?: string) => {
-        if (!currentUser) return;
-        try {
-            const result = await searchConversations({query: targetUsername, pageNumber: 1, pageSize: 5}).unwrap();
-            const match = result.data.items.find((c) =>
-                c.participants.some((p) => p.username?.toLowerCase() === targetUsername.toLowerCase() && p.id !== currentUser.id)
-            );
-            if (match) {
-                handleSelectConversation(match);
-                return;
-            }
-        } catch {
-            // fall through to create
-        }
-        if (targetUserId) {
-            try {
-                const result = await createConversation({userId: targetUserId}).unwrap();
-                setNewConversation(result.data);
-                handleSelectConversation(result.data);
-            } catch {
-                // conversation creation failed
-            }
-        }
-    }, [currentUser, searchConversations, createConversation]);
-
     useEffect(() => {
-        if (openWithUsername && currentUser) {
-            void handleOpenConversationWithUser(openWithUsername, openWithUserId ?? undefined);
-            dispatch(clearOpenWith());
+        const conv = (location.state as { conversation?: ConversationDto } | null)?.conversation;
+        if (conv) {
+            setNewConversation(conv);
+            handleSelectConversation(conv);
         }
-    }, [openWithUsername, openWithUserId, currentUser, handleOpenConversationWithUser, dispatch]);
+    }, []);
 
     if (!isAuth) {
         return (

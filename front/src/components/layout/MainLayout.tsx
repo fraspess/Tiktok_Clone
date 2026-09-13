@@ -1,13 +1,10 @@
-import {Outlet} from "react-router-dom";
+import {Outlet, useLocation} from "react-router-dom";
+import {AnimatePresence} from "framer-motion";
 import Sidebar from "@/components/layout/Sidebar.tsx";
 import Topbar from "@/components/layout/Topbar.tsx";
+import PageTransition from "@/components/layout/PageTransition.tsx";
 import {useState} from "react";
 import AuthModal from "@/components/modals/AuthModal";
-import MessagesDrawer from "@/components/chat/MessagesDrawer.tsx";
-import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
-import {closeDrawer, openDrawer} from "@/store/slices/messagesDrawerSlice.ts";
-import {closeMessages, openMessages} from "@/store/slices/messagesSlice.ts";
-
 
 interface MainLayoutProps {
     children?: React.ReactNode;
@@ -15,28 +12,25 @@ interface MainLayoutProps {
 
 const MainLayout = ({children}: MainLayoutProps) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const dispatch = useAppDispatch();
-    const isMessagesOpen = useAppSelector((s) => s.messagesDrawer.isOpened);
+    const location = useLocation();
 
     return (
         <div className="flex h-screen">
             <Sidebar
                 collapsed={isCollapsed}
                 onToggle={() => setIsCollapsed(!isCollapsed)}
-                isMessagesOpen={isMessagesOpen}
-                onMessagesClick={() => dispatch(openMessages())}
             />
             <div className="flex flex-col flex-1">
                 <Topbar/>
                 <main className="flex-1 overflow-hidden">
-                    {children ?? <Outlet/>}
+                    <AnimatePresence mode="wait" initial={false}>
+                        <PageTransition key={location.pathname}>
+                            {children ?? <Outlet/>}
+                        </PageTransition>
+                    </AnimatePresence>
                 </main>
             </div>
             <AuthModal/>
-            <MessagesDrawer open={isMessagesOpen}
-                            onOpenChange={(open) => open ? dispatch(openDrawer()) : dispatch(closeDrawer())}/>
-            <MessagesDrawer open={isMessagesOpen}
-                            onOpenChange={(open) => dispatch(open ? openMessages() : closeMessages())}/>
         </div>
     )
 }
