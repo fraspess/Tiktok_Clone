@@ -131,7 +131,7 @@ const UploadVideoPage = () => {
     return (
         <div className="flex flex-col gap-6">
             {!file && (
-                <div className="flex flex-col h-64 items-center justify-center">
+                <div className="flex flex-col h-64 items-center justify-center mt-5">
                     <div className="w-full max-w-2xl h-64">
                         <VideoDropzone onFileSelect={onFileSelected}/>
                     </div>
