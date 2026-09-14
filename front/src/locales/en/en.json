@@ -123,6 +123,8 @@
     "followError": "Couldn't follow this user. Please try again"
   },
   "profile": {
+    "noFollowers": "No followers yet",
+    "noFollowing": "Not following anyone yet",
     "myProfile": "My profile",
     "followers": "Followers",
     "following": "Following",

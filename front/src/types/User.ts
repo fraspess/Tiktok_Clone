@@ -14,3 +14,9 @@ export interface UserProfile {
     avatar: UserAvatar | null;
     isFollowing: boolean;
 }
+
+export interface SimpleUser {
+    id: string;
+    username: string;
+    avatar: UserAvatar | null;
+}

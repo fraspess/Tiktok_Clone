@@ -12,6 +12,7 @@ import type {UserProfile} from "@/types/User.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
 import {Send} from "lucide-react";
+import FollowListDialog from "@/components/profile/FollowListDialog.tsx";
 import {setFollowStatus} from "@/store/slices/followSlice.ts";
 
 
@@ -34,6 +35,7 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
     const [followersCount, setFollowersCount] = useState(profile.followersCount);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [followListType, setFollowListType] = useState<"followers" | "following" | null>(null);
 
     useEffect(() => {
         setIsFollowing(followOverride !== undefined ? followOverride : profile.isFollowing);
@@ -156,23 +158,30 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                 </div>
 
                 <div className="flex items-center gap-4 text-sm">
-                    <span>
+                    <button type="button" onClick={() => setFollowListType("followers")} className="hover:underline">
                         <span className="font-semibold">
                             {formatCount(followersCount)}
                         </span>{" "}
                         <span className="text-muted-foreground">
                             {t("profile.followers")}
                         </span>
-                    </span>
-
-                    <span>
+                    </button>
+                    <button type="button" onClick={() => setFollowListType("following")} className="hover:underline">
                         <span className="font-semibold">
                             {formatCount(profile.followingCount)}
                         </span>{" "}
                         <span className="text-muted-foreground">
                             {t("profile.following")}
                         </span>
-                    </span>
+                    </button>
+                    {followListType && (
+                        <FollowListDialog
+                            username={profile.username}
+                            type={followListType}
+                            open={followListType !== null}
+                            onOpenChange={(open) => setFollowListType(open ? followListType : null)}
+                        />
+                    )}
                 </div>
 
                 {profile.description && (
