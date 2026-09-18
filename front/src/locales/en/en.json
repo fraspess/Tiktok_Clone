@@ -123,6 +123,8 @@
     "followError": "Couldn't follow this user. Please try again"
   },
   "profile": {
+    "noFollowers": "No followers yet",
+    "noFollowing": "Not following anyone yet",
     "myProfile": "My profile",
     "followers": "Followers",
     "following": "Following",
@@ -174,7 +176,8 @@
       "hateSpeech": "Hate speech",
       "harassment": "Harassment or bullying",
       "misinformation": "Misinformation",
-      "other": "Other"
+      "other": "Other",
+      "customReasonRequired": "Please describe the reason for the complaint"
     },
     "customReasonLabel": "Add more details (optional)",
     "customReasonPlaceholder": "Tell us more about the reason for the report...",
@@ -219,5 +222,12 @@
     "description": "Description",
     "descriptionPlaceholder": "Your description here",
     "hashtags": "hashtag"
+  },
+  "errors": {
+    "DUPLICATE": "You have already submitted a report for this content",
+    "VIDEO_NOT_FOUND": "Video not found",
+    "INVALID_FILE_TYPE": "Invalid content type",
+    "TOO_LONG": "Text is too long",
+    "default": "Something went wrong, please try again"
   }
 }
