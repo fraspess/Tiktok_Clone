@@ -17,7 +17,7 @@ interface ReportVideoDialogProps {
 const OTHER_REASON_ID = 6;
 
 const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps) => {
-    const {t} = useTranslation();
+    const {t, i18n} = useTranslation();
     const [reportVideo, {isLoading}] = useReportVideoMutation();
     const [selectedReason, setSelectedReason] = useState<string>("");
     const [customReason, setCustomReason] = useState("");
@@ -43,11 +43,27 @@ const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps
         onOpenChange(nextOpen);
     };
 
+    const handleReasonChange = (value: string) => {
+        setSelectedReason(value);
+        if (formError) setFormError(null);
+    };
+
+    const handleCustomReasonChange = (value: string) => {
+        setCustomReason(value);
+        if (formError) setFormError(null);
+    };
+
     const handleSubmit = async () => {
         if (!selectedReason) {
             setFormError(t("report.selectReasonError"));
             return;
         }
+
+        if (selectedReason === String(OTHER_REASON_ID) && !customReason.trim()) {
+            setFormError(t("report.customReasonRequiredError"));
+            return;
+        }
+
         setFormError(null);
 
         try {
@@ -60,11 +76,19 @@ const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps
             toast.success(t("report.success"));
             handleOpenChange(false);
         } catch (err) {
-            const message =
-                isFetchBaseQueryError(err) && typeof err.data === "object" && err.data && "message" in err.data
-                    ? String((err.data as { message?: string }).message)
-                    : t("report.error");
-            toast.error(message || t("report.error"));
+            let code: string | undefined;
+
+            if (isFetchBaseQueryError(err) && typeof err.data === "object" && err.data) {
+                const data = err.data as { code?: string };
+                code = data.code;
+            }
+
+            if (code && i18n.exists(`errors.${code}`)) {
+                setFormError(t(`errors.${code}`));
+                return;
+            }
+
+            toast.error(t("errors.default"));
         }
     };
 
@@ -78,7 +102,7 @@ const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps
 
                 <RadioGroup.Root
                     value={selectedReason}
-                    onValueChange={setSelectedReason}
+                    onValueChange={handleReasonChange}
                     className="flex flex-col gap-2"
                 >
                     {REASONS.map((reason) => (
@@ -110,7 +134,7 @@ const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps
                         <textarea
                             id="report-custom-reason"
                             value={customReason}
-                            onChange={(e) => setCustomReason(e.target.value)}
+                            onChange={(e) => handleCustomReasonChange(e.target.value)}
                             placeholder={t("report.customReasonPlaceholder")}
                             rows={3}
                             className="w-full min-w-0 resize-none rounded-md border border-input bg-transparent px-2.5 py-1.5 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"

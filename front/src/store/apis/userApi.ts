@@ -2,10 +2,18 @@ import {createApi} from "@reduxjs/toolkit/query/react";
 import {baseQueryWithReauth} from "@/store/baseQueryWithReauth.ts";
 import type {ApiResponse} from "@/types/ApiResponse.ts";
 import type {UserProfile} from "@/types/User.ts";
+import type {PagedResult} from "@/types/Pagination.ts";
+import type {SimpleUser} from "@/types/User.ts";
 
 interface FollowUserParams {
     followingId: string;
     username: string;
+}
+
+interface FollowListParams {
+    username: string;
+    pageNumber: number;
+    pageSize: number;
 }
 
 interface UpdateUserParams {
@@ -68,6 +76,18 @@ export const userApi = createApi({
             }),
             invalidatesTags: (_result, _error, {currentUsername}) => [{type: "UserProfile", id: currentUsername}],
         }),
+        getFollowers: build.query<ApiResponse<PagedResult<SimpleUser>>, FollowListParams>({
+            query: ({username, pageNumber, pageSize}) => ({
+                url: `api/users/${username}/followers?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
+        getFollowing: build.query<ApiResponse<PagedResult<SimpleUser>>, FollowListParams>({
+            query: ({username, pageNumber, pageSize}) => ({
+                url: `api/users/${username}/following?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "get",
+            }),
+        }),
     }),
 });
 
@@ -78,4 +98,6 @@ export const {
     useUnfollowUserMutation,
     useUpdateUserMutation,
     useChangeUsernameMutation,
+    useLazyGetFollowersQuery,
+    useLazyGetFollowingQuery,
 } = userApi;
