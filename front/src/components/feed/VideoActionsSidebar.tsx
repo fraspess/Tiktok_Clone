@@ -125,8 +125,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     };
 
     const handleShare = async () => {
-        const username = video.author?.username ?? "";
-        const shareUrl = `${window.location.origin}/@${username}/video/${video.id}`;
+        const shareUrl = `${window.location.origin}/video/${video.id}`;
 
         try {
             await navigator.clipboard.writeText(shareUrl);

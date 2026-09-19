@@ -44,6 +44,12 @@ export const videoApi = createApi({
                 method: "GET",
             }),
         }),
+        getVideoById: build.query<ApiResponse<VideoDto>, string>({
+            query: (id) => ({
+                url: `api/videos/${id}`,
+                method: "get",
+            }),
+        }),
         getUserVideos: build.query<ApiResponse<PagedResult<VideoDto>>, UserVideosParams>({
             query: ({userId, pageNumber, pageSize}) => ({
                 url: `api/videos/user/${userId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
@@ -142,4 +148,5 @@ export const {
     useConfirmUploadMutation,
     useLazyGetFavoriteVideosQuery,
     useLazySearchVideosQuery,
+    useLazyGetVideoByIdQuery,
 } = videoApi;
