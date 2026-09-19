@@ -57,7 +57,7 @@ internal class JwtTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                      ?? throw new UnauthorizedException("Не валідний refresh токен");
 
-        var tokenVersion = principal.FindFirst("Version")?.Value
+        var tokenVersion = principal.FindFirst("version")?.Value
                            ?? throw new UnauthorizedException("Не валідний refresh токен");
 
         var user = userManager.Users.FirstOrDefault(u => u.Id.ToString() == userId)
@@ -122,7 +122,8 @@ internal class JwtTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
         var claims = new List<Claim>
         {
             new("sub", user.Id.ToString()),
-            new("email", user.Email ?? "")
+            new("email", user.Email ?? ""),
+            new("type", "access")
         };
         
         claims.AddRange(from role in await userManager.GetRolesAsync(user) select new Claim("role", role));
@@ -148,7 +149,8 @@ internal class JwtTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
         var claims = new List<Claim>
         {
             new("sub", user.Id.ToString()),
-            new("Version", user.RefreshTokenVersion.ToString())
+            new("version", user.RefreshTokenVersion.ToString()),
+            new("type", "refresh")
         };
 
         var signingCredentials = GetSigningCredentials();

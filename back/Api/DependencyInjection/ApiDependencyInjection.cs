@@ -46,6 +46,18 @@ public static class ApiDependencyInjection
 
                 options.Events = new JwtBearerEvents
                 {
+                    OnTokenValidated = context =>
+                    {
+                        var tokenType = context.Principal?.FindFirst("type")?.Value;
+
+                        if (tokenType != "access")
+                        {
+                            context.Fail("Invalid token type.");
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                    
                     OnMessageReceived = context =>
                     {
                         var accessToken = context.Request.Query["access_token"];
@@ -59,7 +71,14 @@ public static class ApiDependencyInjection
                 };
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AccessToken", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim("type", "access");
+            });
+        });
 
         if (env.IsDevelopment())
             services.AddCors(options =>
@@ -76,7 +95,7 @@ public static class ApiDependencyInjection
                 opt.AddDefaultPolicy(policy =>
                 {
                     policy.WithOrigins(config["Frontend:Url"]!)
-                        .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .AllowAnyHeader()
                         .AllowCredentials();
                 });

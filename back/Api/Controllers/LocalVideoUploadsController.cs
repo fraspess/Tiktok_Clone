@@ -5,15 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace Api.Controllers;
-
-public class LocalVideoUploadsController(IOptions<LocalStorageOptions> options) : ControllerBase
+[DevelopmentOnly]
+public class LocalVideoUploadsController(IOptions<LocalStorageOptions> options, IWebHostEnvironment env) : ControllerBase
 {
     private readonly LocalStorageOptions _options = options.Value;
-    
     [HttpPut("api/videos/{videoId:guid}")]
     [RequestSizeLimit(2_000_000_000)]
     public async Task<IActionResult> UploadVideo(Guid videoId)
     {
+        if (!env.IsDevelopment())
+            return NotFound();
+
         var dir = Path.Combine(_options.RootPath, "uploads", "unprocessed", videoId.ToString());
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, "original");
