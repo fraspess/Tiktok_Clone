@@ -21,7 +21,7 @@ createRoot(document.getElementById('root')!).render(
                     <BrowserRouter>
                         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
                             <AuthBootstrap>
-                                <Toaster/>
+                                <Toaster position="bottom-center"/>
                                 <App/>
                             </AuthBootstrap>
                         </GoogleOAuthProvider>

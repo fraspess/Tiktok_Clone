@@ -31,7 +31,7 @@ public class ImageService(
     {
         try
         {
-            var imageFolder = Path.Combine(Path.GetTempPath(), "images", userId.ToString());
+            var imageFolder = Path.Combine(Path.GetTempPath(), "images", Guid.NewGuid().ToString(), userId.ToString());
             if (!Directory.Exists(imageFolder)) Directory.CreateDirectory(imageFolder);
 
             using var image = await Image.LoadAsync(stream);
