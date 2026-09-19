@@ -29,13 +29,19 @@ export const baseQueryWithReauth: BaseQueryFn<
             const release = await mutex.acquire();
             try {
                 const refreshResult = await baseQuery(
-                    "api/users/refresh",
+                    {
+                        url: "api/users/refresh",
+                        method: "POST"
+                    },
                     api,
                     extraOptions
                 );
                 if (refreshResult.data) {
-                    const {accessToken} = refreshResult.data as { accessToken: string };
-                    api.dispatch(setAccessToken(accessToken));
+                    const response = refreshResult.data as {
+                        data: { accessToken: string };
+                    };
+                    api.dispatch(setAccessToken(response.data.accessToken));
+
                     result = await baseQuery(args, api, extraOptions);
                 } else {
                     api.dispatch(logout());

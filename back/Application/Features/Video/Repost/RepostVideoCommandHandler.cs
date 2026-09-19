@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Application.Interfaces;
 using Domain.Constants;
 using Domain.Entities.Video;
@@ -12,7 +13,7 @@ public class RepostVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser 
     public async Task<Unit> Handle(RepostVideoCommand request, CancellationToken cancellationToken)
     {
         var exists = await appDbContext.VideoReposts
-            .AnyAsync(u => u.UserId == currentUser.Id!.Value, cancellationToken: cancellationToken);
+            .AnyAsync(u => u.UserId == currentUser.Id!.Value && u.VideoId == request.VideoId, cancellationToken: cancellationToken);
         if (exists) return Unit.Value;
         
         var existVideo = await appDbContext.Videos

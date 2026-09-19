@@ -14,7 +14,8 @@ public class MessageService(IAppDbContext appDbContext,
     MessageMapper _mapper, 
     IChatNotifier _notifier,
     UserManager<UserEntity> userManager,
-    IStorageService storageService
+    IStorageService storageService,
+    ICurrentUser currentUser
     )
     : IMessageService
 {
@@ -67,6 +68,8 @@ public class MessageService(IAppDbContext appDbContext,
         var conversationParticipants = await appDbContext.Conversations.Where(c => c.Id == conversationId)
             .Select(p => p.Participants).FirstOrDefaultAsync();
         if (conversationParticipants is null) throw new NotFoundException("Чат не знайдено");
+        if (conversationParticipants.All(p => p.UserId != currentUser.Id!.Value)) throw new NotAllowedException(ErrorCodes.Forbidden);
+        
         var senderUsername = await userManager.Users.Where(u => u.Id == userId).Select(u => u.UserName).FirstOrDefaultAsync() ?? throw new NotFoundException(ErrorCodes.UserNotFound);
         
         var newMessage = new MessageEntity
