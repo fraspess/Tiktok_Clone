@@ -4,3 +4,4 @@ certbot/
 .env_server
 .env
 .idea
+images/
