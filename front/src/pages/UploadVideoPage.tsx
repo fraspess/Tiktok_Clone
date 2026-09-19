@@ -26,26 +26,41 @@ const UploadVideoPage = () => {
     const [confirmUpload] = useConfirmUploadMutation();
     const navigate = useNavigate();
     const errorText = useRef<HTMLParagraphElement | null>(null);
+
+    const [isUploading, setIsUploading] = useState(false);
+    const uploadingRef = useRef(false);
     const onConfirm = async () => {
+        if (!file || uploadingRef.current) return;
+        uploadingRef.current = true;
+        setIsUploading(true);
+
+        if (errorText.current) errorText.current.textContent = "";
+
         try {
-            const response = await initUpload({contentType: file!.type}).unwrap();
-            console.log(response);
-            await fetch(response.url, {
+            const response = await initUpload({contentType: file.type}).unwrap();
+
+            const putRes = await fetch(response.url, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": file!.type,
-                },
-                body: file
-            })
-            await confirmUpload({token: response.uploadToken, description: description.trim()}).unwrap();
+                headers: {"Content-Type": file.type},
+                body: file,
+            });
+            if (!putRes.ok) throw new Error(`Upload failed: ${putRes.status}`);
+
+            await confirmUpload({
+                token: response.uploadToken,
+                description: description.trim(),
+            }).unwrap();
+
             navigate("/");
         } catch (err) {
             if (errorText.current) {
                 errorText.current.textContent = t("uploads.error");
             }
             console.error(err);
+            uploadingRef.current = false;
+            setIsUploading(false);
         }
-    }
+    };
     const onFileSelected = (selected: File) => {
         setFile(selected);
         setDescription("");
@@ -129,9 +144,9 @@ const UploadVideoPage = () => {
     };
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 px-4 pt-6 pb-10 sm:pt-8">
             {!file && (
-                <div className="flex flex-col h-64 items-center justify-center mt-5">
+                <div className="flex flex-col h-64 items-center justify-center">
                     <div className="w-full max-w-2xl h-64">
                         <VideoDropzone onFileSelect={onFileSelected}/>
                     </div>
@@ -139,9 +154,9 @@ const UploadVideoPage = () => {
             )}
 
             {file && (
-                <div className="w-1/2 mx-auto flex flex-col gap-2">
+                <div className="w-full sm:w-3/4 lg:w-1/2 mx-auto flex flex-col gap-2">
                     <div
-                        className="mt-5 flex flex-col gap-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 p-3 w-1/3 mx-auto">
+                        className="flex flex-col gap-2 rounded-lg bg-neutral-100 dark:bg-neutral-900 p-3 w-2/3 sm:w-1/2 lg:w-1/3 mx-auto">
                         <div className="relative w-full aspect-[9/16] overflow-hidden rounded-md bg-black">
                             <video
                                 ref={videoRef}
@@ -184,6 +199,7 @@ const UploadVideoPage = () => {
                     </label>
                     <div className="flex flex-col rounded-lg bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
                         <textarea
+                            readOnly={isUploading}
                             id="description"
                             value={description}
                             onChange={handleChange}
@@ -211,7 +227,14 @@ const UploadVideoPage = () => {
                     </div>
 
                     <div className="flex justify-end mt-3">
-                        <Button onClick={onConfirm} className="px-10" variant="default"> {t("uploads.upload")} </Button>
+                        <Button
+                            onClick={onConfirm}
+                            disabled={isUploading}
+                            className="px-10"
+                            variant="default"
+                        >
+                            {isUploading ? t("uploads.uploading") : t("uploads.upload")}
+                        </Button>
                     </div>
                 </div>
             )}
