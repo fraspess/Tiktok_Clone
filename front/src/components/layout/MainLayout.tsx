@@ -22,7 +22,7 @@ const MainLayout = ({children}: MainLayoutProps) => {
             />
             <div className="flex flex-col flex-1">
                 <Topbar/>
-                <main className="flex-1 overflow-hidden">
+                <main className="flex-1 overflow-y-auto">
                     <AnimatePresence mode="wait" initial={false}>
                         <PageTransition key={location.pathname}>
                             {children ?? <Outlet/>}

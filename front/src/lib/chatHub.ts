@@ -7,7 +7,6 @@ function getChatHubUrl() {
     return new URL("hubs/chat", `${baseUrl.replace(/\/$/, "")}/`).toString();
 }
 
-/** Latest access token for the shared hub (read on every negotiate/reconnect). */
 let accessTokenProvider: (() => string) | null = null;
 
 let sharedConnection: HubConnection | null = null;
@@ -76,7 +75,6 @@ async function startSharedConnection(): Promise<void> {
         .catch((error: unknown) => {
             startPromise = null;
             notifyStatus(false);
-            // React Strict Mode stops the first attempt mid-negotiate; ignore that noise.
             const message = error instanceof Error ? error.message : String(error);
             if (!message.includes("stopped during negotiation")) {
                 console.warn("[chatHub] failed to start", error);
@@ -87,11 +85,6 @@ async function startSharedConnection(): Promise<void> {
     await startPromise;
 }
 
-/**
- * Subscribe to the shared chat hub. Safe under React Strict Mode:
- * mount/unmount only adjusts a ref-count; the socket is not torn down
- * while another subscriber (or the remount) still needs it.
- */
 export function subscribeChatHub(options: {
     getAccessToken: () => string;
     onMessage?: MessageHandler;
@@ -111,7 +104,6 @@ export function subscribeChatHub(options: {
     const token = options.getAccessToken();
     if (token) {
         void startSharedConnection().catch(() => {
-            // Status already notified; caller can retry via token change.
         });
     }
 
@@ -124,7 +116,6 @@ export function subscribeChatHub(options: {
 
             subscriberCount = Math.max(0, subscriberCount - 1);
 
-            // Defer stop so Strict Mode remount can re-subscribe without killing negotiate.
             window.setTimeout(() => {
                 if (subscriberCount > 0) return;
 

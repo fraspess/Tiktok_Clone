@@ -2,7 +2,6 @@ import type {ConversationDto, SimpleUserDto} from "@/types/Conversation.ts";
 import {getCachedMessages} from "@/lib/chatMessagesCache.ts";
 import {getUserProfile, saveUserProfile} from "@/lib/userProfileCache.ts";
 
-/** Other participants (exclude current user). */
 export function getOtherParticipants(
     conversation: ConversationDto,
     currentUserId?: string
@@ -11,7 +10,6 @@ export function getOtherParticipants(
     return conversation.participants.filter((p) => p.id !== currentUserId);
 }
 
-/** Primary peer for a 1:1 chat — the other person, not yourself. */
 export function getConversationPeer(
     conversation: ConversationDto,
     currentUserId?: string
@@ -31,7 +29,6 @@ export function getConversationPeer(
     };
 }
 
-/** Stable key for a 1:1 pair so we can keep only one chat per person. */
 export function getDirectPeerKey(
     conversation: ConversationDto,
     currentUserId?: string
