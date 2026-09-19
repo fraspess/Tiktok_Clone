@@ -11,6 +11,7 @@ import SearchPage from "@/pages/SearchPage.tsx";
 import MessagesPage from "@/pages/MessagesPage.tsx";
 import AdminPage from "@/pages/AdminPage.tsx";
 import AdminRoute from "@/routes/AdminRoute.tsx";
+import SharedVideoPage from "@/pages/SharedVideoPage.tsx";
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/" element={<MainLayout/>}>
                     <Route index element={<HomePage/>}/>
                     <Route path="search" element={<SearchPage/>}/>
+                    <Route path="video/:videoId" element={<SharedVideoPage/>}/>
                     <Route path=":username" element={<ProfilePage/>}/>
                     <Route path=":username/video/:videoId" element={<ProfileVideoFeedPage/>}/>
                     <Route path="reset-password" element={<ResetPasswordPage/>}/>
