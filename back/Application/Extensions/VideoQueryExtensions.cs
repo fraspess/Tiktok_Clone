@@ -20,6 +20,7 @@ public static class VideoQueryExtensions
             CommentsCount = v.CommentCount,
             FavoriteCount = v.FavoriteCount,
             Status = v.Status,
+            IsBanned = v.IsBanned,
             ProccessedInPercents = v.ProccessedInPercents,
             Author = new UserAuthorDto
             {

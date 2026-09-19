@@ -12,6 +12,7 @@ import {conversationApi} from "@/store/apis/conversationApi.ts";
 import {videoApi} from "@/store/apis/videoApi.ts";
 import {userApi} from "@/store/apis/userApi.ts";
 import {commentApi} from "@/store/apis/commentApi.ts";
+import {adminApi} from "@/store/apis/adminApi.ts";
 
 export const store = configureStore({
     reducer: {
@@ -27,6 +28,7 @@ export const store = configureStore({
         [videoApi.reducerPath]: videoApi.reducer,
         [userApi.reducerPath]: userApi.reducer,
         [commentApi.reducerPath]: commentApi.reducer,
+        [adminApi.reducerPath]: adminApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(
@@ -35,6 +37,7 @@ export const store = configureStore({
             videoApi.middleware,
             userApi.middleware,
             commentApi.middleware,
+            adminApi.middleware,
         ),
 })
 

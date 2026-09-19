@@ -13,5 +13,6 @@ public class SimpleVideoDto
     public UserAuthorDto? Author { get; set; }
     public DateTime CreatedAt { get; set; }
     public int ViewCount { get; set; }
+    public bool IsBanned { get; set; }
     public string ThumbnailUrl { get; set; } = string.Empty;
 }

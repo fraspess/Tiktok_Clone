@@ -3,8 +3,9 @@ import {cn} from "@/lib/utils.ts";
 import {Button} from "@/components/ui/button.tsx";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {useTranslation} from "react-i18next";
-import {Book, Home, MessageCircle, Plus, Search, Users} from "lucide-react";
+import {Book, Home, MessageCircle, Plus, Search, ShieldCheck, Users} from "lucide-react";
 import {useAppSelector} from "@/store/hooks.ts";
+import {hasAdminRole} from "@/lib/jwt.ts";
 
 interface SidebarProps {
     collapsed: boolean;
@@ -23,12 +24,15 @@ const Sidebar = ({collapsed, onToggle}: SidebarProps) => {
     const {t} = useTranslation();
     const navigate = useNavigate();
     const isAuth = useAppSelector((s) => s.auth.isAuth);
+    const accessToken = useAppSelector((s) => s.auth.accessToken);
+    const isAdmin = hasAdminRole(accessToken);
 
     const navItems = [
         {to: "/", label: t("nav.home"), icon: Home, end: true},
         {to: "/search", label: t("nav.search"), icon: Search, end: true},
         ...(isAuth ? [{to: "/following", label: t("nav.following"), icon: Users, end: true}] : []),
         ...(isAuth ? [{to: "/messages", label: t("nav.messages"), icon: MessageCircle, end: true}] : []),
+        ...(isAdmin ? [{to: "/admin", label: t("nav.admin"), icon: ShieldCheck, end: true}] : []),
         {to: "/upload", label: t("uploads.title"), icon: Plus}
     ];
 

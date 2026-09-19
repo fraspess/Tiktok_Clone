@@ -24,6 +24,7 @@ public class VideoProjectionDto
     public bool IsLiked { get; set; }
 
     public VideoStatus Status { get; set; }
+    public bool IsBanned { get; set; }
     public int ProccessedInPercents { get; set; }
 
     public DateTime CreatedAt { get; set; }

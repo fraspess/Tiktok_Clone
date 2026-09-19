@@ -18,6 +18,7 @@ export function getAvatarUrl(avatar: AvatarLike): string | null {
     if (!avatar) {
         return null;
     }
+
     if (typeof avatar === "string") {
         const trimmed = avatar.trim();
         return trimmed.length > 0 ? trimmed : null;
@@ -39,4 +40,13 @@ export function getAvatarUrl(avatar: AvatarLike): string | null {
 
     const trimmed = url.trim();
     return trimmed.length > 0 ? trimmed : null;
+}
+
+export function getMediaUrl(url: string | null | undefined): string | undefined {
+    if (!url) {
+        return undefined;
+    }
+
+    const trimmed = url.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
 }

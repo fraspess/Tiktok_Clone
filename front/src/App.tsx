@@ -9,6 +9,8 @@ import ResetPasswordPage from "@/pages/ResetPasswordPage.tsx";
 import FollowingPage from "@/pages/FollowingPage.tsx";
 import SearchPage from "@/pages/SearchPage.tsx";
 import MessagesPage from "@/pages/MessagesPage.tsx";
+import AdminPage from "@/pages/AdminPage.tsx";
+import AdminRoute from "@/routes/AdminRoute.tsx";
 
 function App() {
 
@@ -26,6 +28,9 @@ function App() {
                         <Route path="upload" element={<UploadVideoPage/>}/>
                         <Route path="following" element={<FollowingPage/>}/>
                         <Route path="messages" element={<MessagesPage/>}/>
+                    </Route>
+                    <Route element={<AdminRoute/>}>
+                        <Route path="admin" element={<AdminPage/>}/>
                     </Route>
                 </Route>
             </Routes>

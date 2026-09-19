@@ -19,7 +19,7 @@ public class SendReportCommandHandler(IAppDbContext appDbContext, ICurrentUser u
 
         if (await appDbContext.Reports.AnyAsync(r => r.SenderId == userId && r.ContentId == contentId,
                 cancellationToken))
-            throw new BadRequestException(ErrorCodes.Duplicate);
+            return Unit.Value;
 
         appDbContext.Reports.Add(new ReportEntity
         {

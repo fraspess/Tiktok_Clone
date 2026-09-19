@@ -20,6 +20,7 @@ public partial class VideoMapper(IStorageService storageService)
     [MapProperty(nameof(VideoProjectionDto.Author.Id), nameof(VideoDto.Author.Id))]
     [MapProperty(nameof(VideoProjectionDto.Author.Username), nameof(VideoDto.Author.Username))]
     [MapProperty(nameof(VideoProjectionDto.Author.IsFollowing), nameof(SimpleVideoDto.Author.IsFollowing))]
+    [MapProperty(nameof(VideoProjectionDto.IsBanned), nameof(SimpleVideoDto.IsBanned))]
     [MapProperty(nameof(VideoProjectionDto.Id), nameof(VideoDto.VideoUrl), Use = nameof(GetVideoUrl))]
     [MapProperty(nameof(VideoProjectionDto.Author.Id), nameof(VideoDto.Author.Avatar), Use = nameof(GetAvatarUrl))]
     [MapProperty(nameof(VideoProjectionDto.Id), nameof(VideoDto.ThumbnailUrl), Use = nameof(GetThumbnailUrl))]

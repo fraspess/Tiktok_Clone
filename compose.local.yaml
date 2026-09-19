@@ -44,16 +44,16 @@ services:
             RabbitMQ__UserName: guest
             RabbitMQ__Password: guest
             Jwt__Key: 672ffa71-4bba-4ba5-b07c-8aaf7bb9410b
-            Google__ClientId: ${GOOGLE_CLIENT_ID}
-            Google__ClientSecret: ${GOOGLE_CLIENT_SECRET}
-            SMTP__Password: ${SMTP_PASSWORD}
+            Google__ClientId: ${GOOGLE_CLIENT_ID:-984354561584-3c1naevnk34ngu281cpbu1esie4e4dq0.apps.googleusercontent.com}
+            Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-dummy_secret_for_dev}
+            SMTP__Password: ${SMTP_PASSWORD:-dummy_smtp_pass}
             Redis__ConnectionString: "redis:6379, password=localredispass"
             LocalStorage__RootPath: "/app/local-storage"
         ports:
             - "8080:8080"
         volumes:
-          - api_uploads:/app/local-storage
-          - ./back/Api/SeedVideos:/app/SeedVideos
+            - api_uploads:/app/local-storage
+            - ./back/Api/SeedVideos:/app/SeedVideos
         networks:
             - tiktok_network
         depends_on:
@@ -62,7 +62,7 @@ services:
             rabbitMQ:
                 condition: service_healthy
         healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+            test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
             interval: 10s
             timeout: 5s
             retries: 5
