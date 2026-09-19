@@ -119,7 +119,7 @@ export const videoApi = createApi({
                 method: "GET",
             }),
         }),
-        confirmUpload: build.mutation<ApiResponse<{videoId: string}>, CompleteUploadData>({
+        confirmUpload: build.mutation<ApiResponse<null>, CompleteUploadData>({
             query: (body) => ({
                 url: "api/videos/upload-complete",
                 method: "POST",

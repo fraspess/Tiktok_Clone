@@ -1,6 +1,7 @@
 import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
 import {videoApi} from "@/store/apis/videoApi.ts";
 import {putWithProgress} from "@/lib/putWithProgress.ts";
+import {decodeJwtPayload} from "@/lib/jwt.ts";
 // TODO: підстав свій шлях до типу AppDispatch
 import type {AppDispatch} from "@/store/store.ts";
 
@@ -130,6 +131,13 @@ export const startUpload =
                 videoApi.endpoints.initUpload.initiate({contentType: file.type})
             ).unwrap();
 
+            // Confirmation returns no ID; use the ID supplied in the upload token.
+            const videoId = decodeJwtPayload(init.uploadToken)?.videoId;
+            if (typeof videoId !== "string" || !videoId) {
+                throw new Error("Upload token is missing videoId");
+            }
+            dispatch(setVideoId({id, videoId}));
+
             await putWithProgress(init.url, file, (progress) =>
                 dispatch(setProgress({id, progress}))
             );
@@ -143,16 +151,10 @@ export const startUpload =
                 })
             ).unwrap();
 
-            const videoId = res?.data?.videoId;
-            if (videoId) {
-                dispatch(setVideoId({id, videoId}));
-                // рядок не видаляємо: його прибере подія SendVideoProcessingSucceded
-            } else {
-                // бекенд не повернув videoId: не можемо привʼязати події SignalR,
-                // тому просто оновлюємо список, щоб відео зʼявилось як звичайне
-                URL.revokeObjectURL(previewUrl);
-                dispatch(completeUpload(id));
+            if (!res.isSuccess) {
+                throw new Error(res.message ?? "Upload confirmation failed");
             }
+            // Keep the progress row until SignalR reports completion.
         } catch (e) {
             console.error(e);
             dispatch(setStatus({id, status: "error"}));
