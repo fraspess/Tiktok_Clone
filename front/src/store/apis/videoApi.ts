@@ -41,19 +41,19 @@ export const videoApi = createApi({
         getFyp: build.query<ApiResponse<PagedResult<VideoDto>>, FypParams>({
             query: ({pageNumber, pageSize}) => ({
                 url: `api/videos/fyp?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
         getUserVideos: build.query<ApiResponse<PagedResult<VideoDto>>, UserVideosParams>({
             query: ({userId, pageNumber, pageSize}) => ({
                 url: `api/videos/user/${userId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
         reportVideo: build.mutation<ApiResponse<null>, ReportVideoParams>({
             query: ({contentId, reason, customReason}) => ({
                 url: "api/reports",
-                method: "post",
+                method: "POST",
                 body: {
                     contentType: "Video",
                     contentId,
@@ -65,25 +65,25 @@ export const videoApi = createApi({
         likeVideo: build.mutation<ApiResponse<null>, string>({
             query: (videoId) => ({
                 url: `api/videos/${videoId}/like`,
-                method: "post",
+                method: "POST",
             }),
         }),
         unlikeVideo: build.mutation<ApiResponse<null>, string>({
             query: (videoId) => ({
                 url: `api/videos/${videoId}/like`,
-                method: "delete",
+                method: "DELETE",
             }),
         }),
         favoriteVideo: build.mutation<ApiResponse<null>, string>({
             query: (videoId) => ({
                 url: `api/videos/${videoId}/favorite`,
-                method: "post",
+                method: "POST",
             }),
         }),
         unfavoriteVideo: build.mutation<ApiResponse<null>, string>({
             query: (videoId) => ({
                 url: `api/videos/${videoId}/favorite`,
-                method: "delete",
+                method: "DELETE",
             }),
         }),
         initUpload: build.mutation<InitUploadData, InitUploadRequest>({
@@ -104,7 +104,7 @@ export const videoApi = createApi({
         getFavoriteVideos: build.query<ApiResponse<PagedResult<VideoDto>>, FavoriteVideosParams>({
             query: ({userId, pageNumber, pageSize}) => ({
                 url: `api/users/${userId}/favorites?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
         confirmUpload: build.mutation<null, CompleteUploadData>({
@@ -117,13 +117,13 @@ export const videoApi = createApi({
         searchVideos: build.query<ApiResponse<PagedResult<VideoDto>>, SearchVideosParams>({
             query: ({query, pageNumber, pageSize}) => ({
                 url: `api/videos/search/${encodeURIComponent(query)}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
         getFypFollowing: build.query<ApiResponse<PagedResult<VideoDto>>, FypParams>({
             query: ({pageNumber, pageSize}) => ({
                 url: `api/videos/fyp/following?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
     }),

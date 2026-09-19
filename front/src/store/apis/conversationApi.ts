@@ -23,22 +23,24 @@ export const conversationApi = createApi({
         getConversations: build.query<ApiResponse<PagedResult<ConversationDto>>, PaginationParams>({
             query: ({pageNumber, pageSize}) => ({
                 url: `api/conversations?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
         getMessages: build.query<ApiResponse<PagedResult<MessageDto>>, PaginationParams & { conversationId: string }>({
             query: ({conversationId, pageNumber, pageSize}) => ({
                 url: `api/conversations/messages?conversationId=${conversationId}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
         createConversation: build.mutation<ApiResponse<ConversationDto>, { userId: string }>({
             query: (body) => ({url: "api/conversations", method: "post", body}),
         }),
-        searchConversations: build.query<ApiResponse<PagedResult<ConversationDto>>, PaginationParams & { query: string }>({
+        searchConversations: build.query<ApiResponse<PagedResult<ConversationDto>>, PaginationParams & {
+            query: string
+        }>({
             query: ({query, pageNumber, pageSize}) => ({
                 url: `api/conversations/search?query=${encodeURIComponent(query)}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
     }),
