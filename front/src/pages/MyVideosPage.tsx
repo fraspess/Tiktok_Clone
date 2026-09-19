@@ -100,7 +100,9 @@ const MyVideosPage = () => {
                                         <span className="text-right text-xs text-muted-foreground">{percent}%</span>
                                         <div className="h-1.5 overflow-hidden rounded bg-neutral-200 dark:bg-neutral-800">
                                             <div
-                                                className="h-full bg-foreground transition-[width]"
+                                                className={`h-full bg-foreground transition-[width] ease-linear ${
+                                                    isUploading ? "duration-150" : "duration-500"
+                                                }`}
                                                 style={{width: `${percent}%`}}
                                             />
                                         </div>
