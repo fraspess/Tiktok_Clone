@@ -30,52 +30,54 @@ internal class VideoStartProcessingConsumer(
             Directory.CreateDirectory(tempPath);
             await storage.DownloadOriginalAsync(videoId, inputPath);
 
-            // if (!File.Exists(inputPath))
-            // {
-            //     _logger.LogError("Файл {ErrorInput} не був знайдений ", inputPath);
-            //     throw new Exception("Файл не знайдений");
-            // }
-
             logger.LogInformation("Started processing video {inputPath}", inputPath);
 
-            await ValidateVideoAsync(inputPath);
+            var videoInfo = await ValidateVideoAsync(inputPath);
+            var duration = videoInfo.Duration;
+            var hasAudio = videoInfo.AudioStreams.Count > 0;
+
+            if (!hasAudio)
+                logger.LogInformation("Video {VideoId} has no audio stream, processing without audio", videoId);
 
             Directory.CreateDirectory(outputDir);
 
-            var videoInfo = await FFProbe.AnalyseAsync(inputPath);
-            var duration = videoInfo.Duration;
-
-            await NormalizeVideoAsync(inputPath, normalizedPath, duration, context.Message.VideoId);
-            await GenerateHlsAsync(normalizedPath, outputDir, duration, context.Message.VideoId);
-            await GenerateThumbnailAsync(normalizedPath, outputDir);
+            await NormalizeVideoAsync(inputPath, normalizedPath, duration, videoId, hasAudio);
+            await GenerateHlsAsync(normalizedPath, outputDir, duration, videoId, hasAudio);
+            await GenerateThumbnailAsync(normalizedPath, outputDir, duration);
 
             if (File.Exists(normalizedPath))
                 File.Delete(normalizedPath);
 
             await storage.UploadProcessedAsync(videoId, outputDir);
-            
-            await publishEndpoint.Publish(new VideoProcessedEvent
-                { VideoId = context.Message.VideoId });
+
+            await publishEndpoint.Publish(new VideoProcessedEvent { VideoId = videoId });
 
             logger.LogInformation("Video successfully processed {outputPath}", outputPath);
         }
         catch (Exception ex)
         {
-            logger.LogError("Failed to convert file: {Error} ", ex.Message);
-            await publishEndpoint.Publish(new VideoProcessingFailedEvent(context.Message.VideoId, ex.Message));
+            logger.LogError(ex, "Failed to convert file: {Error}", ex.Message);
+            await publishEndpoint.Publish(new VideoProcessingFailedEvent(videoId, ex.Message));
             throw;
         }
         finally
         {
-            if (Directory.Exists(tempPath))
-                Directory.Delete(tempPath, true);
+            try
+            {
+                if (Directory.Exists(tempPath))
+                    Directory.Delete(tempPath, true);
 
-            if (Directory.Exists(outputPath))
-                Directory.Delete(outputPath, true);
+                if (Directory.Exists(outputPath))
+                    Directory.Delete(outputPath, true);
+            }
+            catch (Exception cleanupEx)
+            {
+                logger.LogWarning(cleanupEx, "Failed to clean up temp files for video {VideoId}", videoId);
+            }
         }
     }
 
-    private static async Task ValidateVideoAsync(string filePath)
+    private static async Task<IMediaAnalysis> ValidateVideoAsync(string filePath)
     {
         IMediaAnalysis mediaInfo;
         try
@@ -96,37 +98,50 @@ internal class VideoStartProcessingConsumer(
         if (mediaInfo.Duration > TimeSpan.FromHours(3))
             throw new Exception("Відео не може бути довше ніж 3 години");
         
-        if (mediaInfo.AudioStreams.Count == 0)
-            throw new Exception("Відео не має аудіопотоку");
+        return mediaInfo;
     }
 
-    private async Task NormalizeVideoAsync(string input, string output, TimeSpan duration, Guid videoid)
+    private async Task NormalizeVideoAsync(string input, string output, TimeSpan duration, Guid videoId, bool hasAudio)
     {
-        const string filter =
+        var filter =
             "split[orig][copy];" +
             "[copy]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20[bg];" +
             "[orig]scale=1080:1920:force_original_aspect_ratio=decrease[fg];" +
-            "[bg][fg]overlay=(W-w)/2:(H-h)/2[v];" +
-            "[0:a]loudnorm=I=-14:TP=-1:LRA=11[a]";
+            "[bg][fg]overlay=(W-w)/2:(H-h)/2[v]";
+
+        var mapArgs = "-map [v]";
+
+        if (hasAudio)
+        {
+            filter += ";[0:a]loudnorm=I=-14:TP=-1:LRA=11[a]";
+            mapArgs += " -map [a]";
+        }
 
         await FFMpegArguments
             .FromFileInput(input)
-            .OutputToFile(output, true, options => options
-                .WithVideoCodec(_opts.Encoding.VideoCodec)
-                .WithAudioCodec(_opts.Encoding.AudioCodec)
-                .WithCustomArgument($"-preset {_opts.Encoding.Preset}")
-                .WithConstantRateFactor(_opts.Encoding.Crf)
-                .WithCustomArgument($"-filter_complex \"{filter}\" -map [v] -map [a]")
-                .WithFastStart())
-            .NotifyOnProgress(async void (progress) =>
+            .OutputToFile(output, true, options =>
             {
-                var percent = (int)Math.Floor(progress.TotalSeconds / duration.TotalSeconds * 100);
-                await publishEndpoint.Publish(new VideoProcessingProgressEvent(videoid, percent / 2));
+                options
+                    .WithVideoCodec(_opts.Encoding.VideoCodec)
+                    .WithCustomArgument($"-preset {_opts.Encoding.Preset}")
+                    .WithConstantRateFactor(_opts.Encoding.Crf)
+                    .WithCustomArgument($"-filter_complex \"{filter}\" {mapArgs}")
+                    .WithFastStart();
+
+                if (hasAudio)
+                    options.WithAudioCodec(_opts.Encoding.AudioCodec);
+                else
+                    options.WithCustomArgument("-an");
+            })
+            .NotifyOnProgress((TimeSpan progress) =>
+            {
+                var percent = CalcPercent(progress, duration);
+                PublishProgressSafe(videoId, percent / 2);
             })
             .ProcessAsynchronously();
     }
 
-    private async Task GenerateHlsAsync(string input, string output, TimeSpan duration, Guid videoid)
+    private async Task GenerateHlsAsync(string input, string output, TimeSpan duration, Guid videoId, bool hasAudio)
     {
         var qualities = _opts.Qualities;
 
@@ -139,23 +154,30 @@ internal class VideoStartProcessingConsumer(
             var i1 = i;
             await FFMpegArguments
                 .FromFileInput(input)
-                .OutputToFile(Path.Combine(dir, "playlist.m3u8"), true, options => options
-                    .WithVideoCodec(_opts.Encoding.VideoCodec)
-                    .WithAudioCodec(_opts.Encoding.AudioCodec)
-                    .WithCustomArgument($"-preset {_opts.Encoding.Preset}")
-                    .WithCustomArgument($"-vf scale={q.Scale}")
-                    .WithCustomArgument($"-b:v {q.VideoBitrate} -maxrate {q.MaxRate} -bufsize {q.BuffSize}")
-                    .WithCustomArgument("-hls_time 4")
-                    .WithCustomArgument("-hls_playlist_type vod")
-                    .WithCustomArgument("-hls_flags independent_segments")
-                    .WithCustomArgument($"-hls_segment_filename \"{Path.Combine(dir, "seg_%03d.ts")}\"")
-                    .ForceFormat("hls"))
-                .NotifyOnProgress(async void (progress) =>
+                .OutputToFile(Path.Combine(dir, "playlist.m3u8"), true, options =>
                 {
-                    var percent = (int)Math.Floor(progress / duration * 100);
+                    options
+                        .WithVideoCodec(_opts.Encoding.VideoCodec)
+                        .WithCustomArgument($"-preset {_opts.Encoding.Preset}")
+                        .WithCustomArgument($"-vf scale={q.Scale}")
+                        .WithCustomArgument($"-b:v {q.VideoBitrate} -maxrate {q.MaxRate} -bufsize {q.BuffSize}")
+                        .WithCustomArgument("-hls_time 4")
+                        .WithCustomArgument("-hls_playlist_type vod")
+                        .WithCustomArgument("-hls_flags independent_segments")
+                        .WithCustomArgument($"-hls_segment_filename \"{Path.Combine(dir, "seg_%03d.ts")}\"")
+                        .ForceFormat("hls");
+
+                    if (hasAudio)
+                        options.WithAudioCodec(_opts.Encoding.AudioCodec);
+                    else
+                        options.WithCustomArgument("-an");
+                })
+                .NotifyOnProgress((TimeSpan progress) =>
+                {
+                    var percent = CalcPercent(progress, duration);
                     var offset = 50 + i1 * (50 / qualities.Count);
-                    var total = offset + percent / 2 / qualities.Count;
-                    await publishEndpoint.Publish(new VideoProcessingProgressEvent(videoid, total));
+                    var total = Math.Clamp(offset + percent / 2 / qualities.Count, 0, 100);
+                    PublishProgressSafe(videoId, total);
                 })
                 .ProcessAsynchronously();
         }
@@ -176,9 +198,32 @@ internal class VideoStartProcessingConsumer(
         await File.WriteAllTextAsync(Path.Combine(output, "master.m3u8"), sb.ToString());
     }
 
-    private static async Task GenerateThumbnailAsync(string input, string output)
+    private static async Task GenerateThumbnailAsync(string input, string output, TimeSpan duration)
     {
         var thumbPath = Path.Combine(output, "thumbnail.jpg");
-        await FFMpeg.SnapshotAsync(input, thumbPath, captureTime: TimeSpan.FromSeconds(1));
+        await FFMpeg.SnapshotAsync(input, thumbPath, captureTime: TimeSpan.FromSeconds(Math.Min(1, duration.TotalSeconds / 2)));
+    }
+
+    private static int CalcPercent(TimeSpan progress, TimeSpan duration)
+    {
+        if (duration <= TimeSpan.Zero)
+            return 0;
+
+        return Math.Clamp((int)Math.Floor(progress.TotalSeconds / duration.TotalSeconds * 100), 0, 100);
+    }
+    
+    private void PublishProgressSafe(Guid videoId, int percent)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await publishEndpoint.Publish(new VideoProcessingProgressEvent(videoId, percent));
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to publish progress for video {VideoId}", videoId);
+            }
+        });
     }
 }
