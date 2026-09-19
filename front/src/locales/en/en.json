@@ -67,11 +67,12 @@
     }
   },
   "collapseSidebar": "Collapse sidebar",
-  "nav": {
-    "home": "For You",
+"nav": {
+    "home": "Home",
     "search": "Search",
     "following": "Following",
-    "messages": "Messages"
+    "messages": "Messages",
+    "admin": "Admin panel"
   },
   "search": {
     "placeholder": "Search for users and hashtags",
@@ -123,8 +124,6 @@
     "followError": "Couldn't follow this user. Please try again"
   },
   "profile": {
-    "noFollowers": "No followers yet",
-    "noFollowing": "Not following anyone yet",
     "myProfile": "My profile",
     "followers": "Followers",
     "following": "Following",
@@ -176,8 +175,7 @@
       "hateSpeech": "Hate speech",
       "harassment": "Harassment or bullying",
       "misinformation": "Misinformation",
-      "other": "Other",
-      "customReasonRequired": "Please describe the reason for the complaint"
+      "other": "Other"
     },
     "customReasonLabel": "Add more details (optional)",
     "customReasonPlaceholder": "Tell us more about the reason for the report...",
@@ -185,6 +183,7 @@
     "submit": "Submit report",
     "cancel": "Cancel",
     "success": "Report submitted successfully",
+    "alreadySubmitted": "You have already submitted a report for this video",
     "error": "Failed to submit the report. Please try again"
   },
   "comments": {
@@ -223,11 +222,46 @@
     "descriptionPlaceholder": "Your description here",
     "hashtags": "hashtag"
   },
-  "errors": {
-    "DUPLICATE": "You have already submitted a report for this content",
-    "VIDEO_NOT_FOUND": "Video not found",
-    "INVALID_FILE_TYPE": "Invalid content type",
-    "TOO_LONG": "Text is too long",
-    "default": "Something went wrong, please try again"
+  "admin": {
+    "title": "Admin panel",
+    "users": "Users",
+    "videos": "Videos",
+    "reports": "Reports",
+    "ban": "Ban",
+    "unban": "Unban",
+    "banned": "Banned",
+    "blocked": "Blocked",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "banned": "Banned"
+    },
+    "reportStats": {
+      "total": "Total reports"
+    },
+    "banUserTitle": "Ban user",
+    "banVideoTitle": "Ban video",
+    "selectReason": "Please select a reason",
+    "userBanned": "User banned",
+    "userUnbanned": "User unbanned",
+    "videoBanned": "Video banned",
+    "videoUnbanned": "Video unbanned",
+    "banError": "Failed to ban. Please try again.",
+    "unbanError": "Failed to unban. Please try again.",
+    "loading": "Loading...",
+    "loadError": "Failed to load. Please try again.",
+    "empty": "Nothing here",
+    "previous": "Previous",
+    "next": "Next",
+    "views": "{{count}} views",
+    "reportedBy": "Reported by",
+    "reason": "Reason",
+    "markProcessed": "Mark as processed",
+    "processed": "Processed",
+    "types": {
+      "video": "Videos",
+      "user": "Users",
+      "comment": "Comments"
+    }
   }
 }

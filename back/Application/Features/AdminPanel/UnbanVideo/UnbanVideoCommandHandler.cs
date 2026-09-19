@@ -12,6 +12,7 @@ internal class UnbanVideoCommandHandler(IAppDbContext appDbContext) : IRequestHa
     {
         var video = await appDbContext
                         .Videos
+                        .IgnoreQueryFilters()
                         .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
                     ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
 

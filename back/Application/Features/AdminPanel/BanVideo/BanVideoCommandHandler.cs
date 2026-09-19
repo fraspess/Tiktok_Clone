@@ -13,8 +13,12 @@ internal class BanVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser u
     {
         var video = await appDbContext
                         .Videos
+                        .IgnoreQueryFilters()
                         .FirstOrDefaultAsync(v => v.Id == request.VideoId, cancellationToken)
                     ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
+
+        if (video.IsBanned)
+            return Unit.Value;
 
         video.Ban(user.Id!.Value);
 

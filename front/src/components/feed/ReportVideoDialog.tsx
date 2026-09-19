@@ -77,10 +77,17 @@ const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps
             handleOpenChange(false);
         } catch (err) {
             let code: string | undefined;
+            let message: string | undefined;
 
             if (isFetchBaseQueryError(err) && typeof err.data === "object" && err.data) {
-                const data = err.data as { code?: string };
+                const data = err.data as { code?: string; message?: string; errors?: string[] };
                 code = data.code;
+                message = data.message ?? data.errors?.[0];
+            }
+
+            if (code === "DUPLICATE") {
+                setFormError(t("report.alreadySubmitted"));
+                return;
             }
 
             if (code && i18n.exists(`errors.${code}`)) {
@@ -88,7 +95,7 @@ const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps
                 return;
             }
 
-            toast.error(t("errors.default"));
+            toast.error(message || t("report.error"));
         }
     };
 
@@ -143,7 +150,6 @@ const ReportVideoDialog = ({videoId, open, onOpenChange}: ReportVideoDialogProps
                 )}
 
                 {formError && <p className="text-sm text-destructive">{formError}</p>}
-
                 <DialogFooter>
                     <Button variant="outline" onClick={() => handleOpenChange(false)}>
                         {t("report.cancel")}

@@ -21,7 +21,10 @@ internal class AdminPanelGetReportsCommandHandler(
     {
         var reports = await appDbContext
             .Reports
+            .IgnoreQueryFilters()
             .Where(r => r.ContentType == request.ReportType)
+            .Where(r => r.Status == ReportStatus.Pending)
+            .OrderByDescending(r => r.CreatedAt)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken);
 
         var senderIds = reports.Items.Select(r => r.SenderId).Distinct().ToList();
