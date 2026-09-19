@@ -20,7 +20,7 @@ namespace Persistence.Seeder;
 
 public static class DbSeeder
 {
-    // All json seed files should be located in Tiktok_Clone/Helpers and have Copy To Output Directory
+    // All json seed files should be located in Api/Helpers and have Copy To Output Directory
     public static async Task SeedDataAsync(this WebApplication webApplication)
     {
         using var scope = webApplication.Services.CreateScope();
@@ -37,6 +37,13 @@ public static class DbSeeder
         await SeedUsersAsync(userManager, imageService, environment);
         await SeedVideosAsync(context, environment, _options, userManager);
 
+    }
+
+    public static async Task SeedOnlyRolesAsync(this WebApplication webApplication)
+    {
+        var scope = webApplication.Services.CreateScope();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<RoleEntity>>();
+        await SeedRolesAsync(roleManager);
     }
 
     private static async Task SeedRolesAsync(RoleManager<RoleEntity> roleManager)

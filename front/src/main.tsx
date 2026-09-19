@@ -11,6 +11,7 @@ import {TooltipProvider} from "@/components/ui/tooltip.tsx";
 import {GoogleOAuthProvider} from "@react-oauth/google";
 import {GOOGLE_CLIENT_ID} from "@/env.ts";
 import AuthBootstrap from "@/components/auth/AuthBootstrap.tsx";
+import {Toaster} from "sonner";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
                     <BrowserRouter>
                         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
                             <AuthBootstrap>
+                                <Toaster/>
                                 <App/>
                             </AuthBootstrap>
                         </GoogleOAuthProvider>

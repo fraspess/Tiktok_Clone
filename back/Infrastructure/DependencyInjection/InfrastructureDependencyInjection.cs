@@ -28,7 +28,10 @@ public static class InfrastructureDependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services, WebApplicationBuilder builder, IConfiguration config)
     {
-        services.AddSignalR();
+        services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = true;
+        });
         services.AddScoped<IEmailService, EmailService>();
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
