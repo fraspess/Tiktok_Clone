@@ -30,7 +30,7 @@ export const commentApi = createApi({
         getComments: build.query<ApiResponse<PagedResult<CommentDto>>, GetCommentsParams>({
             query: ({videoId, pageNumber, pageSize}) => ({
                 url: `api/comments/${videoId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
             providesTags: (result, _err, {videoId}) =>
                 result
@@ -50,7 +50,7 @@ export const commentApi = createApi({
         createComment: build.mutation<ApiResponse<null>, CreateCommentParams>({
             query: ({text, videoId, parentCommentId}) => ({
                 url: "api/comments",
-                method: "post",
+                method: "POST",
                 body: {text, videoId, parentCommentId},
             }),
             invalidatesTags: (_result, _err, {videoId, parentCommentId}) =>
@@ -65,7 +65,7 @@ export const commentApi = createApi({
         }>({
             query: ({commentId}) => ({
                 url: `api/comments?commentId=${commentId}`,
-                method: "delete",
+                method: "DELETE",
             }),
             invalidatesTags: (_result, _err, {videoId, parentCommentId}) =>
                 parentCommentId
@@ -75,7 +75,7 @@ export const commentApi = createApi({
         likeComment: build.mutation<ApiResponse<null>, { commentId: string }>({
             query: ({commentId}) => ({
                 url: `api/comments/like?commentId=${commentId}`,
-                method: "post",
+                method: "POST",
             }),
         }),
     }),

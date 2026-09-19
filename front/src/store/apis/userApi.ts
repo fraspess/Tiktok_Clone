@@ -1,9 +1,8 @@
 import {createApi} from "@reduxjs/toolkit/query/react";
 import {baseQueryWithReauth} from "@/store/baseQueryWithReauth.ts";
 import type {ApiResponse} from "@/types/ApiResponse.ts";
-import type {UserProfile} from "@/types/User.ts";
+import type {SimpleUser, UserProfile} from "@/types/User.ts";
 import type {PagedResult} from "@/types/Pagination.ts";
-import type {SimpleUser} from "@/types/User.ts";
 
 interface FollowUserParams {
     followingId: string;
@@ -34,7 +33,7 @@ export const userApi = createApi({
         getMe: build.query<ApiResponse<UserProfile>, void>({
             query: () => ({
                 url: `api/users/me`,
-                method: "get",
+                method: "GET",
             }),
             providesTags: (result) =>
                 result?.data ? [{type: "UserProfile", id: result.data.username}] : [],
@@ -42,28 +41,28 @@ export const userApi = createApi({
         getUserProfile: build.query<ApiResponse<UserProfile>, string>({
             query: (username) => ({
                 url: `api/users/${username}`,
-                method: "get",
+                method: "GET",
             }),
             providesTags: (_result, _error, username) => [{type: "UserProfile", id: username}],
         }),
         followUser: build.mutation<ApiResponse<null>, FollowUserParams>({
             query: ({followingId}) => ({
                 url: `api/users/follow?following=${followingId}`,
-                method: "post",
+                method: "POST",
             }),
             invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
         }),
         unfollowUser: build.mutation<ApiResponse<null>, FollowUserParams>({
             query: ({followingId}) => ({
                 url: `api/users/follow?following=${followingId}`,
-                method: "delete",
+                method: "DELETE",
             }),
             invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
         }),
         updateUser: build.mutation<ApiResponse<null>, UpdateUserParams>({
             query: ({formData}) => ({
                 url: `api/users`,
-                method: "patch",
+                method: "PATCH",
                 body: formData,
             }),
             invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
@@ -71,7 +70,7 @@ export const userApi = createApi({
         changeUsername: build.mutation<ApiResponse<null>, ChangeUsernameParams>({
             query: ({newUsername}) => ({
                 url: `api/users/change-username`,
-                method: "patch",
+                method: "PATCH",
                 body: {newUsername},
             }),
             invalidatesTags: (_result, _error, {currentUsername}) => [{type: "UserProfile", id: currentUsername}],
@@ -79,13 +78,13 @@ export const userApi = createApi({
         getFollowers: build.query<ApiResponse<PagedResult<SimpleUser>>, FollowListParams>({
             query: ({username, pageNumber, pageSize}) => ({
                 url: `api/users/${username}/followers?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
         getFollowing: build.query<ApiResponse<PagedResult<SimpleUser>>, FollowListParams>({
             query: ({username, pageNumber, pageSize}) => ({
                 url: `api/users/${username}/following?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-                method: "get",
+                method: "GET",
             }),
         }),
     }),
