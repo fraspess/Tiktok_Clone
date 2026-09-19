@@ -110,6 +110,12 @@ export const adminApi = createApi({
             }),
             invalidatesTags: (_result, _err, id) => [{type: "AdminReports", id}],
         }),
+        markReportAsResolved: build.mutation<ApiResponse<null>, string>({
+            query: (id) => ({
+                url: `api/admin-panel/reports/mark-as-resolved/${id}`,
+                method: "PATCH",
+            })
+        })
     }),
 });
 
@@ -124,4 +130,5 @@ export const {
     useGetAdminReportsQuery,
     useGetReportReasonsQuery,
     useDeleteAdminCommentMutation,
+    useMarkReportAsResolvedMutation,
 } = adminApi;

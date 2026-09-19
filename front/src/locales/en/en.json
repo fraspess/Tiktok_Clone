@@ -67,7 +67,7 @@
     }
   },
   "collapseSidebar": "Collapse sidebar",
-"nav": {
+  "nav": {
     "home": "Home",
     "search": "Search",
     "following": "Following",
@@ -239,6 +239,7 @@
     "reportStats": {
       "total": "Total reports"
     },
+    "noVideoDescription": "No description",
     "banUserTitle": "Ban user",
     "banVideoTitle": "Ban video",
     "selectReason": "Please select a reason",

@@ -10,17 +10,32 @@ import {
     useGetAdminUsersQuery,
     useGetAdminVideosQuery,
     useGetReportReasonsQuery,
+    useMarkReportAsResolvedMutation,
     useUnbanUserMutation,
     useUnbanVideoMutation,
 } from "@/store/apis/adminApi.ts";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog.tsx";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog.tsx";
 import {RadioGroup} from "radix-ui";
 import {cn} from "@/lib/utils.ts";
 import {getAvatarUrl, getMediaUrl} from "@/lib/getAvatarUrl.ts";
-import type {AdminReportDto, AvatarDto, EnumValueDto, ReportType, SimpleUserDto, SimpleVideoDto} from "@/types/Admin.ts";
+import type {
+    AdminReportDto,
+    AvatarDto,
+    EnumValueDto,
+    ReportType,
+    SimpleUserDto,
+    SimpleVideoDto
+} from "@/types/Admin.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 
 const PAGE_SIZE = 10;
@@ -37,11 +52,11 @@ function useApiErrorMessage() {
 }
 
 function PaginationControls({
-                                 hasNext,
-                                 hasPrevious,
-                                 currentPage,
-                                 onPageChange,
-                             }: {
+                                hasNext,
+                                hasPrevious,
+                                currentPage,
+                                onPageChange,
+                            }: {
     hasNext: boolean;
     hasPrevious: boolean;
     currentPage: number;
@@ -68,7 +83,8 @@ function StatusFilter({value, onChange}: { value: BanFilter; onChange: (value: B
     return (
         <div className="flex gap-1 px-6 pt-3">
             {filters.map((filter) => (
-                <Button key={filter} variant={value === filter ? "secondary" : "ghost"} size="sm" onClick={() => onChange(filter)}>
+                <Button key={filter} variant={value === filter ? "secondary" : "ghost"} size="sm"
+                        onClick={() => onChange(filter)}>
                     {t(`admin.filters.${filter}`)}
                 </Button>
             ))}
@@ -156,7 +172,8 @@ function UserRow({user, filter}: { user: SimpleUserDto; filter: BanFilter }) {
                         <DialogTitle>{t("admin.banUserTitle")}</DialogTitle>
                         <DialogDescription>@{user.username}</DialogDescription>
                     </DialogHeader>
-                    <RadioGroup.Root value={selectedReason} onValueChange={setSelectedReason} className="flex flex-col gap-2">
+                    <RadioGroup.Root value={selectedReason} onValueChange={setSelectedReason}
+                                     className="flex flex-col gap-2">
                         {(reasons?.data ?? []).map((reason) => (
                             <label
                                 key={reason.id}
@@ -273,7 +290,7 @@ const VideoRow = ({video}: { video: SimpleVideoDto }) => {
                     )}
                 </div>
                 <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{video.description || "@null"}</p>
+                    <p className="truncate text-sm font-medium">{video.description || t(t("admin.noVideoDescription"))}</p>
                     <p className="truncate text-xs text-muted-foreground">
                         @{video.author?.username ?? "?"}
                         {video.hashTags.map((tag) => ` #${tag}`).join("")}
@@ -300,7 +317,8 @@ const VideoRow = ({video}: { video: SimpleVideoDto }) => {
                         <DialogTitle>{t("admin.banVideoTitle")}</DialogTitle>
                         <DialogDescription>{video.description || video.id}</DialogDescription>
                     </DialogHeader>
-                    <RadioGroup.Root value={selectedReason} onValueChange={setSelectedReason} className="flex flex-col gap-2">
+                    <RadioGroup.Root value={selectedReason} onValueChange={setSelectedReason}
+                                     className="flex flex-col gap-2">
                         {(reasons?.data ?? []).map((reason) => (
                             <label
                                 key={reason.id}
@@ -371,10 +389,10 @@ const VideosTab = () => {
 const REPORT_TYPES: ReportType[] = ["Video", "User", "Comment"];
 
 function BanReportAction({
-    report,
-    reportType,
-    onBlocked,
-}: {
+                             report,
+                             reportType,
+                             onBlocked,
+                         }: {
     report: AdminReportDto;
     reportType: Exclude<ReportType, "Comment">;
     onBlocked: () => void;
@@ -420,7 +438,8 @@ function BanReportAction({
 
     return (
         <>
-            <Button variant="destructive" size="sm" onClick={() => setOpen(true)} disabled={!report.reportedContent?.id}>
+            <Button variant="destructive" size="sm" onClick={() => setOpen(true)}
+                    disabled={!report.reportedContent?.id}>
                 <ShieldX/> {t("admin.ban")}
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
@@ -431,8 +450,10 @@ function BanReportAction({
                     </DialogHeader>
                     <RadioGroup.Root value={reason} onValueChange={setReason} className="flex flex-col gap-2">
                         {(reasons?.data ?? []).map((item: EnumValueDto) => (
-                            <label key={item.id} className={cn("flex cursor-pointer items-center gap-3 rounded-md border border-border px-3 py-2 text-sm", reason === String(item.id) && "border-primary bg-muted")}>
-                                <RadioGroup.Item value={String(item.id)} className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input">
+                            <label key={item.id}
+                                   className={cn("flex cursor-pointer items-center gap-3 rounded-md border border-border px-3 py-2 text-sm", reason === String(item.id) && "border-primary bg-muted")}>
+                                <RadioGroup.Item value={String(item.id)}
+                                                 className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-input">
                                     <RadioGroup.Indicator className="h-2 w-2 rounded-full bg-primary"/>
                                 </RadioGroup.Item>
                                 {item.description ?? item.name}
@@ -441,7 +462,8 @@ function BanReportAction({
                     </RadioGroup.Root>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setOpen(false)}>{t("report.cancel")}</Button>
-                        <Button variant="destructive" onClick={handleBan} disabled={!reason || isLoading}>{t("admin.ban")}</Button>
+                        <Button variant="destructive" onClick={handleBan}
+                                disabled={!reason || isLoading}>{t("admin.ban")}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -455,6 +477,19 @@ const ReportsTab = () => {
     const [page, setPage] = useState(1);
     const [blocked, setBlocked] = useState<Set<string>>(new Set<string>());
     const [processed, setProcessed] = useState<Set<string>>(new Set<string>());
+    const [markAsResolved, {isLoading: isResolving}] = useMarkReportAsResolvedMutation();
+
+    const handleResolve = async (reportId: string) => {
+        try {
+            await markAsResolved(reportId).unwrap();
+
+            toast.success("Report resolved");
+            setProcessed((prev) => new Set(prev).add(reportId));
+        } catch (err) {
+            console.error(err);
+            reportError("Failed to resolve report");
+        }
+    };
 
     const {data, isLoading, isError} = useGetAdminReportsQuery({
         reportType,
@@ -466,23 +501,6 @@ const ReportsTab = () => {
         refetchOnMountOrArgChange: true,
     });
 
-    const toggleProcessed = (id: string) => {
-        setProcessed((prev) => {
-            const next = new Set(prev);
-            if (next.has(id)) {
-                next.delete(id);
-            } else {
-                next.add(id);
-            }
-            try {
-                localStorage.setItem("admin-processed-reports", JSON.stringify([...next]));
-            } catch {
-                // ignore storage failures
-            }
-            return next;
-        });
-    };
-
     const markBlocked = (id: string) => {
         setBlocked((prev) => {
             const next = new Set(prev).add(id);
@@ -493,7 +511,6 @@ const ReportsTab = () => {
             }
             return next;
         });
-        if (!processed.has(id)) toggleProcessed(id);
     };
 
     if (isLoading) return <p className="px-6 py-4 text-sm text-muted-foreground">{t("admin.loading")}</p>;
@@ -542,7 +559,8 @@ const ReportsTab = () => {
                                     <p className="text-sm font-medium">
                                         {t("admin.reportedBy")}: @{reporter?.username ?? "?"}
                                     </p>
-                                    {content?.title && <p className="truncate text-xs text-muted-foreground">{content.title}</p>}
+                                    {content?.title &&
+                                        <p className="truncate text-xs text-muted-foreground">{content.title}</p>}
                                     {reportedAvatar && (
                                         <img src={getMediaUrl(reportedAvatar)} alt="" loading="lazy"
                                              className="mt-1 h-10 w-10 rounded-md object-cover"
@@ -554,12 +572,19 @@ const ReportsTab = () => {
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
                                     {isBlocked ? (
-                                        <span className="text-xs font-medium text-destructive">{t("admin.blocked")}</span>
+                                        <span
+                                            className="text-xs font-medium text-destructive">{t("admin.blocked")}</span>
                                     ) : reportType !== "Comment" ? (
-                                        <BanReportAction report={report} reportType={reportType} onBlocked={() => markBlocked(report.id)}/>
+                                        <BanReportAction report={report} reportType={reportType}
+                                                         onBlocked={() => markBlocked(report.id)}/>
                                     ) : null}
-                                    <Button variant={isDone ? "outline" : "secondary"} size="sm" onClick={() => toggleProcessed(report.id)}>
-                                        {isDone ? t("admin.processed") : t("admin.markProcessed")}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={isResolving}
+                                        onClick={() => handleResolve(report.id)}
+                                    >
+                                        {isResolving ? "Resolving..." : "Mark as Resolved"}
                                     </Button>
                                 </div>
                             </div>

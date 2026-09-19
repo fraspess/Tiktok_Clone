@@ -3,12 +3,19 @@ using Application.Interfaces;
 using Application.Mapper;
 using Domain.Entities.Message;
 using Domain.Constants;
+using Domain.Entities.Identity;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Message;
 
-public class MessageService(IAppDbContext appDbContext, MessageMapper _mapper, IChatNotifier _notifier)
+public class MessageService(IAppDbContext appDbContext,
+    MessageMapper _mapper, 
+    IChatNotifier _notifier,
+    UserManager<UserEntity> userManager,
+    IStorageService storageService
+    )
     : IMessageService
 {
     public async Task FlushPendingAsync(Guid userId)
@@ -20,9 +27,10 @@ public class MessageService(IAppDbContext appDbContext, MessageMapper _mapper, I
                 m.Conversation.Participants
                     .Any(p => p.UserId == userId))
             .OrderBy(m => m.CreatedAt)
+            .Include(m => m.Sender)
             .ToListAsync();
 
-        if (!pendingMessages.Any()) return;
+        if (pendingMessages.Count == 0) return;
 
 
         var dtos = pendingMessages.Select(m => _mapper.ToDto(m)).ToList();
@@ -56,9 +64,11 @@ public class MessageService(IAppDbContext appDbContext, MessageMapper _mapper, I
 
     public async Task SendAsync(Guid userId, Guid conversationId, string content)
     {
-        var conversationExists = await appDbContext.Conversations.AnyAsync(u => u.Id == conversationId);
-        if (!conversationExists) throw new NotFoundException("Чат не знайдено");
-
+        var conversationParticipants = await appDbContext.Conversations.Where(c => c.Id == conversationId)
+            .Select(p => p.Participants).FirstOrDefaultAsync();
+        if (conversationParticipants is null) throw new NotFoundException("Чат не знайдено");
+        var senderUsername = await userManager.Users.Where(u => u.Id == userId).Select(u => u.UserName).FirstOrDefaultAsync() ?? throw new NotFoundException(ErrorCodes.UserNotFound);
+        
         var newMessage = new MessageEntity
         {
             SenderId = userId,
@@ -68,5 +78,21 @@ public class MessageService(IAppDbContext appDbContext, MessageMapper _mapper, I
 
         await appDbContext.Messages.AddAsync(newMessage);
         await appDbContext.SaveChangesAsync();
+
+        var dto = new MessageDto
+        {
+            Id = newMessage.Id,
+            Content = newMessage.Content,
+            SenderId = newMessage.SenderId,
+            IsOwn = false,
+            CreatedAt = newMessage.CreatedAt,
+            SenderUsername = senderUsername,
+            SenderAvatarUrl = storageService.GetUserAvatar(userId)
+        };
+        
+        foreach(var participant in conversationParticipants)
+        {
+            await _notifier.SendMessageAsync(participant.UserId, dto);
+        }
     }
 }

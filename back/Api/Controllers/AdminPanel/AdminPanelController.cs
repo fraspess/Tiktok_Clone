@@ -8,6 +8,7 @@ using Application.Features.AdminPanel.GetUserById;
 using Application.Features.AdminPanel.GetUsers;
 using Application.Features.AdminPanel.GetUserVideos;
 using Application.Features.AdminPanel.GetVideos;
+using Application.Features.AdminPanel.MarkReportAsResolved;
 using Application.Features.AdminPanel.UnbanUser;
 using Application.Features.AdminPanel.UnbanVideo;
 using Application.Features.Comment.Delete;
@@ -101,5 +102,12 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
     {
         await _mediator.Send(new DeleteCommentCommand(id));
         return Ok(ApiResponse<object>.Success(null!));
+    }
+
+    [HttpPatch("reports/mark-as-resolved/{id}")]
+    public async Task<IActionResult> MarAsResolved(Guid id)
+    {
+        await _mediator.Send(new MarkReportAsResolvedCommand(id));
+        return Ok();
     }
 }
