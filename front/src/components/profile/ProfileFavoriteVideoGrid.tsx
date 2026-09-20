@@ -9,10 +9,11 @@ import {formatCount} from "@/lib/utils.ts";
 
 interface ProfileFavoriteVideoGridProps {
     userId: string;
+    username: string;
     enabled: boolean;
 }
 
-const ProfileFavoriteVideoGrid = ({userId, enabled}: ProfileFavoriteVideoGridProps) => {
+const ProfileFavoriteVideoGrid = ({userId, username, enabled}: ProfileFavoriteVideoGridProps) => {
     const {t} = useTranslation();
     const navigate = useNavigate();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -75,10 +76,8 @@ const ProfileFavoriteVideoGrid = ({userId, enabled}: ProfileFavoriteVideoGridPro
         <div ref={containerRef} className="h-full w-full overflow-y-auto px-4 pb-8">
             <div className="grid gap-2 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
                 {videos.map((video) => {
-                    const authorUsername = video.author?.username;
                     const goToVideo = () => {
-                        if (!authorUsername) return;
-                        navigate(`/@${authorUsername}/video/${video.id}`, {
+                        navigate(`/@${username}/video/${video.id}`, {
                             state: {userId: video.author?.id},
                         });
                     };

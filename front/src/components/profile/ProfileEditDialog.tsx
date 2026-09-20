@@ -110,23 +110,27 @@ const ProfileEditDialog = ({profile, open, onOpenChange}: ProfileEditDialogProps
                 }).unwrap();
             }
 
+            // After a successful rename the backend no longer recognizes the old
+            // username, so any further calls (and the redirect below) must use the new one.
+            const currentUsername = usernameChanged ? trimmedUsername : profile.username;
+
             if (bioChanged || avatarChanged) {
                 const formData = new FormData();
                 formData.append("Bio", trimmedBio);
                 if (avatarFile) formData.append("Avatar", avatarFile);
 
-                await updateUser({username: profile.username, formData}).unwrap();
+                await updateUser({username: currentUsername, formData}).unwrap();
+            }
+
+            if (usernameChanged) {
+                await refetchMe();
             }
 
             toast.success(t("profile.edit.success"));
             onOpenChange(false);
 
             if (usernameChanged) {
-                // Make sure the cached "current user" (used e.g. by the "My profile" link
-                // in the top bar) reflects the new username before we navigate away —
-                // otherwise it can briefly still point at the old, now-nonexistent username.
-                await refetchMe();
-                navigate(`/@${trimmedUsername}`, {replace: true});
+                navigate(`/@${currentUsername}`, {replace: true});
             }
         } catch (err) {
             const code = extractErrorCode(err);

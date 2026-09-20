@@ -63,7 +63,15 @@ const MyVideosPage = () => {
         }
     }, [finishedCount, refetch]);
 
-    const videos = data?.data.items ?? [];
+    const pendingVideoIds = useMemo(
+        () => new Set(pending.map((u) => u.videoId).filter((id): id is string => Boolean(id))),
+        [pending]
+    );
+
+    const videos = useMemo(
+        () => (data?.data.items ?? []).filter((video) => !pendingVideoIds.has(video.id)),
+        [data, pendingVideoIds]
+    );
     const totalPages = data?.data.totalPages as number | undefined;
     const hasNext = totalPages ? pageNumber < totalPages : videos.length === PAGE_SIZE;
 
