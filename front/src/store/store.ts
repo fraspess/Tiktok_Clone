@@ -7,6 +7,7 @@ import messagesDrawerReducer from "@/store/slices/messagesDrawerSlice"
 import videosCacheReducer from "@/store/slices/videosCacheSlice"
 import messagesReducer from "@/store/slices/messagesSlice"
 import followReducer from "@/store/slices/followSlice"
+import uploadsReducer from "@/store/slices/uploadsSlice"
 import {authApi} from "@/store/apis/authApi.ts";
 import {conversationApi} from "@/store/apis/conversationApi.ts";
 import {videoApi} from "@/store/apis/videoApi.ts";
@@ -23,6 +24,7 @@ export const store = configureStore({
         videosCache: videosCacheReducer,
         messages: messagesReducer,
         follow: followReducer,
+        uploads: uploadsReducer,
         [authApi.reducerPath]: authApi.reducer,
         [conversationApi.reducerPath]: conversationApi.reducer,
         [videoApi.reducerPath]: videoApi.reducer,

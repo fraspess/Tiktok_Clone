@@ -3,13 +3,16 @@ import {useTranslation} from "react-i18next";
 import {Hash, Pause, Play, Volume2, VolumeX} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import VideoDropzone from "@/components/videoDropZone/VideoDropZone.tsx";
-import {useConfirmUploadMutation, useInitUploadMutation} from "@/store/apis/videoApi.ts";
 import {useNavigate} from "react-router-dom";
+import {useAppDispatch} from "@/store/hooks.ts";
+import {startUpload} from "@/store/slices/uploadsSlice.ts";
 
 const MAX_DESCRIPTION_LENGTH = 4000;
 
 const UploadVideoPage = () => {
     const {t} = useTranslation();
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const videoRef = useRef<HTMLVideoElement>(null);
 
     const [file, setFile] = useState<File | null>(null);
@@ -22,45 +25,12 @@ const UploadVideoPage = () => {
     const [_, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
 
-    const [initUpload] = useInitUploadMutation();
-    const [confirmUpload] = useConfirmUploadMutation();
-    const navigate = useNavigate();
-    const errorText = useRef<HTMLParagraphElement | null>(null);
-
-    const [isUploading, setIsUploading] = useState(false);
-    const uploadingRef = useRef(false);
-    const onConfirm = async () => {
-        if (!file || uploadingRef.current) return;
-        uploadingRef.current = true;
-        setIsUploading(true);
-
-        if (errorText.current) errorText.current.textContent = "";
-
-        try {
-            const response = await initUpload({contentType: file.type}).unwrap();
-
-            const putRes = await fetch(response.url, {
-                method: "PUT",
-                headers: {"Content-Type": file.type},
-                body: file,
-            });
-            if (!putRes.ok) throw new Error(`Upload failed: ${putRes.status}`);
-
-            await confirmUpload({
-                token: response.uploadToken,
-                description: description.trim(),
-            }).unwrap();
-
-            navigate("/");
-        } catch (err) {
-            if (errorText.current) {
-                errorText.current.textContent = t("uploads.error");
-            }
-            console.error(err);
-            uploadingRef.current = false;
-            setIsUploading(false);
-        }
+    const onConfirm = () => {
+        if (!file) return;
+        dispatch(startUpload(file, description.trim()));
+        navigate("/studio");
     };
+
     const onFileSelected = (selected: File) => {
         setFile(selected);
         setDescription("");
@@ -199,7 +169,6 @@ const UploadVideoPage = () => {
                     </label>
                     <div className="flex flex-col rounded-lg bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
                         <textarea
-                            readOnly={isUploading}
                             id="description"
                             value={description}
                             onChange={handleChange}
@@ -223,17 +192,11 @@ const UploadVideoPage = () => {
                                 {description.length}/{MAX_DESCRIPTION_LENGTH}
                             </span>
                         </div>
-                        <p ref={errorText} className="text-red-500 text-center"/>
                     </div>
 
                     <div className="flex justify-end mt-3">
-                        <Button
-                            onClick={onConfirm}
-                            disabled={isUploading}
-                            className="px-10"
-                            variant="default"
-                        >
-                            {isUploading ? t("uploads.uploading") : t("uploads.upload")}
+                        <Button onClick={onConfirm} className="px-10" variant="default">
+                            {t("uploads.upload")}
                         </Button>
                     </div>
                 </div>

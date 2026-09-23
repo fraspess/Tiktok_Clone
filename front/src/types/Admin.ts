@@ -7,7 +7,8 @@ export interface AvatarDto {
 export interface SimpleUserDto {
     id: string;
     avatar: AvatarDto | object | string | null;
-    username: string;
+    username: string | null;
+    isBanned: boolean;
 }
 
 export interface AdminUserDto {
@@ -31,14 +32,14 @@ export type SimpleVideoAuthor = {
 
 export interface SimpleVideoDto {
     id: string;
-    videoUrl: string;
-    description: string;
-    hashTags: string[];
+    videoUrl: string | null;
+    description: string | null;
+    hashTags: string[] | null;
     author: SimpleVideoAuthor;
     createdAt: string;
-    viewCount: number;
+    viewCount: number | null;
     isBanned: boolean;
-    thumbnailUrl: string;
+    thumbnailUrl: string | null;
 }
 
 export interface ReportUserDto {

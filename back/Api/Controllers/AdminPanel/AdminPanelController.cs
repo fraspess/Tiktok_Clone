@@ -26,10 +26,16 @@ namespace Api.Controllers.AdminPanel;
 public class AdminPanelController(IMediator _mediator) : ControllerBase
 {
     [HttpGet("users")]
-    public async Task<IActionResult> GetUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5)
+    public async Task<IActionResult> GetUsers(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? search = null,
+        [FromQuery] bool? isBanned = null)
     {
-        var users = await _mediator.Send(new AdminPanelGetUsersCommand(new PaginationSettings
-            { PageNumber = pageNumber, PageSize = pageSize }));
+        var users = await _mediator.Send(new AdminPanelGetUsersCommand(
+            new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize },
+            search,
+            isBanned));
         return Ok(ApiResponse<object>.Success(users));
     }
 
@@ -56,10 +62,14 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
 
 
     [HttpGet("videos")]
-    public async Task<IActionResult> GetVideos([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5)
+    public async Task<IActionResult> GetVideos(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] bool? isBanned = null)
     {
-        var videos = await _mediator.Send(new AdminPanelGetVideosCommand(new PaginationSettings
-            { PageNumber = pageNumber, PageSize = pageSize }));
+        var videos = await _mediator.Send(new AdminPanelGetVideosCommand(
+            new PaginationSettings { PageNumber = pageNumber, PageSize = pageSize },
+            isBanned));
         return Ok(ApiResponse<object>.Success(videos));
     }
 
@@ -108,6 +118,6 @@ public class AdminPanelController(IMediator _mediator) : ControllerBase
     public async Task<IActionResult> MarAsResolved(Guid id)
     {
         await _mediator.Send(new MarkReportAsResolvedCommand(id));
-        return Ok();
+        return Ok(ApiResponse<object>.Success(null!));
     }
 }

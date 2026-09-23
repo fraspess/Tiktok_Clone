@@ -21,6 +21,7 @@ internal class BanVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser u
             return Unit.Value;
 
         video.Ban(user.Id!.Value);
+        video.BanReason = request.Reason;
 
         appDbContext.Videos.Update(video);
         await appDbContext.SaveChangesAsync(cancellationToken);

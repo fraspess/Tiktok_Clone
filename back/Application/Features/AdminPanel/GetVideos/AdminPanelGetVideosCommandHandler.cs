@@ -15,10 +15,17 @@ internal class AdminPanelGetVideosCommandHandler(IAppDbContext appDbContext, Vid
     public async Task<PagedResult<SimpleVideoDto>> Handle(AdminPanelGetVideosCommand request,
         CancellationToken cancellationToken)
     {
-        var videos = await appDbContext
+        var videosQuery = appDbContext
             .Videos
             .IgnoreQueryFilters()
-            .Where(v => v.Status == VideoStatus.Processed)
+            .Where(v => v.Status == VideoStatus.Processed);
+
+        if (request.IsBanned.HasValue)
+        {
+            videosQuery = videosQuery.Where(v => v.IsBanned == request.IsBanned.Value);
+        }
+
+        var videos = await videosQuery
             .ToProjectionDto(user.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken);
 

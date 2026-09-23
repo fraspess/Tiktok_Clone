@@ -36,7 +36,9 @@ export const userApi = createApi({
                 method: "GET",
             }),
             providesTags: (result) =>
-                result?.data ? [{type: "UserProfile", id: result.data.username}] : [],
+                result?.data
+                    ? [{type: "UserProfile", id: result.data.username}, {type: "UserProfile", id: "ME"}]
+                    : [{type: "UserProfile", id: "ME"}],
         }),
         getUserProfile: build.query<ApiResponse<UserProfile>, string>({
             query: (username) => ({
@@ -73,7 +75,7 @@ export const userApi = createApi({
                 method: "PATCH",
                 body: {newUsername},
             }),
-            invalidatesTags: (_result, _error, {currentUsername}) => [{type: "UserProfile", id: currentUsername}],
+            invalidatesTags: () => [{type: "UserProfile", id: "ME"}],
         }),
         getFollowers: build.query<ApiResponse<PagedResult<SimpleUser>>, FollowListParams>({
             query: ({username, pageNumber, pageSize}) => ({

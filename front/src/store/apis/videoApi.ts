@@ -56,6 +56,12 @@ export const videoApi = createApi({
                 method: "GET",
             }),
         }),
+        getMyVideos: build.query<ApiResponse<PagedResult<VideoDto>>, FypParams>({
+            query: ({pageNumber, pageSize}) => ({
+                url: `api/videos/my?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+                method: "GET",
+            }),
+        }),
         reportVideo: build.mutation<ApiResponse<null>, ReportVideoParams>({
             query: ({contentId, reason, customReason}) => ({
                 url: "api/reports",
@@ -113,7 +119,7 @@ export const videoApi = createApi({
                 method: "GET",
             }),
         }),
-        confirmUpload: build.mutation<null, CompleteUploadData>({
+        confirmUpload: build.mutation<ApiResponse<null>, CompleteUploadData>({
             query: (body) => ({
                 url: "api/videos/upload-complete",
                 method: "POST",
@@ -149,4 +155,5 @@ export const {
     useLazyGetFavoriteVideosQuery,
     useLazySearchVideosQuery,
     useLazyGetVideoByIdQuery,
+    useGetMyVideosQuery,
 } = videoApi;

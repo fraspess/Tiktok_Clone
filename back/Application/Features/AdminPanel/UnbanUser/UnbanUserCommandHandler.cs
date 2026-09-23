@@ -1,7 +1,6 @@
 ﻿using Domain.Entities.Identity;
 using Domain.Constants;
 using Domain.Exceptions;
-using Google.Apis.Logging;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +12,7 @@ internal class UnbanUserCommandHandler(UserManager<UserEntity> userManager) : IR
     public async Task<Unit> Handle(UnbanUserCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken)
-                   ?? throw new BadRequestException(ErrorCodes.UserNotFound);
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
         user.IsBanned = false;
         user.BannedAt = null;

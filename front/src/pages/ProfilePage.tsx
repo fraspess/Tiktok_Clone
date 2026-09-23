@@ -126,7 +126,12 @@ const ProfilePage = () => {
                     <CachedVideoGrid filter={isLiked} username={profile.username}/>
                 )}
                 {activeTab === "saved" && profile.isOwnProfile && (
-                    <ProfileFavoriteVideoGrid userId={profile.id} enabled={activeTab === "saved"}/>                )}
+                    <ProfileFavoriteVideoGrid
+                        userId={profile.id}
+                        username={profile.username}
+                        enabled={activeTab === "saved"}
+                    />
+                )}
             </div>
         </div>
     );
