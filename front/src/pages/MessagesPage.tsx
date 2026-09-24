@@ -4,6 +4,7 @@ import {useLocation} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
+import {cn} from "@/lib/utils.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
 import {useLazyGetMessagesQuery, useLazySearchConversationsQuery} from "@/store/apis/conversationApi.ts";
@@ -197,7 +198,10 @@ const MessagesPage = () => {
 
     return (
         <div className="flex h-full min-h-0 w-full bg-[#121212] text-white">
-            <div className="flex w-full max-w-[420px] shrink-0 flex-col border-r border-white/10">
+            <div className={cn(
+                "w-full shrink-0 flex-col border-r border-white/10 md:flex md:max-w-[420px]",
+                selectedConversation ? "hidden" : "flex"
+            )}>
                 <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-5">
                     <h1 className="text-[24px] font-bold tracking-[-0.03em]">{t("chat.inbox")}</h1>
                     <Button size="icon-sm" variant="ghost" onClick={() => setIsNewConversationOpen(true)}
@@ -234,10 +238,11 @@ const MessagesPage = () => {
                     error={messagesError}
                     isConnected={isConnected}
                     onSend={handleSend}
+                    onBack={() => setSelectedConversation(null)}
                     currentUser={currentUser}
                 />
             ) : (
-                <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-white/60">
+                <div className="hidden flex-1 items-center justify-center px-6 text-center text-sm text-white/60 md:flex">
                     {t("chat.selectConversation")}
                 </div>
             )}

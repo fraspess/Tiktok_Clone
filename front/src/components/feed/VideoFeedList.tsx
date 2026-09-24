@@ -69,7 +69,7 @@ const VideoFeedList =
     return (
         <div
             ref={containerRef}
-            className="h-full w-full snap-y snap-mandatory overflow-y-scroll scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="h-full w-full snap-y snap-mandatory overflow-y-scroll overscroll-y-contain scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
             {videos.map((video) => (
                 <VideoCard key={video.id} video={video} containerRef={containerRef}/>

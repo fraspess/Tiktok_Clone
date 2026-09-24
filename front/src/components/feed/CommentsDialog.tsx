@@ -182,7 +182,7 @@ const CommentRow = ({
                                 onChange={(e) => setReplyText(e.target.value)}
                                 placeholder={t("comments.replyPlaceholder", {username: comment.ownerUsername})}
                                 maxLength={500}
-                                className="w-full min-w-0 rounded-full border border-input bg-transparent px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                                className="w-full min-w-0 rounded-full border border-input bg-transparent px-3 py-1.5 text-base md:text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                             />
                             <Button type="submit" size="icon-sm" disabled={isSendingReply || !replyText.trim()}>
                                 {isSendingReply ? <Loader2 className="h-4 w-4 animate-spin"/> : <Send className="h-4 w-4"/>}
@@ -295,7 +295,7 @@ const CommentsDialog = ({videoId, open, onOpenChange, onCommentsCountChange}: Co
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-lg">
+            <DialogContent className="flex h-[75dvh] max-h-[85dvh] flex-col max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:h-auto sm:max-h-[85vh] sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>{t("comments.title")}</DialogTitle>
                 </DialogHeader>
@@ -342,7 +342,7 @@ const CommentsDialog = ({videoId, open, onOpenChange, onCommentsCountChange}: Co
                         placeholder={isAuth ? t("comments.placeholder") : t("comments.signInToComment")}
                         maxLength={500}
                         className={cn(
-                            "w-full min-w-0 rounded-full border border-input bg-transparent px-3.5 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                            "w-full min-w-0 rounded-full border border-input bg-transparent px-3.5 py-2 text-base md:text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                         )}
                     />
                     <Button type="submit" size="icon" disabled={isSending || !text.trim()}>

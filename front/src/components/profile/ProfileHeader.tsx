@@ -100,9 +100,9 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
 
     return (
         <div
-            className="flex flex-col items-center gap-4 px-4 py-8 text-center sm:flex-row sm:items-start sm:text-left"
+            className="flex flex-col items-center gap-4 px-4 py-4 text-center sm:flex-row sm:py-8 sm:items-start sm:text-left"
         >
-            <div className="h-28 w-28 shrink-0 overflow-hidden rounded-full bg-neutral-700">
+            <div className="h-20 w-20 shrink-0 sm:h-28 sm:w-28 overflow-hidden rounded-full bg-neutral-700">
                 {profile.avatar?.large ? (
                     <img
                         src={profile.avatar.large}

@@ -174,7 +174,7 @@ const UploadVideoPage = () => {
                             onChange={handleChange}
                             rows={5}
                             placeholder={t("details.descriptionPlaceholder")}
-                            className="w-full resize-none bg-transparent px-4 pt-4 pb-2 text-sm outline-none placeholder:text-muted-foreground"
+                            className="w-full resize-none bg-transparent px-4 pt-4 pb-2 text-base md:text-sm outline-none placeholder:text-muted-foreground"
                         />
                         <div
                             className="flex items-center justify-between px-4 py-2 border-t border-neutral-200 dark:border-neutral-800">

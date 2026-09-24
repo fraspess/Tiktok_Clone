@@ -1,7 +1,7 @@
 import {Link} from "react-router-dom";
 import type {FormEvent} from "react";
 import {useCallback, useEffect, useRef, useState} from "react";
-import {Loader2, Send} from "lucide-react";
+import {ArrowLeft, Loader2, Send} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
@@ -16,6 +16,7 @@ interface ConversationWindowProps {
     error: string | null;
     isConnected: boolean;
     onSend: (content: string) => Promise<void>;
+    onBack?: () => void;
     currentUser?: {id: string; username: string};
 }
 
@@ -31,6 +32,7 @@ const ConversationWindow = ({
                                 error,
                                 isConnected,
                                 onSend,
+                                onBack,
                                 currentUser,
                             }: ConversationWindowProps) => {
     const {t} = useTranslation();
@@ -62,7 +64,13 @@ const ConversationWindow = ({
 
     return (
         <section className="flex min-w-0 flex-1 flex-col bg-[#121212]">
-            <header className="border-b border-white/10 px-5 py-4">
+            <header className="flex items-center gap-2 border-b border-white/10 px-3 py-3 md:px-5 md:py-4">
+                {onBack && (
+                    <Button type="button" variant="ghost" size="icon-sm" onClick={onBack}
+                            className="shrink-0 text-white md:hidden" aria-label={t("chat.back", "Назад")}>
+                        <ArrowLeft className="h-5 w-5"/>
+                    </Button>
+                )}
                 <h2 className="truncate text-base font-semibold text-white">
                     {otherParticipants.length > 0 ? (
                         otherParticipants.map((p, idx) => (
@@ -79,7 +87,7 @@ const ConversationWindow = ({
                 </h2>
             </header>
 
-            <div className="flex-1 overflow-y-auto px-5 py-4">
+            <div className="flex-1 overflow-y-auto px-3 py-4 md:px-5">
                 {isLoading ? (
                     <div className="flex h-full items-center justify-center text-white/60">
                         <Loader2 className="mr-2 h-5 w-5 animate-spin"/>{t("chat.loadingMessages")}
@@ -117,7 +125,7 @@ const ConversationWindow = ({
                 )}
             </div>
 
-            <form onSubmit={submit} className="flex gap-2 border-t border-white/10 p-4">
+            <form onSubmit={submit} className="flex gap-2 border-t border-white/10 p-3 md:p-4">
                 <Input
                     ref={inputRef}
                     value={content}

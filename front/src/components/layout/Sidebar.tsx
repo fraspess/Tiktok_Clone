@@ -39,7 +39,7 @@ const Sidebar = ({collapsed, onToggle}: SidebarProps) => {
 
     return (
         <aside className={cn(
-            "sticky top-0 flex h-screen flex-col border-r pr-3 transition-all duration-300 md:max-w-none max-w-[70%] dark:bg-neutral-900",
+            "sticky top-0 hidden h-dvh flex-col border-r pr-3 transition-all duration-300 md:max-w-none max-w-[70%] md:flex dark:bg-neutral-900",
             collapsed ? "w-12" : "w-64"
         )}>
             <div className={cn("flex items-center justify-between p-2")}>

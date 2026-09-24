@@ -9,7 +9,8 @@ const HomePage = () => {
             <img
                 src={mascot}
                 alt=""
-                className="pointer-events-none absolute -bottom-16 -right-2 z-20 w-[520px] max-w-[60vw] select-none opacity-90"
+                loading="lazy"
+                className="pointer-events-none absolute -bottom-16 -right-2 z-20 hidden w-[520px] max-w-[60vw] select-none opacity-90 md:block"
             />
         </div>
     )

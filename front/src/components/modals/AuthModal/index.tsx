@@ -40,7 +40,7 @@ const AuthModal = () => {
         <Dialog open={isOpened} onOpenChange={handleClose}>
             <DialogContent onInteractOutside={(e) => {
                 e.preventDefault()
-            }} className="sm:max-w-sm max-h-[90vh] overflow-y-auto">
+            }} className="sm:max-w-sm max-h-[90dvh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-4xl">
                         {step === "signIn" && t("auth.signInTitle")}
