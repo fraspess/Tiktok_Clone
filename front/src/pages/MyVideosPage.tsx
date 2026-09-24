@@ -11,7 +11,7 @@ const PAGE_SIZE = 20;
 const ROW =
     "grid grid-cols-[minmax(0,1fr)_minmax(96px,1fr)] sm:grid-cols-[minmax(0,3fr)_1fr_1fr_1fr_1fr_1.4fr] items-center gap-4 px-4";
 
-const Thumbnail = ({src}: {src?: string | null}) => {
+const Thumbnail = ({src}: { src?: string | null }) => {
     const [broken, setBroken] = useState(false);
 
     if (!src || broken) {
@@ -72,8 +72,8 @@ const MyVideosPage = () => {
         () => (data?.data.items ?? []).filter((video) => !pendingVideoIds.has(video.id)),
         [data, pendingVideoIds]
     );
-    const totalPages = data?.data.totalPages as number | undefined;
-    const hasNext = totalPages ? pageNumber < totalPages : videos.length === PAGE_SIZE;
+    const totalPages = data?.data.metadata.totalPages;
+    const hasNext = data?.data.metadata.hasNext ?? false;
 
     const pageList = useMemo(() => {
         if (!totalPages || totalPages <= 1) return null;
@@ -83,7 +83,8 @@ const MyVideosPage = () => {
     return (
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-3 pt-4 pb-6 md:px-6 md:pt-20 md:pb-10">
             <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className={`${ROW} border-b border-neutral-200 py-3 text-xs text-muted-foreground dark:border-neutral-800`}>
+                <div
+                    className={`${ROW} border-b border-neutral-200 py-3 text-xs text-muted-foreground dark:border-neutral-800`}>
                     <span>{t("studio.video", "Відео")}</span>
                     <span className="hidden sm:block">{t("studio.date", "Дата")}</span>
                     <span className="hidden text-right sm:block">{t("studio.views", "Перегляди")}</span>
@@ -114,11 +115,13 @@ const MyVideosPage = () => {
                             <span className="hidden text-right text-muted-foreground sm:block">—</span>
                             <div className="flex w-full flex-col items-end gap-1 self-center -mt-5">
                                 {u.status === "error" ? (
-                                    <span className="text-xs text-red-500">{u.errorMessage ?? t("studio.error", "Помилка")}</span>
+                                    <span
+                                        className="text-xs text-red-500">{u.errorMessage ?? t("studio.error", "Помилка")}</span>
                                 ) : (
                                     <>
                                         <span className="text-xs tabular-nums text-muted-foreground">{percent}%</span>
-                                        <div className="h-1.5 w-full overflow-hidden rounded bg-neutral-200 dark:bg-neutral-800">
+                                        <div
+                                            className="h-1.5 w-full overflow-hidden rounded bg-neutral-200 dark:bg-neutral-800">
                                             <div
                                                 className={`h-full bg-foreground transition-[width] ease-linear ${
                                                     isUploading ? "duration-150" : "duration-500"
