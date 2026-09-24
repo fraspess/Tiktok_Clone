@@ -136,7 +136,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-5">
+        <div className="absolute bottom-16 right-2 z-20 flex flex-col items-center gap-3 md:static md:bottom-auto md:right-auto md:gap-5">
 
             <div className="relative mb-1">
                 <Link
@@ -159,7 +159,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                     <button
                         type="button"
                         onClick={toggleFollow}
-                        className="absolute -bottom-1.5 left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full bg-red-500 text-white"
+                        className="absolute -bottom-2 left-1/2 flex h-6 w-6 -translate-x-1/2 md:-bottom-1.5 md:h-5 md:w-5 items-center justify-center rounded-full bg-red-500 text-white"
                     >
                         <Plus size={12} strokeWidth={3}/>
                     </button>
@@ -171,10 +171,10 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 onClick={toggleLike}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
                     <Heart size={24} className={isLiked ? "fill-red-500 text-red-500" : "text-white"}/>
                 </span>
-                <span className="text-xs font-medium text-black dark:text-white">{formatCount(likeCount)}</span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(likeCount)}</span>
             </button>
 
             <button
@@ -182,10 +182,10 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 onClick={() => setIsCommentsOpen(true)}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
                     <MessageCircle size={24}/>
                 </span>
-                <span className="text-xs font-medium text-black dark:text-white">{formatCount(commentsCount)}</span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(commentsCount)}</span>
             </button>
 
             <button
@@ -193,17 +193,17 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 onClick={toggleSave}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
                     <Bookmark size={24} className={isSaved ? "fill-white" : ""}/>
                 </span>
-                <span className="text-xs font-medium text-black dark:text-white">{formatCount(saveCount)}</span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(saveCount)}</span>
             </button>
 
             <button type="button" onClick={handleShare} className="flex flex-col items-center gap-1 text-white">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
                     <Share2 size={24}/>
                 </span>
-                <span className="text-xs font-medium text-black dark:text-white">{t("feed.share")}</span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("feed.share")}</span>
             </button>
 
             <button
@@ -211,10 +211,10 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 onClick={() => setIsReportOpen(true)}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
                     <Flag size={22}/>
                 </span>
-                <span className="text-xs font-medium text-black dark:text-white">{t("report.reportButton")}</span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("report.reportButton")}</span>
             </button>
 
             <ReportVideoDialog

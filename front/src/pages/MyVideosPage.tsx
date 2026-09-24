@@ -81,7 +81,7 @@ const MyVideosPage = () => {
     }, [pageNumber, totalPages]);
 
     return (
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 pt-20 pb-10">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-3 pt-4 pb-6 md:px-6 md:pt-20 md:pb-10">
             <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
                 <div className={`${ROW} border-b border-neutral-200 py-3 text-xs text-muted-foreground dark:border-neutral-800`}>
                     <span>{t("studio.video", "Відео")}</span>

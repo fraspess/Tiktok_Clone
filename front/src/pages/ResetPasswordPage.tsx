@@ -39,7 +39,7 @@ const ResetPasswordPage = () => {
 
     if (!isValidParams) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+            <div className="flex min-h-[calc(100dvh-8rem)] md:min-h-[calc(100dvh-4rem)] items-center justify-center px-4">
                 <div className="w-full max-w-md text-center">
                     <CircleAlert className="mx-auto h-16 w-16 text-red-500 mb-4"/>
                     <h1 className="text-2xl font-semibold mb-2">{t("auth.resetPassword.invalidLinkTitle")}</h1>
@@ -90,7 +90,7 @@ const ResetPasswordPage = () => {
 
     if (isSuccess) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+            <div className="flex min-h-[calc(100dvh-8rem)] md:min-h-[calc(100dvh-4rem)] items-center justify-center px-4">
                 <div className="w-full max-w-md text-center">
                     <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4"/>
                     <h1 className="text-2xl font-semibold mb-2">{t("auth.resetPassword.successTitle")}</h1>
@@ -104,7 +104,7 @@ const ResetPasswordPage = () => {
     }
 
     return (
-        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+        <div className="flex min-h-[calc(100dvh-8rem)] md:min-h-[calc(100dvh-4rem)] items-center justify-center px-4">
             <div className="w-full max-w-md">
                 <h1 className="text-2xl font-semibold mb-2">{t("auth.resetPassword.title")}</h1>
                 <p className="text-muted-foreground mb-6">{t("auth.resetPassword.description")}</p>

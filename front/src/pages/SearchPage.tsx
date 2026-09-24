@@ -149,7 +149,7 @@ const SearchPage = () => {
                                 <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
                                     {t("search.videos")}
                                 </h3>
-                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
+                                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
                                     {videos.map((video) => (
                                         <div
                                             key={video.id}

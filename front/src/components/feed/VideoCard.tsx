@@ -165,10 +165,10 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
         <section
             ref={sectionRef}
             id={video.id}
-            className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-neutral-100 px-4 dark:bg-neutral-950"
+            className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-black md:bg-neutral-100 md:px-4 md:dark:bg-neutral-950"
         >
             <div
-                className="relative aspect-[9/16] h-full max-h-[85vh] max-w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
+                className="relative h-full w-full overflow-hidden bg-black md:aspect-[9/16] md:max-h-[85dvh] md:w-auto md:max-w-full md:rounded-2xl md:shadow-2xl">
                 <video
                     ref={videoRef}
                     poster={video.thumbnailUrl || undefined}
@@ -180,10 +180,15 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                     preload="metadata"
                     onClick={togglePlayPause}
                 />
+                {!isPlaying && (
+                    <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center md:hidden">
+                        <Play size={64} className="fill-white/80 text-white/80 drop-shadow-lg"/>
+                    </div>
+                )}
                 <button
                     type="button"
                     onClick={togglePlayPause}
-                    className="absolute left-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
+                    className="absolute left-4 top-4 z-20 hidden rounded-full bg-black/40 p-3 md:block text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
                     {isPlaying ? <Pause size={26}/> : <Play size={26}/>}
                 </button>
@@ -203,12 +208,12 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                         }
                         dispatch(setMuted(next));
                     }}
-                    className="absolute right-4 top-4 z-20 rounded-full bg-black/40 p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
+                    className="absolute right-3 top-[calc(env(safe-area-inset-top,0px)+3.5rem)] z-20 rounded-full bg-black/40 p-2.5 md:right-4 md:top-4 md:p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
                     {isMuted ? <VolumeX size={26}/> : <Volume2 size={26}/>}
                 </button>
 
-                <div className="absolute bottom-4 left-4 right-4 text-white">
+                <div className="absolute bottom-4 left-4 right-20 text-white [text-shadow:0_1px_4px_rgb(0_0_0/0.7)] md:right-4 md:[text-shadow:none]">
                     {video.author?.username ? (
                         <Link
                             to={`/@${video.author.username}`}
@@ -228,7 +233,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                 <div
                     ref={progressBarRef}
                     onClick={handleSeek}
-                    className="absolute bottom-0 left-0 right-0 z-10 flex h-3 w-full cursor-pointer items-end px-0"
+                    className="absolute bottom-0 left-0 right-0 z-10 flex h-5 w-full cursor-pointer items-end px-0 md:h-3"
                 >
                     <div className="h-1 w-full bg-white/30">
                         <div

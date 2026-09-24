@@ -194,7 +194,7 @@ const ProfileEditDialog = ({profile, open, onOpenChange}: ProfileEditDialogProps
                         onChange={(e) => setBio(e.target.value)}
                         rows={3}
                         maxLength={BIO_MAX_LENGTH}
-                        className="w-full min-w-0 resize-none rounded-md border border-input bg-transparent px-2.5 py-1.5 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                        className="w-full min-w-0 resize-none rounded-md border border-input bg-transparent px-2.5 py-1.5 text-base md:text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
                     />
                     <span className="self-end text-xs text-muted-foreground">
                         {bio.length}/{BIO_MAX_LENGTH}

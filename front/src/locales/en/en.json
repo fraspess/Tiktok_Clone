@@ -272,5 +272,21 @@
       "user": "Users",
       "comment": "Comments"
     }
+  },
+  "studio": {
+    "video": "Video",
+    "date": "Date",
+    "views": "Views",
+    "likes": "Likes",
+    "comments": "Comments",
+    "error": "Error",
+    "uploading": "Uploading…",
+    "processing": "Processing…",
+    "loading": "Loading…",
+    "loadError": "Failed to load videos",
+    "empty": "You don't have any videos yet",
+    "noDescription": "No description",
+    "prev": "Previous",
+    "next": "Next"
   }
 }
