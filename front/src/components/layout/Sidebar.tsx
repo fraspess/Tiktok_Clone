@@ -44,8 +44,7 @@ const Sidebar = ({collapsed, onToggle}: SidebarProps) => {
         )}>
             <div className={cn("flex items-center justify-between p-2")}>
                 {!collapsed &&
-                    <h1 className="text-lg font-bold hover:cursor-pointer" onClick={() => navigate("/")}>TikTok
-                        Clone</h1>}
+                    <h1 className="text-lg font-bold hover:cursor-pointer" onClick={() => navigate("/")}>Much&More</h1>}
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" onClick={onToggle}>
