@@ -11,7 +11,8 @@ public class DeleteVideoCommandHandler(IAppDbContext appDbContext, ICurrentUser 
 {
     public async Task<Unit> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
     {
-        var video = await appDbContext.Videos.FirstOrDefaultAsync(v => v.ShortId == request.VideoId, cancellationToken)
+        var video = await appDbContext.Videos.IgnoreQueryFilters()
+                        .FirstOrDefaultAsync(v => v.ShortId == request.VideoId && !v.IsDeleted, cancellationToken)
                     ?? throw new NotFoundException(ErrorCodes.VideoNotFound);
 
         if (video.UserId != user.Id) throw new NotAllowedException(ErrorCodes.Forbidden);

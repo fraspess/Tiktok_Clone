@@ -8,6 +8,7 @@ import {
     useGetAdminReportsQuery,
     useGetAdminUsersQuery,
     useGetAdminVideosQuery,
+    useGetAdminUserVideosQuery,
     useGetReportReasonsQuery,
     useMarkReportAsResolvedMutation,
     useUnbanUserMutation,
@@ -86,13 +87,33 @@ function UserRow({user}: {user: SimpleUserDto}) {
     const [banUser, {isLoading: banning}] = useBanUserMutation();
     const [unbanUser, {isLoading: unbanning}] = useUnbanUserMutation();
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [videosOpen, setVideosOpen] = useState(false);
     const username = getUsername(user.username);
     const avatar = getAvatarUrl(user.avatar);
     const ban = async (reason: number) => { try { await banUser({id: user.id, reason}).unwrap(); toast.success(t("admin.userBanned")); setDialogOpen(false); } catch (error) { showError(error, t("admin.banError")); } };
     const unban = async () => { try { await unbanUser(user.id).unwrap(); toast.success(t("admin.userUnbanned")); } catch (error) { showError(error, t("admin.unbanError")); } };
     return <div className="flex items-center justify-between gap-3 border-b border-border px-3 sm:px-6 py-3 last:border-b-0"><div className="flex min-w-0 items-center gap-3"><div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-medium">{username.charAt(0).toUpperCase()}{avatar && <img src={getMediaUrl(avatar)} alt={username} loading="lazy" className="absolute inset-0 h-full w-full object-cover" onError={(e) => e.currentTarget.remove()}/>}</div><div className="min-w-0"><p className="truncate text-sm font-medium">@{username}</p>{user.isBanned && <p className="text-xs text-destructive">{t("admin.banned")}</p>}</div></div>
         {user.isBanned ? <Button variant="outline" size="sm" onClick={unban} disabled={unbanning}>{unbanning && <Loader2 className="animate-spin"/>}<ShieldCheck/> {t("admin.unban")}</Button> : <Button variant="destructive" size="sm" onClick={() => setDialogOpen(true)}><ShieldX/> {t("admin.ban")}</Button>}
+        <Button variant="outline" size="sm" onClick={() => setVideosOpen(true)}>{t("admin.userVideos")}</Button>
+        <Dialog open={videosOpen} onOpenChange={setVideosOpen}><DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-3xl">
+            <DialogHeader><DialogTitle>{t("admin.userVideos")}</DialogTitle><DialogDescription>@{username}</DialogDescription></DialogHeader>
+            {videosOpen && <UserVideos userId={user.id}/>}
+        </DialogContent></Dialog>
         <ModerationReasonDialog open={dialogOpen} onOpenChange={setDialogOpen} contentType="User" title={t("admin.banUserTitle")} description={`@${username}`} onConfirm={ban} isLoading={banning}/>
+    </div>;
+}
+
+function UserVideos({userId}: {userId: string}) {
+    const {t} = useTranslation();
+    const [page, setPage] = useState(1);
+    const {currentData, isFetching, isError, refetch} = useGetAdminUserVideosQuery({id: userId, pageNumber: page, pageSize: PAGE_SIZE});
+    const metadata = currentData?.data.metadata;
+    return <div>
+        {isFetching ? <p role="status">{t("admin.loading")}</p> : isError ?
+            <div role="alert">{t("admin.loadError")} <Button onClick={() => void refetch()}>{t("chat.privacy.retry")}</Button></div> :
+            currentData?.data.items.length ? currentData.data.items.map(video => <VideoRow key={video.id} video={video}/>) : <p>{t("admin.empty")}</p>}
+        {!isFetching && <PaginationControls hasNext={metadata?.hasNext ?? false} hasPrevious={page > 1}
+            currentPage={page} totalPages={metadata?.totalPages} onPageChange={setPage}/>}
     </div>;
 }
 

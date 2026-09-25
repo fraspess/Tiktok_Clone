@@ -25,8 +25,8 @@ const ConversationListItem = ({ conversation, isSelected = false, onClick, curre
             type="button"
             onClick={onClick}
             className={cn(
-                "group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-white/10 active:bg-white/15",
-                isSelected && "bg-white/10"
+                "group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-accent active:bg-accent/80",
+                isSelected && "bg-accent"
             )}
         >
             <UserAvatar
@@ -36,7 +36,7 @@ const ConversationListItem = ({ conversation, isSelected = false, onClick, curre
 
             <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                    <span className="truncate text-[15px] font-semibold text-white/95">
+                    <span className="truncate text-[15px] font-semibold text-foreground">
                         {displayName.startsWith("@") ? displayName : `@${displayName}`}
                     </span>
                 </div>

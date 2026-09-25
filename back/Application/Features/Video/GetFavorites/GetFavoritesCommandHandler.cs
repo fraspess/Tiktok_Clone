@@ -7,16 +7,16 @@ using MediatR;
 
 namespace Application.Features.Video.GetFavorites;
 
-public class GetFavoritesCommandHandler(IAppDbContext appDbContext, ICurrentUser currentUser, VideoMapper videoMapper) : IRequestHandler<GetFavoritesCommand, PagedResult<SimpleVideoDto>>
+public class GetFavoritesCommandHandler(IAppDbContext appDbContext, ICurrentUser currentUser, VideoMapper videoMapper) : IRequestHandler<GetFavoritesCommand, PagedResult<VideoDto>>
 {
-    public async Task<PagedResult<SimpleVideoDto>> Handle(GetFavoritesCommand request, CancellationToken cancellationToken)
+    public async Task<PagedResult<VideoDto>> Handle(GetFavoritesCommand request, CancellationToken cancellationToken)
     {
         var favoritesVideo = await appDbContext.Videos
             .Where(v => v.Favorites.Any(f => f.UserId == request.userId))
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
 
-        var mapped = favoritesVideo.MapItems(videoMapper.ToSimpleDto);
+        var mapped = favoritesVideo.MapItems(videoMapper.ToDto);
         return mapped;
     }
 }

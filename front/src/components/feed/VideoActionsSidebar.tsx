@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
 import {Link} from "react-router-dom";
-import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2} from "lucide-react";
+import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2, Repeat2} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {toast} from "sonner";
 import type {VideoDto} from "@/types/Video.ts";
@@ -13,6 +13,8 @@ import {updateVideo} from "@/store/slices/videosCacheSlice.ts";
 import {useFollowUserMutation, useUnfollowUserMutation, useGetMeQuery} from "@/store/apis/userApi.ts";
 import {setFollowStatus} from "@/store/slices/followSlice.ts";
 import {
+    useRepostVideoMutation,
+    useUnrepostVideoMutation,
     useFavoriteVideoMutation,
     useLikeVideoMutation,
     useUnfavoriteVideoMutation,
@@ -37,6 +39,21 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     const followOverride = useAppSelector((s) => s.follow.overrides[video.author?.id ?? ""]);
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+    const [repost, {isLoading: reposting}] = useRepostVideoMutation();
+    const [unrepost, {isLoading: unreposting}] = useUnrepostVideoMutation();
+    const cachedRepost = useAppSelector(s => s.videosCache.videos[video.id]?.isReposted);
+    const isReposted = cachedRepost ?? video.isReposted ?? false;
+    const [repostOverride, setRepostOverride] = useState<boolean | null>(null);
+    const reposted = repostOverride ?? isReposted;
+    const toggleRepost = async () => {
+        if (!requireAuth() || reposting || unreposting) return;
+        try {
+            await (reposted ? unrepost(video.id) : repost(video.id)).unwrap();
+            setRepostOverride(!reposted);
+            dispatch(updateVideo({id: video.id, changes: {isReposted: !reposted}}));
+        } catch { toast.error(t("feed.repostError")); }
+    };
 
     const [likeVideo] = useLikeVideoMutation();
     const [unlikeVideo] = useUnlikeVideoMutation();
@@ -199,6 +216,11 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(saveCount)}</span>
             </button>
 
+            <button type="button" onClick={() => void toggleRepost()} disabled={reposting || unreposting}
+                aria-pressed={reposted} className="flex flex-col items-center gap-1 text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40"><Repeat2 size={24} className={reposted ? "text-yellow-400" : ""}/></span>
+                <span className="text-xs md:text-foreground">{t(reposted ? "feed.unrepost" : "feed.repost")}</span>
+            </button>
             <button type="button" onClick={handleShare} className="flex flex-col items-center gap-1 text-white">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
                     <Share2 size={24}/>
@@ -208,7 +230,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
 
             <button
                 type="button"
-                onClick={() => setIsReportOpen(true)}
+                onClick={() => {if (requireAuth()) setIsReportOpen(true);}}
                 className="flex flex-col items-center gap-1 text-white"
             >
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">

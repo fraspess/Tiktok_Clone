@@ -2,8 +2,11 @@ import {useEffect, useMemo, useRef, useState} from "react";
 import {Link} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button.tsx";
-import {useGetMyVideosQuery} from "@/store/apis/videoApi.ts";
-import {useAppSelector} from "@/store/hooks.ts";
+import {useGetMyVideosQuery, useDeleteVideoMutation} from "@/store/apis/videoApi.ts";
+import {useAppSelector, useAppDispatch} from "@/store/hooks.ts";
+import {toast} from "sonner";
+import {removeVideo} from "@/store/slices/videosCacheSlice.ts";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter} from "@/components/ui/dialog.tsx";
 import {formatCount} from "@/lib/utils.ts";
 
 const PAGE_SIZE = 20;
@@ -45,6 +48,9 @@ const buildPageList = (current: number, total: number): (number | "...")[] => {
 
 const MyVideosPage = () => {
     const {t} = useTranslation();
+    const dispatch = useAppDispatch();
+    const [deleteVideo, {isLoading: deleting}] = useDeleteVideoMutation();
+    const [deleteId, setDeleteId] = useState<string | null>(null);
     const [pageNumber, setPageNumber] = useState(1);
 
     const {data, isLoading, isError, refetch} = useGetMyVideosQuery(
@@ -69,7 +75,7 @@ const MyVideosPage = () => {
     );
 
     const videos = useMemo(
-        () => (data?.data.items ?? []).filter((video) => !pendingVideoIds.has(video.id)),
+        () => (data?.data.items ?? []).filter((video) => !pendingVideoIds.has(video.uploadId)),
         [data, pendingVideoIds]
     );
     const totalPages = data?.data.metadata.totalPages;
@@ -80,16 +86,27 @@ const MyVideosPage = () => {
         return buildPageList(pageNumber, totalPages);
     }, [pageNumber, totalPages]);
 
+    const confirmDelete = async () => {
+        if (!deleteId || deleting) return;
+        try {
+            await deleteVideo(deleteId).unwrap();
+            dispatch(removeVideo(deleteId));
+            setDeleteId(null);
+            if (videos.length === 1 && pageNumber > 1) setPageNumber(p => p - 1);
+            toast.success(t("studio.deleted"));
+        } catch { toast.error(t("studio.deleteError")); }
+    };
+
     return (
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-3 pt-4 pb-6 md:px-6 md:pt-20 md:pb-10">
             <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
                 <div
                     className={`${ROW} border-b border-neutral-200 py-3 text-xs text-muted-foreground dark:border-neutral-800`}>
-                    <span>{t("studio.video", "Відео")}</span>
-                    <span className="hidden sm:block">{t("studio.date", "Дата")}</span>
-                    <span className="hidden text-right sm:block">{t("studio.views", "Перегляди")}</span>
-                    <span className="hidden text-right sm:block">{t("studio.likes", "Лайки")}</span>
-                    <span className="hidden text-right sm:block">{t("studio.comments", "Коментарі")}</span>
+                    <span>{t("studio.video")}</span>
+                    <span className="hidden sm:block">{t("studio.date")}</span>
+                    <span className="hidden text-right sm:block">{t("studio.views")}</span>
+                    <span className="hidden text-right sm:block">{t("studio.likes")}</span>
+                    <span className="hidden text-right sm:block">{t("studio.comments")}</span>
                     <span/>
                 </div>
 
@@ -103,10 +120,10 @@ const MyVideosPage = () => {
                                 <div className="h-16 w-28 shrink-0 rounded-md bg-neutral-300 dark:bg-neutral-700"/>
                                 <span className="text-sm text-muted-foreground">
                                     {u.status === "error"
-                                        ? t("studio.error", "Помилка")
+                                        ? t("studio.error")
                                         : isUploading
-                                            ? t("studio.uploading", "Завантаження…")
-                                            : t("studio.processing", "Обробка…")}
+                                            ? t("studio.uploading")
+                                            : t("studio.processing")}
                                 </span>
                             </div>
                             <span className="hidden text-muted-foreground sm:block">—</span>
@@ -116,7 +133,7 @@ const MyVideosPage = () => {
                             <div className="flex w-full flex-col items-end gap-1 self-center -mt-5">
                                 {u.status === "error" ? (
                                     <span
-                                        className="text-xs text-red-500">{u.errorMessage ?? t("studio.error", "Помилка")}</span>
+                                        className="text-xs text-red-500">{u.errorMessage ?? t("studio.error")}</span>
                                 ) : (
                                     <>
                                         <span className="text-xs tabular-nums text-muted-foreground">{percent}%</span>
@@ -137,13 +154,13 @@ const MyVideosPage = () => {
                 })}
 
                 {isLoading && (
-                    <p className="px-4 py-8 text-center text-muted-foreground">{t("studio.loading", "Завантаження…")}</p>
+                    <p className="px-4 py-8 text-center text-muted-foreground">{t("studio.loading")}</p>
                 )}
                 {isError && (
-                    <p className="px-4 py-8 text-center text-red-500">{t("studio.loadError", "Не вдалося завантажити відео")}</p>
+                    <p className="px-4 py-8 text-center text-red-500">{t("studio.loadError")}</p>
                 )}
                 {!isLoading && !isError && videos.length === 0 && pending.length === 0 && (
-                    <p className="px-4 py-8 text-center text-muted-foreground">{t("studio.empty", "У вас ще немає відео")}</p>
+                    <p className="px-4 py-8 text-center text-muted-foreground">{t("studio.empty")}</p>
                 )}
 
                 {videos.map((video) => (
@@ -154,7 +171,7 @@ const MyVideosPage = () => {
                         <Link to={`/video/${video.id}`} className="flex min-w-0 items-center gap-3">
                             <Thumbnail src={video.thumbnailUrl}/>
                             <span className="line-clamp-2 break-words text-sm">
-                                {video.description || t("studio.noDescription", "Без опису")}
+                                {video.description || t("studio.noDescription")}
                             </span>
                         </Link>
                         <span className="hidden text-sm text-muted-foreground sm:block">
@@ -163,11 +180,17 @@ const MyVideosPage = () => {
                         <span className="hidden text-right text-sm sm:block">{formatCount(video.viewCount ?? 0)}</span>
                         <span className="hidden text-right text-sm sm:block">{formatCount(video.likeCount)}</span>
                         <span className="hidden text-right text-sm sm:block">{formatCount(video.commentsCount)}</span>
-                        <span/>
+                        <Button variant="destructive" size="sm" onClick={() => setDeleteId(video.id)}>{t("studio.delete")}</Button>
                     </div>
                 ))}
             </div>
 
+            <Dialog open={deleteId !== null} onOpenChange={open => {if (!open && !deleting) setDeleteId(null);}}>
+                <DialogContent><DialogHeader><DialogTitle>{t("studio.delete")}</DialogTitle><DialogDescription>{t("studio.deleteConfirm")}</DialogDescription></DialogHeader>
+                    <DialogFooter><Button variant="outline" disabled={deleting} onClick={() => setDeleteId(null)}>{t("report.cancel")}</Button>
+                        <Button variant="destructive" disabled={deleting} onClick={() => void confirmDelete()}>{t("studio.delete")}</Button></DialogFooter>
+                </DialogContent>
+            </Dialog>
             {(pageNumber > 1 || hasNext) && (
                 <div className="flex items-center justify-center gap-2">
                     <Button
@@ -175,7 +198,7 @@ const MyVideosPage = () => {
                         disabled={pageNumber === 1}
                         onClick={() => setPageNumber((p) => p - 1)}
                     >
-                        {t("studio.prev", "Назад")}
+                        {t("studio.prev")}
                     </Button>
 
                     {pageList ? (
@@ -207,7 +230,7 @@ const MyVideosPage = () => {
                         disabled={!hasNext}
                         onClick={() => setPageNumber((p) => p + 1)}
                     >
-                        {t("studio.next", "Далі")}
+                        {t("studio.next")}
                     </Button>
                 </div>
             )}

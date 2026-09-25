@@ -50,6 +50,13 @@ public class SendReportCommandHandler(IAppDbContext appDbContext, ICurrentUser u
         if (!Guid.TryParse(rawId, out var id))
             throw new BadRequestException(ErrorCodes.InvalidFileType);
 
+        var exists = contentType switch
+        {
+            ContentTypes.User => await appDbContext.Set<Domain.Entities.Identity.UserEntity>().AnyAsync(u => u.Id == id, cancellationToken),
+            ContentTypes.Comment => await appDbContext.Comments.AnyAsync(c => c.Id == id, cancellationToken),
+            _ => false
+        };
+        if (!exists) throw new NotFoundException(ErrorCodes.ResourceNotFound);
         return id;
     }
 }

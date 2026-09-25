@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {useLazyGetUserVideosQuery} from "@/store/apis/videoApi.ts";
+import {useLazyGetUserVideosQuery, useLazyGetVideoCollectionQuery, type CollectionKind} from "@/store/apis/videoApi.ts";
 import {useAppDispatch} from "@/store/hooks.ts";
 import {cacheVideos} from "@/store/slices/videosCacheSlice.ts";
 import type {VideoDto} from "@/types/Video.ts";
@@ -9,6 +9,7 @@ interface UseInfiniteUserVideosOptions {
     seedVideos?: VideoDto[];
     seedNextPage?: number;
     seedHasNext?: boolean;
+    collectionKind?: CollectionKind;
 }
 
 export function useInfiniteUserVideos(
@@ -18,7 +19,8 @@ export function useInfiniteUserVideos(
 ) {
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
-    const [trigger, {isFetching}] = useLazyGetUserVideosQuery();
+    const [triggerUserVideos, userVideosQuery] = useLazyGetUserVideosQuery();
+    const [triggerCollection, collectionQuery] = useLazyGetVideoCollectionQuery();
     const [videos, setVideos] = useState<VideoDto[]>(() => options?.seedVideos ?? []);
     const [hasNext, setHasNext] = useState<boolean>(options?.seedHasNext ?? true);
     const [error, setError] = useState<string | null>(null);
@@ -26,21 +28,22 @@ export function useInfiniteUserVideos(
     const nextPageRef = useRef(options?.seedNextPage ?? 1);
     const seenIdsRef = useRef<Set<string>>(new Set((options?.seedVideos ?? []).map((v) => v.id)));
     const isLoadingRef = useRef(false);
-    const previousUserIdRef = useRef(userId);
+    const sourceKey = `${userId ?? ""}:${options?.collectionKind ?? "videos"}`;
+    const previousSourceKeyRef = useRef(sourceKey);
 
 
     useEffect(() => {
-        if (previousUserIdRef.current === userId) {
+        if (previousSourceKeyRef.current === sourceKey) {
             return;
         }
-        previousUserIdRef.current = userId;
+        previousSourceKeyRef.current = sourceKey;
         nextPageRef.current = 1;
         seenIdsRef.current = new Set();
         isLoadingRef.current = false;
         setVideos([]);
         setHasNext(true);
         setError(null);
-    }, [userId]);
+    }, [sourceKey]);
 
     const loadMore = useCallback(async () => {
         if (!userId || isLoadingRef.current || !hasNext) {
@@ -48,11 +51,18 @@ export function useInfiniteUserVideos(
         }
         isLoadingRef.current = true;
         try {
-            const response = await trigger({
-                userId,
-                pageNumber: nextPageRef.current,
-                pageSize,
-            }).unwrap();
+            const response = options?.collectionKind
+                ? await triggerCollection({
+                    userId,
+                    kind: options.collectionKind,
+                    pageNumber: nextPageRef.current,
+                    pageSize,
+                }).unwrap()
+                : await triggerUserVideos({
+                    userId,
+                    pageNumber: nextPageRef.current,
+                    pageSize,
+                }).unwrap();
 
             const {items, metadata} = response.data;
             const newItems = items.filter((video) => !seenIdsRef.current.has(video.id));
@@ -67,7 +77,7 @@ export function useInfiniteUserVideos(
         } finally {
             isLoadingRef.current = false;
         }
-    }, [trigger, userId, pageSize, hasNext, t, dispatch]);
+    }, [triggerCollection, triggerUserVideos, userId, pageSize, hasNext, t, dispatch, options?.collectionKind]);
 
-    return {videos, loadMore, hasNext, isFetching, error};
+    return {videos, loadMore, hasNext, isFetching: userVideosQuery.isFetching || collectionQuery.isFetching, error};
 }

@@ -1,5 +1,7 @@
 using Application.Interfaces;
 using Domain.Entities.Identity;
+using Domain.Constants;
+using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,9 @@ internal class ChangeMessagePrivacyHandler(ICurrentUser currentUser, UserManager
 {
     public async Task<Unit> Handle(ChangeMessagePrivacyCommand request, CancellationToken cancellationToken)
     {
+        if (!Enum.IsDefined(request.newMessagePrivacy))
+            throw new BadRequestException(ErrorCodes.InvalidValue);
+
         await userManager.Users
             .Where(u => u.Id == currentUser.Id)
             .ExecuteUpdateAsync(setters => setters

@@ -11,9 +11,13 @@ import ProfileEditDialog from "@/components/profile/ProfileEditDialog.tsx";
 import type {UserProfile} from "@/types/User.ts";
 import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
 import {openModal} from "@/store/slices/authModalSlice.ts";
-import {Send} from "lucide-react";
+import ReportContentDialog from "@/components/feed/ReportContentDialog.tsx";
+import {Flag, Send} from "lucide-react";
 import FollowListDialog from "@/components/profile/FollowListDialog.tsx";
 import {setFollowStatus} from "@/store/slices/followSlice.ts";
+import MessagePrivacyDialog from "@/components/chat/MessagePrivacyDialog.tsx";
+import MessagesNotAcceptedDialog from "@/components/chat/MessagesNotAcceptedDialog.tsx";
+import {isMessagePrivacyError} from "@/lib/messagePrivacy.ts";
 
 
 interface ProfileHeaderProps {
@@ -29,12 +33,15 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
 
     const [followUser, {isLoading}] = useFollowUserMutation();
     const [unfollowUser, {isLoading: isUnfollowLoading}] = useUnfollowUserMutation();
-    const [createConversation] = useCreateConversationMutation();
+    const [createConversation, {isLoading: isCreatingConversation}] = useCreateConversationMutation();
 
     const followOverride = useAppSelector((s) => s.follow.overrides[profile.id]);
     const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
     const [followersCount, setFollowersCount] = useState(profile.followersCount);
+    const [isReportOpen, setIsReportOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+    const [isMessagesNotAcceptedOpen, setIsMessagesNotAcceptedOpen] = useState(false);
     const [followListType, setFollowListType] = useState<"followers" | "following" | null>(null);
 
     useEffect(() => {
@@ -74,6 +81,7 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
     };
 
     const handleSendMessage = async () => {
+        if (isCreatingConversation) return;
         if (!isAuth) {
             dispatch(openModal());
             return;
@@ -86,6 +94,10 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
 
             navigate("/messages", {state: {conversation: result.data}});
         } catch (err) {
+            if (isMessagePrivacyError(err)) {
+                setIsMessagesNotAcceptedOpen(true);
+                return;
+            }
             const message =
                 isFetchBaseQueryError(err) &&
                 typeof err.data === "object" &&
@@ -125,13 +137,15 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                     </h1>
 
                     {profile.isOwnProfile ? (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setIsEditOpen(true)}
-                        >
-                            {t("profile.edit.trigger")}
-                        </Button>
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsEditOpen(true)}
+                            >
+                                {t("profile.edit.trigger")}
+                            </Button>
+                        </>
                     ) : (
                         <>
                             <Button
@@ -149,9 +163,15 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
                                 type="button"
                                 variant="outline"
                                 onClick={handleSendMessage}
+                                disabled={isCreatingConversation}
                             >
                                 <Send className="mr-2 h-4 w-4"/>
                                 {t("profile.message")}
+                            </Button>
+                            <Button variant="outline"
+                                    onClick={() => isAuth ? setIsReportOpen(true) : dispatch(openModal())}>
+                                <Flag className="mr-2 h-4 w-4"></Flag>
+                                {t("report.reportButton")}
                             </Button>
                         </>
                     )}
@@ -192,12 +212,18 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
             </div>
 
             {profile.isOwnProfile && (
-                <ProfileEditDialog
-                    profile={profile}
-                    open={isEditOpen}
-                    onOpenChange={setIsEditOpen}
-                />
+                <>
+                    <ProfileEditDialog
+                        profile={profile}
+                        open={isEditOpen}
+                        onOpenChange={setIsEditOpen}
+                    />
+                    <MessagePrivacyDialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}/>
+                </>
             )}
+            <ReportContentDialog contentId={profile.id} contentType="User" open={isReportOpen}
+                                 onOpenChange={setIsReportOpen}/>
+            <MessagesNotAcceptedDialog open={isMessagesNotAcceptedOpen} onOpenChange={setIsMessagesNotAcceptedOpen}/>
         </div>
     );
 };

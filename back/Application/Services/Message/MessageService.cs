@@ -15,7 +15,8 @@ public class MessageService(IAppDbContext appDbContext,
     IChatNotifier _notifier,
     UserManager<UserEntity> userManager,
     IStorageService storageService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    MessagePrivacyService messagePrivacy
     )
     : IMessageService
 {
@@ -43,24 +44,37 @@ public class MessageService(IAppDbContext appDbContext,
         var message = await appDbContext
                           .Messages
                           .FirstOrDefaultAsync(m =>
-                              m.Id == messageId &&
+                              m.Id == messageId && m.SenderId != userId &&
                               m.Conversation.Participants.Any(p => p.UserId == userId))
                       ?? throw new NotFoundException("Повідомлення не знайдено");
 
+        if (message.IsDelivered) return;
         message.IsDelivered = true;
         await appDbContext.SaveChangesAsync();
+        await NotifyReceiptAsync(message);
     }
 
     public async Task MarkAsReadAsync(Guid userId, Guid messageId)
     {
         var message = await appDbContext.Messages
                           .FirstOrDefaultAsync(m =>
-                              m.Id == messageId &&
+                              m.Id == messageId && m.SenderId != userId &&
                               m.Conversation.Participants.Any(p => p.UserId == userId))
                       ?? throw new NotFoundException("Повідомлення не знайдено");
 
+        if (message.IsRead) return;
+        message.IsDelivered = true;
         message.IsRead = true;
         await appDbContext.SaveChangesAsync();
+        await NotifyReceiptAsync(message);
+    }
+
+    private async Task NotifyReceiptAsync(MessageEntity message)
+    {
+        var recipients = await appDbContext.Conversations.Where(c => c.Id == message.ConversationId)
+            .SelectMany(c => c.Participants.Select(p => p.UserId)).ToListAsync();
+        foreach (var recipient in recipients)
+            await _notifier.SendReceiptAsync(recipient, message.ConversationId, message.Id, message.IsDelivered, message.IsRead);
     }
 
     public async Task SendAsync(Guid userId, Guid conversationId, string content)
@@ -69,6 +83,11 @@ public class MessageService(IAppDbContext appDbContext,
             .Select(p => p.Participants).FirstOrDefaultAsync();
         if (conversationParticipants is null) throw new NotFoundException("Чат не знайдено");
         if (conversationParticipants.All(p => p.UserId != currentUser.Id!.Value)) throw new NotAllowedException(ErrorCodes.Forbidden);
+
+        foreach (var recipient in conversationParticipants.Where(p => p.UserId != userId))
+        {
+            await messagePrivacy.EnsureCanMessageAsync(userId, recipient.UserId);
+        }
         
         var senderUsername = await userManager.Users.Where(u => u.Id == userId).Select(u => u.UserName).FirstOrDefaultAsync() ?? throw new NotFoundException(ErrorCodes.UserNotFound);
         
@@ -85,6 +104,7 @@ public class MessageService(IAppDbContext appDbContext,
         var dto = new MessageDto
         {
             Id = newMessage.Id,
+            ConversationId = conversationId,
             Content = newMessage.Content,
             SenderId = newMessage.SenderId,
             IsOwn = false,
@@ -93,7 +113,8 @@ public class MessageService(IAppDbContext appDbContext,
             SenderAvatarUrl = storageService.GetUserAvatar(userId)
         };
         
-        foreach(var participant in conversationParticipants)
+        // Queue the sender's message before a recipient can acknowledge it.
+        foreach(var participant in conversationParticipants.OrderByDescending(p => p.UserId == userId))
         {
             await _notifier.SendMessageAsync(participant.UserId, dto);
         }

@@ -64,7 +64,10 @@
       "invalidLinkTitle": "Invalid reset link",
       "invalidLinkDescription": "This password reset link is invalid or has expired. Please request a new one.",
       "invalidToken": "This reset link is invalid or has expired"
-    }
+    },
+    "logoutAll": "Log out on all devices",
+    "logoutAllConfirm": "This will end all your sessions, including this one.",
+    "logoutAllError": "Couldn't log out on all devices. Please try again."
   },
   "collapseSidebar": "Collapse sidebar",
   "nav": {
@@ -72,6 +75,7 @@
     "search": "Search",
     "following": "Following",
     "messages": "Messages",
+    "studio": "My videos",
     "admin": "Admin panel"
   },
   "search": {
@@ -84,7 +88,37 @@
     "loadError": "Error loading results"
   },
   "chat": {
+    "sendError": "Couldn't send your message. Your draft has been kept. Please try again.",
+    "messagesNotAccepted": {
+      "title": "This user doesn't accept messages",
+      "description": "This user's privacy settings don't allow you to message them.",
+      "close": "Got it"
+    },
+    "privacy": {
+      "trigger": "Message privacy",
+      "title": "Who can message you?",
+      "description": "Choose who can send you messages. This applies to new and existing chats.",
+      "everyone": "Everyone",
+      "everyoneDescription": "Anyone can send you messages.",
+      "followers": "My followers",
+      "followersDescription": "Only people who follow you can message you.",
+      "following": "People I follow",
+      "followingDescription": "Only people you follow can message you.",
+      "mutualFollowers": "Mutual followers",
+      "mutualFollowersDescription": "Only people you follow who also follow you can message you.",
+      "nobody": "Nobody",
+      "nobodyDescription": "Don't accept messages from anyone.",
+      "loading": "Loading privacy settings…",
+      "loadError": "Couldn't load your privacy settings.",
+      "retry": "Try again",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Message privacy updated",
+      "saveError": "Couldn't save your privacy settings. Please try again."
+    },
     "inbox": "Inbox",
+    "back": "Back",
+    "closeMessages": "Close messages",
     "loading": "Loading conversations...",
     "emptyTitle": "No messages yet",
     "empty": "When you start chatting, your conversations will appear here",
@@ -109,7 +143,12 @@
     "time": {
       "now": "now",
       "yesterday": "Yesterday"
-    }
+    },
+    "loadOlder": "Load older messages",
+    "sending": "Sending…",
+    "sent": "Sent",
+    "delivered": "Delivered",
+    "read": "Read"
   },
   "feed": {
     "emptyFollowing": "No videos yet from the people you follow.",
@@ -121,7 +160,10 @@
     "shareError": "Couldn't copy the link",
     "likeError": "Couldn't like this video. Please try again",
     "saveError": "Couldn't save this video. Please try again",
-    "followError": "Couldn't follow this user. Please try again"
+    "followError": "Couldn't follow this user. Please try again",
+    "repost": "Repost",
+    "unrepost": "Undo repost",
+    "repostError": "Couldn't update your repost. Please try again."
   },
   "profile": {
     "myProfile": "My profile",
@@ -130,10 +172,15 @@
     "follow": "Follow",
     "followingStatus": "Following",
     "followError": "Couldn't follow this user. Please try again",
+    "sendMessage": "Message",
+    "sendMessageError": "Couldn't create the conversation. Please try again",
     "message": "Message",
     "notFound": "User not found",
     "loadError": "Failed to load profile",
     "loadingVideos": "Loading videos...",
+    "emptyFollowers": "No followers yet",
+    "emptyFollowing": "Not following anyone yet",
+    "loadMore": "Load more",
     "emptyVideos": "No videos yet",
     "videosLoadError": "Failed to load videos",
     "backToFeed": "Back to feed",
@@ -160,8 +207,11 @@
       "uploaded": "Uploaded",
       "saved": "Saved",
       "videos": "Videos",
-      "liked": "Liked"
+      "liked": "Liked",
+      "reposts": "Reposts"
     },
+    "uploaded": "Uploaded",
+    "saved": "Saved",
     "emptyFavorites": "There is nothing here yet",
     "favoritesLoadError": "Failed to load saved videos"
   },
@@ -179,12 +229,45 @@
     },
     "customReasonLabel": "Add more details (optional)",
     "customReasonPlaceholder": "Tell us more about the reason for the report...",
+    "customReasonRequiredError": "Please provide a reason",
     "selectReasonError": "Please select a reason",
     "submit": "Submit report",
     "cancel": "Cancel",
     "success": "Report submitted successfully",
     "alreadySubmitted": "You have already submitted a report for this video",
-    "error": "Failed to submit the report. Please try again"
+    "error": "Failed to submit the report. Please try again",
+    "chooseReason": "Choose a reason for your report.",
+    "reasonsError": "Couldn't load report reasons.",
+    "duplicateContent": "You have already reported this content.",
+    "requiredDetails": "Describe the reason",
+    "reasonNames": {
+      "Spam": "Spam",
+      "InappropriateContent": "Inappropriate content",
+      "HateSpeech": "Hate speech",
+      "Violence": "Harassment or bullying",
+      "MissInformation": "Misinformation",
+      "Other": "Other",
+      "Impersonation": "Impersonation",
+      "BotActivity": "Bot activity",
+      "MultiplePolicyViolations": "Repeated policy violations",
+      "SuspiciousActivity": "Suspicious activity",
+      "UnauthorizedAccess": "Unauthorized access",
+      "UnderageUser": "Underage user",
+      "IllegalContent": "Illegal content",
+      "CommunityGuidelinesViolation": "Community guidelines violation",
+      "DuplicateContent": "Duplicate content",
+      "Harassment": "Harassment",
+      "Bullying": "Bullying",
+      "Threatening": "Threats",
+      "CopyrightViolation": "Copyright violation",
+      "PrivacyViolation": "Privacy violation",
+      "AdultContent": "Adult content"
+    },
+    "titles": {
+      "Video": "Report video",
+      "User": "Report user",
+      "Comment": "Report comment"
+    }
   },
   "comments": {
     "title": "Comments",
@@ -215,6 +298,8 @@
     "aspectRatioTitle": "Aspect ratios",
     "aspectRatioDesc": "Recommended: 16:9 for landscape, 9:16 for vertical.",
     "upload": "Post",
+    "invalidType": "Please select a video file",
+    "fileTooLarge": "The file must be no larger than {{maxSizeMb}} MB",
     "error": "Internal server error. Please try again later."
   },
   "details": {
@@ -271,7 +356,8 @@
       "video": "Videos",
       "user": "Users",
       "comment": "Comments"
-    }
+    },
+    "userVideos": "User's videos"
   },
   "studio": {
     "video": "Video",
@@ -287,6 +373,10 @@
     "empty": "You don't have any videos yet",
     "noDescription": "No description",
     "prev": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "delete": "Delete video",
+    "deleteConfirm": "Delete this video? It will no longer be available to viewers.",
+    "deleted": "Video deleted",
+    "deleteError": "Couldn't delete the video. Please try again."
   }
 }

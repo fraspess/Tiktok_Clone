@@ -23,6 +23,11 @@ export interface VideoDto {
     viewCount: number;
     isFavorited: boolean;
     isLiked: boolean;
+    isReposted?: boolean;
     author: VideoAuthor | null;
     createdAt: string;
+}
+
+export interface MyVideoDto extends VideoDto {
+    uploadId: string;
 }

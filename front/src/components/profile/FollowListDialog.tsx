@@ -65,7 +65,7 @@ const FollowListDialog = ({username, type, open, onOpenChange}: FollowListDialog
     };
 
     const title = type === "followers" ? t("profile.followers") : t("profile.following");
-    const emptyMessage = type === "followers" ? "No followers yet" : "Not following anyone yet";
+    const emptyMessage = type === "followers" ? t("profile.emptyFollowers") : t("profile.emptyFollowing");
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -105,7 +105,7 @@ const FollowListDialog = ({username, type, open, onOpenChange}: FollowListDialog
                 </div>
                 {hasNext && (
                     <Button variant="outline" onClick={loadNextPage} disabled={isLoading}>
-                        {isLoading ? t("profile.loadingVideos") : "Load more"}
+                        {isLoading ? t("profile.loadingVideos") : t("profile.loadMore")}
                     </Button>
                 )}
             </DialogContent>
