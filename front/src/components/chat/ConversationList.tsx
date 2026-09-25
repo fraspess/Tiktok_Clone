@@ -113,7 +113,7 @@ const ConversationList = ({selectedConversationId, onSelect, currentUser, search
                         onClick={() => onSelect(conversation)}
                         currentUser={currentUser}
                     />
-                    {index < displayConversations.length - 1 && <Separator className="ml-[76px] bg-white/8"/>}
+                    {index < displayConversations.length - 1 && <Separator className="ml-[76px]"/>}
                 </div>
             ))}
 

@@ -22,6 +22,7 @@ public class VideoDto
 
     public bool IsFavorited { get; set; }
     public bool IsLiked { get; set; }
+    public bool IsReposted { get; set; }
 
     public UserAuthorDto? Author { get; set; }
 

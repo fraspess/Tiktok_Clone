@@ -30,6 +30,7 @@ public static class VideoQueryExtensions
             },
             IsFavorited = v.Favorites.Any(f => f.UserId == currentUserId),
             IsLiked = v.Likes.Any(l => l.UserId == currentUserId),
+            IsReposted = v.Reposts.Any(r => r.UserId == currentUserId),
             CreatedAt = v.CreatedAt,
             ViewCount = v.ViewCount
         });
@@ -37,6 +38,7 @@ public static class VideoQueryExtensions
 
     public static async Task<Guid> GetIdFromShortIdAsync(this IQueryable<VideoEntity> query, string shortId, CancellationToken ct = default)
     {
-        return await query.Where(v => v.ShortId == shortId).Select(v => v.Id).FirstOrDefaultAsync(ct);
+        var id = Guid.TryParse(shortId, out var parsedId) ? parsedId : Guid.Empty;
+        return await query.Where(v => v.ShortId == shortId || v.Id == id).Select(v => v.Id).FirstOrDefaultAsync(ct);
     }
 }

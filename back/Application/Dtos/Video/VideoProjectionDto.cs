@@ -22,6 +22,7 @@ public class VideoProjectionDto
     public UserAuthorDto Author { get; set; }
     public bool IsFavorited { get; set; }
     public bool IsLiked { get; set; }
+    public bool IsReposted { get; set; }
 
     public VideoStatus Status { get; set; }
     public bool IsBanned { get; set; }

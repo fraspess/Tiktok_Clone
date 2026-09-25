@@ -4,6 +4,7 @@ import {useTranslation} from "react-i18next";
 import {ArrowLeft} from "lucide-react";
 import VideoCard from "@/components/feed/VideoCard.tsx";
 import {useInfiniteUserVideos} from "@/hooks/useInfiniteUserVideos.ts";
+import type {CollectionKind} from "@/store/apis/videoApi.ts";
 import {useIntersectionObserver} from "@/hooks/useIntersectionObserver.ts";
 import {useGetUserProfileQuery} from "@/store/apis/userApi.ts";
 import type {VideoDto} from "@/types/Video.ts";
@@ -16,13 +17,16 @@ interface LocationState {
 }
 
 const ProfileVideoFeedPage = () => {
-    const {username: rawUsername, videoId} = useParams<{ username: string; videoId: string }>();
+    const {username: rawUsername, videoId, collection} = useParams<{ username: string; videoId: string; collection?: string }>();
     const username = rawUsername?.startsWith("@") ? rawUsername.slice(1) : rawUsername;
     const location = useLocation();
     const navigate = useNavigate();
     const {t} = useTranslation();
 
     const state = (location.state ?? {}) as LocationState;
+    const collectionKind: CollectionKind | undefined = collection === "liked" || collection === "reposts" || collection === "favorites"
+        ? collection
+        : undefined;
 
 
     const {data: profileData} = useGetUserProfileQuery(username ?? "", {
@@ -38,6 +42,7 @@ const ProfileVideoFeedPage = () => {
         seedVideos: state.videos,
         seedNextPage: state.nextPage,
         seedHasNext: state.hasNext,
+        collectionKind,
     });
 
     useEffect(() => {
@@ -45,7 +50,7 @@ const ProfileVideoFeedPage = () => {
             loadMore();
         }
 
-    }, [userId]);
+    }, [collectionKind, userId]);
 
 
     useEffect(() => {

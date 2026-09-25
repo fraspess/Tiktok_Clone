@@ -28,6 +28,7 @@ function App() {
                     <Route path="video/:videoId" element={<SharedVideoPage/>}/>
                     <Route path=":username" element={<ProfilePage/>}/>
                     <Route path=":username/video/:videoId" element={<ProfileVideoFeedPage/>}/>
+                    <Route path=":username/:collection/video/:videoId" element={<ProfileVideoFeedPage/>}/>
                     <Route path="reset-password" element={<ResetPasswordPage/>}/>
 
                     <Route element={<ProtectedRoute/>}>

@@ -18,6 +18,7 @@ public static class ApplicationDependencyInjection
         this IServiceCollection services, IConfiguration config)
     {
         services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<MessagePrivacyService>();
         services.AddScoped<IHashTagService, HashTagService>();
 
         services.AddValidatorsFromAssembly(typeof(AssemblyReference).Assembly);

@@ -77,14 +77,15 @@ const ProfileFavoriteVideoGrid = ({userId, username, enabled}: ProfileFavoriteVi
             <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
                 {videos.map((video) => {
                     const goToVideo = () => {
-                        navigate(`/@${username}/video/${video.id}`, {
-                            state: {userId: video.author?.id},
+                        navigate(`/@${username}/favorites/video/${video.id}`, {
+                            state: {userId},
                         });
                     };
 
                     return (
                         <div
                             key={video.id}
+                            data-testid={`favorite-video-${video.id}`}
                             role="button"
                             tabIndex={0}
                             onClick={goToVideo}

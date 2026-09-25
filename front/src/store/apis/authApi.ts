@@ -34,6 +34,9 @@ export const authApi = createApi({
         googleAuth: build.mutation({
             query: (token) => ({url: "api/users/google", method: "POST", body: token})
         }),
+        logoutAll: build.mutation<ApiResponse<null>, void>({
+            query: () => ({url: "api/users/logout/all", method: "POST"}),
+        }),
         logout: build.mutation({
             query: () => ({url: "api/users/logout", method: "POST"})
         }),
@@ -55,7 +58,7 @@ export const {
     useGetCurrentUserQuery,
     useGoogleAuthMutation,
     useLogoutMutation,
+    useLogoutAllMutation,
     useForgotPasswordMutation,
     useResetPasswordMutation,
 } = authApi;
-

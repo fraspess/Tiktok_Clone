@@ -6,6 +6,7 @@ public static class ErrorCodes
     public const string EmailNotConfirmed = "EMAIL_NOT_CONFIRMED";
     public const string Unauthorized = "UNAUTHORIZED";
     public const string Forbidden = "FORBIDDEN";
+    public const string MessagesNotAccepted = "MESSAGES_NOT_ACCEPTED";
     
     public const string CommentNotFound = "COMMENT_NOT_FOUND";
     public const string VideoNotFound = "VIDEO_NOT_FOUND";

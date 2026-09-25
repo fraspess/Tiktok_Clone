@@ -1,13 +1,16 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {ensureChatConnected, HubConnectionState, subscribeChatHub} from "@/lib/chatHub.ts";
-import type {MessageDto} from "@/types/Message.ts";
+import type {MessageDto, MessageReceipt} from "@/types/Message.ts";
 
 interface UseChatConnectionOptions {
     accessToken: string;
+    onReceipt?: (receipt: MessageReceipt) => void;
     onMessagesReceived: (data?: MessageDto | MessageDto[]) => void;
 }
 
-export function useChatConnection({accessToken, onMessagesReceived}: UseChatConnectionOptions) {
+export function useChatConnection({accessToken, onMessagesReceived, onReceipt}: UseChatConnectionOptions) {
+    const receiptRef = useRef(onReceipt);
+    useEffect(() => { receiptRef.current = onReceipt; }, [onReceipt]);
     const accessTokenRef = useRef(accessToken);
     const onMessagesReceivedRef = useRef(onMessagesReceived);
     const connectionRef = useRef<ReturnType<typeof subscribeChatHub>["connection"] | null>(null);
@@ -31,6 +34,7 @@ export function useChatConnection({accessToken, onMessagesReceived}: UseChatConn
         const subscription = subscribeChatHub({
             getAccessToken: () => accessTokenRef.current,
             onMessage: handleMessage,
+            onReceipt: receipt => receiptRef.current?.(receipt),
             onPendingMessages: handleMessage,
             onStatusChange: setIsConnected,
         });
@@ -60,12 +64,21 @@ export function useChatConnection({accessToken, onMessagesReceived}: UseChatConn
         await connection.invoke("SendMessage", conversationId, content);
     }, []);
 
+    const markAsDelivered = useCallback(async (messageId: string) => {
+        const connection = connectionRef.current?.() ?? null;
+        if (connection?.state !== HubConnectionState.Connected) return false;
+        await connection.invoke("MarkAsDelivered", messageId);
+        return true;
+    }, []);
+
     const markAsRead = useCallback(async (messageId: string) => {
         const connection = connectionRef.current?.() ?? null;
         if (connection?.state === HubConnectionState.Connected) {
             await connection.invoke("MarkAsRead", messageId);
+            return true;
         }
+        return false;
     }, []);
 
-    return {isConnected, sendMessage, markAsRead};
+    return {isConnected, sendMessage, markAsRead, markAsDelivered};
 }
