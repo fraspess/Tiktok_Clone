@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using NanoidDotNet;
 using Serilog;
@@ -32,18 +31,41 @@ public static class DbSeeder
         await context.Database.MigrateAsync();
         var localStorageOptions = scope.ServiceProvider.GetRequiredService<IOptions<LocalStorageOptions>>();
         
-        var _options = localStorageOptions.Value;
+        var options = localStorageOptions.Value;
         await SeedRolesAsync(roleManager);
         await SeedUsersAsync(userManager, imageService, environment);
-        await SeedVideosAsync(context, environment, _options, userManager);
+        await SeedVideosAsync(context, environment, options, userManager);
 
     }
 
-    public static async Task SeedOnlyRolesAsync(this WebApplication webApplication)
+    public static async Task ProductionSeed(this WebApplication webApplication)
     {
         var scope = webApplication.Services.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<RoleEntity>>();
         await SeedRolesAsync(roleManager);
+        
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<UserEntity>>();
+        var adminExists = await userManager.GetUsersInRoleAsync(RoleNames.ADMIN_ROLE);
+        if (adminExists.Count == 0)
+        {
+            var adminSettings = scope.ServiceProvider.GetRequiredService<IOptions<AdminAccountOptions>>();
+            var adminOptions = adminSettings.Value;
+            var adminUser = new UserEntity()
+            {
+                UserName = adminOptions.Login,
+                Email = "admin@example.com",
+                EmailConfirmed = true,
+                FirstName = "Admin",
+                LastName = "Admin",
+            };
+            
+            var result = await userManager.CreateAsync(adminUser, adminOptions.Password);
+            
+            if (!result.Succeeded)
+                Log.Error("Failed to seed role {AdminUser}. Errors : {Errors}",
+                    adminUser,
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
     }
 
     private static async Task SeedRolesAsync(RoleManager<RoleEntity> roleManager)
@@ -90,7 +112,7 @@ public static class DbSeeder
 
             if (users == null)
             {
-                Log.Error("Failed to get users from json file to seed databse");
+                Log.Error("Failed to get users from json file to seed database");
                 return;
             }
 

@@ -51,6 +51,11 @@ public static class OptionsDependencyInjection
             .BindConfiguration("LocalStorage")
             .ValidateDataAnnotations()
             .ValidateOnStart();
+        
+        services.AddOptions<AdminAccountOptions>()
+            .BindConfiguration("AdminAccount")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         return services;
     }
