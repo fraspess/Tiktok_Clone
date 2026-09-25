@@ -31,6 +31,6 @@ public class MessagePrivacyService(IAppDbContext db)
             _ => false,
         };
 
-        if (!allowed) throw new NotAllowedException(ErrorCodes.MessagesNotAccepted, null);
+        if (!allowed) throw new NotAllowedException(ErrorCodes.MessagesNotAccepted);
     }
 }

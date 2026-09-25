@@ -44,7 +44,7 @@ public class VideoController(IMediator _mediator, Application.Interfaces.IAppDbC
         var videoFile = Path.Combine(Directory.GetCurrentDirectory(), "videos", "output", fileName);
         if (!System.IO.File.Exists(videoFile))
         {
-            return NotFound(ApiResponse<string>.Error("Відео не знайдено"));
+            return NotFound(ApiResponse<string>.Error(ErrorCodes.VideoNotFound, "Video not found."));
         }
 
         var stream = System.IO.File.OpenRead(videoFile);

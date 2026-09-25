@@ -45,7 +45,7 @@ internal class UserService(
         var checkPassword = await userManager.CheckPasswordAsync(user, dto.Password);
         if (!checkPassword) throw new BadRequestException(ErrorCodes.InvalidCredentials);
 
-        if (!user.EmailConfirmed) throw new NotAllowedException(ErrorCodes.EmailNotConfirmed, new {email = user.Email});
+        if (!user.EmailConfirmed) throw new NotAllowedException(ErrorCodes.EmailNotConfirmed, payload: new {email = user.Email});
 
         if (user.IsBanned) throw new NotAllowedException(ErrorCodes.UserBanned);
 

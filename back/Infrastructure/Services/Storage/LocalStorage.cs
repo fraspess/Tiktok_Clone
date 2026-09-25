@@ -1,6 +1,7 @@
 using Application.Dtos.User;
 using Application.Interfaces;
 using Application.Options;
+using Domain.Constants;
 using Domain.Exceptions;
 using Microsoft.Extensions.Options;
 
@@ -46,7 +47,7 @@ internal class LocalFileStorageService(IOptions<LocalStorageOptions> options) : 
     {
         var allowed = new[] { "video/mp4", "video/quicktime", "video/x-msvideo", "video/webm" };
         if (!allowed.Contains(contentType))
-            throw new BadRequestException("Тільки відео файли дозволені");
+            throw new BadRequestException(ErrorCodes.InvalidFileType, "Only video files are allowed.");
         
         var url = $"{_options.BaseUrl}/api/videos/{videoId}?contentType={Uri.EscapeDataString(contentType)}";
         return Task.FromResult(url);

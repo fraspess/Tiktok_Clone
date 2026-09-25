@@ -12,6 +12,8 @@ public static class ErrorCodes
     public const string VideoNotFound = "VIDEO_NOT_FOUND";
     public const string UserNotFound = "USER_NOT_FOUND";
     public const string ResourceNotFound = "RESOURCE_NOT_FOUND";
+    public const string MessageNotFound = "MESSAGE_NOT_FOUND";
+    public const string ConversationNotFound = "CONVERSATION_NOT_FOUND";
     
     public const string Required = "REQUIRED";
     public const string Invalid = "INVALID";
@@ -44,6 +46,7 @@ public static class ErrorCodes
     public const string FileRequired = "FILE_REQUIRED";
     public const string FileTooLarge = "FILE_TOO_LARGE";
     public const string InvalidFileType = "INVALID_FILE_TYPE";
+    public const string InvalidContentType = "INVALID_CONTENT_TYPE";
     
     public const string InvalidToken = "INVALID_TOKEN";
     public const string ExpiredToken = "EXPIRED_TOKEN";

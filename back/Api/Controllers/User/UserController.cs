@@ -85,7 +85,7 @@ public class UserController(IMediator _mediator) : ControllerBase
     public async Task<IActionResult> Refresh()
     {
         var refreshToken = Request.Cookies["refreshToken"]
-                           ?? throw new UnauthorizedException("Refresh token не знайдений");
+                           ?? throw new UnauthorizedException(ErrorCodes.InvalidToken, "Refresh token not found.");
 
         var newTokens = await _mediator.Send(new RefreshTokensCommand(refreshToken));
 

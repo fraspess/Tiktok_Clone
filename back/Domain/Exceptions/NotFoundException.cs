@@ -1,8 +1,8 @@
 ﻿namespace Domain.Exceptions;
 
-public class NotFoundException : Exception
+public class NotFoundException : ApiException
 {
-    public NotFoundException(string message) : base(message)
+    public NotFoundException(string code, string? message = null) : base(code, message)
     {
     }
 }

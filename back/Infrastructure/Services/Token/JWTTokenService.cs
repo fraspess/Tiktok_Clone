@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using Application.Features.Video.Upload.CompleteUpload;
 using Application.Options;
+using Domain.Constants;
 using Domain.Entities.Identity;
 using Domain.Exceptions;
 using Microsoft.Extensions.Options;
@@ -51,22 +52,22 @@ internal class JwtTokenService(IOptions<JwtOptions> settings, UserManager<UserEn
         }
         catch (Exception)
         {
-            throw new UnauthorizedException("Не валідний refresh токен");
+            throw new UnauthorizedException(ErrorCodes.InvalidToken, "The refresh token is invalid.");
         }
 
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                     ?? throw new UnauthorizedException("Не валідний refresh токен");
+                     ?? throw new UnauthorizedException(ErrorCodes.InvalidToken, "The refresh token is invalid.");
 
         var tokenVersion = principal.FindFirst("version")?.Value
-                           ?? throw new UnauthorizedException("Не валідний refresh токен");
+                           ?? throw new UnauthorizedException(ErrorCodes.InvalidToken, "The refresh token is invalid.");
 
         var user = userManager.Users.FirstOrDefault(u => u.Id.ToString() == userId)
-                   ?? throw new UnauthorizedException("Користувача не знайдено");
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound, "User not found.");
 
         if (user.RefreshTokenVersion != int.Parse(tokenVersion))
-            throw new UnauthorizedException("Не валідний refresh токен");
+            throw new UnauthorizedException(ErrorCodes.InvalidToken, "The refresh token is invalid.");
 
-        if (user.IsBanned) throw new NotAllowedException("Аккаунт заблокований");
+        if (user.IsBanned) throw new NotAllowedException(ErrorCodes.UserBanned, "This account has been banned.");
 
         return await GenerateTokensAsync(user);
     }

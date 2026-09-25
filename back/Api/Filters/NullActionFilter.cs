@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using Application;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -15,11 +16,8 @@ public class NullActionFilter : IActionFilter
         foreach (var parameter in bodyParameters)
             if (!context.ActionArguments.TryGetValue(parameter.Name, out var value) || value is null)
             {
-                context.Result = new BadRequestObjectResult(new
-                {
-                    isSuccess = false,
-                    errors = new[] { "Тіло запиту не має бути порожнім!" }
-                });
+                context.Result = new BadRequestObjectResult(
+                    ApiResponse<object>.Error(ErrorCodes.Required, "The request body is required."));
                 return;
             }
     }

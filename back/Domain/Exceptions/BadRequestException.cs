@@ -1,8 +1,8 @@
 ﻿namespace Domain.Exceptions;
 
-public class BadRequestException : Exception
+public class BadRequestException : ApiException
 {
-    public BadRequestException(string message) : base(message)
+    public BadRequestException(string code, string? message = null) : base(code, message)
     {
     }
 }

@@ -30,7 +30,7 @@ public class RateLimitFilter(SlidingWindowRateLimiter _limiter) : IAsyncActionFi
 
         if (!allowed)
         {
-            context.Result = new ObjectResult(ApiResponse<object>.Error(ErrorCodes.TooManyRequests))
+            context.Result = new ObjectResult(ApiResponse<object>.Error(ErrorCodes.TooManyRequests, "Too many requests. Please try again later."))
             {
                 StatusCode = 429
             };
