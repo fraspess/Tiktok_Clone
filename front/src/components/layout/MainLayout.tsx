@@ -2,7 +2,6 @@ import {Outlet, useLocation} from "react-router-dom";
 import {AnimatePresence} from "framer-motion";
 import Sidebar from "@/components/layout/Sidebar.tsx";
 import Topbar from "@/components/layout/Topbar.tsx";
-import PageTransition from "@/components/layout/PageTransition.tsx";
 import {useState} from "react";
 import AuthModal from "@/components/modals/AuthModal";
 import MobileNav from "@/components/layout/MobileNav.tsx";
@@ -30,9 +29,7 @@ const MainLayout = ({children}: MainLayoutProps) => {
                 <Topbar overlay={overlayTopbar}/>
                 <main className="min-h-0 flex-1 overflow-y-auto">
                     <AnimatePresence mode="wait" initial={false}>
-                        <PageTransition key={location.pathname}>
-                            {children ?? <Outlet/>}
-                        </PageTransition>
+                        {children ?? <Outlet/>}
                     </AnimatePresence>
                 </main>
                 <MobileNav/>

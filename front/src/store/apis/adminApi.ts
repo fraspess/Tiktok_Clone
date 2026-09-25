@@ -80,6 +80,10 @@ export const adminApi = createApi({
             }),
             invalidatesTags: () => ["AdminUsers"],
         }),
+        getAdminUserVideos: build.query<ApiResponse<PagedResult<SimpleVideoDto>>, PageParams & {id: string}>({
+            query: params => ({url: "api/admin-panel/users/video", params}),
+            providesTags: result => result?.data.items.map(v => ({type: "AdminVideos", id: v.id})) ?? [],
+        }),
         getAdminVideos: build.query<ApiResponse<PagedResult<SimpleVideoDto>>, GetAdminVideosParams>({
             query: ({pageNumber, pageSize, isBanned}) => ({
                 url: `api/admin-panel/videos?${new URLSearchParams({
@@ -144,6 +148,7 @@ export const {
     useBanUserMutation,
     useUnbanUserMutation,
     useGetAdminVideosQuery,
+    useGetAdminUserVideosQuery,
     useBanVideoMutation,
     useUnbanVideoMutation,
     useGetAdminReportsQuery,

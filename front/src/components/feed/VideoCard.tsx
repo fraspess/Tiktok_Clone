@@ -1,4 +1,5 @@
 import {type MouseEvent, type RefObject, useEffect, useMemo, useRef, useState} from "react";
+import {useViewVideoMutation} from "@/store/apis/videoApi.ts";
 import Hls from "hls.js";
 import {Link} from "react-router-dom";
 import {Pause, Play, Volume2, VolumeX} from "lucide-react";
@@ -14,6 +15,13 @@ interface VideoCardProps {
 }
 
 const VideoCard = ({video, containerRef}: VideoCardProps) => {
+    const [registerView] = useViewVideoMutation();
+    const viewedId = useRef<string | null>(null);
+    const recordView = () => {
+        if (!isVisible || viewedId.current === video.id) return;
+        viewedId.current = video.id;
+        void registerView(video.id).unwrap().catch(() => { viewedId.current = null; });
+    };
     const sectionRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
@@ -178,6 +186,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                     autoPlay
                     playsInline
                     preload="metadata"
+                    onPlaying={recordView}
                     onClick={togglePlayPause}
                 />
                 {!isPlaying && (

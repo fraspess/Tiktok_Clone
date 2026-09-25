@@ -193,13 +193,15 @@ public class UserController(IMediator _mediator) : ControllerBase
     }
 
     [HttpPost("settings/message-privacy")]
-    public async Task<IActionResult> ChangeMessagePrivacy(MessagePrivacy newPrivacy)
+    [Authorize]
+    public async Task<IActionResult> ChangeMessagePrivacy([FromQuery] MessagePrivacy newPrivacy)
     {
         await _mediator.Send(new ChangeMessagePrivacyCommand(newPrivacy));
         return Ok(ApiResponse<object?>.Success(null));
     }
 
     [HttpGet("settings/message-privacy")]
+    [Authorize]
     public async Task<IActionResult> GetMessagePrivacy()
     {
         var privacy = await _mediator.Send(new GetMessagePrivacyCommand());

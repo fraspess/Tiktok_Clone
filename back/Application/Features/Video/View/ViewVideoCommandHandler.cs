@@ -15,9 +15,18 @@ public class ViewVideoCommandHandler(IAppDbContext context, ICurrentUser user) :
         var videoId = await context.Videos.GetIdFromShortIdAsync(request.Id, cancellationToken);
         if (videoId == Guid.Empty) throw new NotFoundException(ErrorCodes.VideoNotFound);
 
+        // Anonymous playback is counted without creating a user-owned view record.
+        if (user.Id is null)
+        {
+            await context.Videos.Where(v => v.Id == videoId)
+                .ExecuteUpdateAsync(v => v.SetProperty(x => x.ViewCount, x => x.ViewCount + 1), cancellationToken);
+            return Unit.Value;
+        }
+
         var existingView = await context
             .VideoViews
             .Where(v => v.VideoId == videoId && user.Id == v.UserId)
+            .OrderByDescending(v => v.ViewedAt)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
         if (existingView is not null)
         {

@@ -3,10 +3,9 @@ using Application.Dtos.User;
 using Application.Extensions;
 using Application.Interfaces;
 using Application.Mapper;
-using Domain.Constants;
+using Application.Services.Message;
 using Domain.Entities.Conversation;
 using Domain.Entities.Identity;
-using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,8 @@ public class CreateConversationCommandHandler(
     ConversationMapper mapper,
     UserManager<UserEntity> userManager,
     ICurrentUser currentUser,
-    IStorageService storageService)
+    IStorageService storageService,
+    MessagePrivacyService messagePrivacy)
     : IRequestHandler<CreateConversationCommand, ConversationDto>
 {
     public async Task<ConversationDto> Handle(CreateConversationCommand request,
@@ -27,7 +27,7 @@ public class CreateConversationCommandHandler(
         var participant = request.UsersId;
         var currentUserId = currentUser.Id!.Value;
 
-        ConversationDto conversation = null!;
+        await messagePrivacy.EnsureCanMessageAsync(currentUserId, participant, cancellationToken);
         var existingConversation = await appDbContext.Conversations
             .Where(c => c.Participants.Any(p => p.UserId == currentUserId) &&
                         c.Participants.Any(p => p.UserId == participant))
@@ -42,53 +42,7 @@ public class CreateConversationCommandHandler(
             }
             return existingConversation;
         }
-        
-        var participantPrivacy = await userManager.Users.Where(u=>u.Id == participant).Select(u => u.MessagePrivacy).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-        switch (participantPrivacy)
-        {
-            case MessagePrivacy.Nobody:
-            {
-                throw new NotAllowedException(ErrorCodes.Forbidden);
-            }
-            case MessagePrivacy.Everyone:
-            {
-                conversation = await CreateConversationAsync(participant);
-                break;
-            }
-            case MessagePrivacy.MutualFollowers:
-            {
-                var areFriends = await appDbContext.UserFollows
-                    .AnyAsync(u =>
-                            u.FollowerId == currentUserId &&
-                            u.FollowingId == participant &&
-                            appDbContext.UserFollows.Any(reverse =>
-                                reverse.FollowerId == participant &&
-                                reverse.FollowingId == currentUserId),
-                        cancellationToken);
-                if(!areFriends) throw new NotAllowedException(ErrorCodes.Forbidden);
-                
-                conversation = await CreateConversationAsync(participant);
-                break;
-            }
-            case MessagePrivacy.Followers:
-            {
-                var isFollower = await appDbContext.UserFollows.Where(u => u.FollowerId == currentUserId && u.FollowingId == participant).AnyAsync(cancellationToken: cancellationToken);
-                if(!isFollower) throw new NotAllowedException(ErrorCodes.Forbidden);
-                conversation = await CreateConversationAsync(participant);
-                break;
-            }
-            case MessagePrivacy.Following:
-            {
-                var isFollowing = await appDbContext.UserFollows
-                    .AnyAsync(u =>
-                            u.FollowerId == currentUserId &&
-                            u.FollowingId == participant,
-                        cancellationToken);
-                if(!isFollowing) throw new NotAllowedException(ErrorCodes.Forbidden);
-                conversation = await CreateConversationAsync(participant);
-                break;
-            }
-        }
+        var conversation = await CreateConversationAsync(participant);
         
         await appDbContext.SaveChangesAsync(cancellationToken);
         

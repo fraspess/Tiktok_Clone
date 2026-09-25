@@ -1,17 +1,17 @@
-import {useCallback, useState} from "react";
+import {useState} from "react";
 import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import {ArrowLeft, Bookmark, Grid3X3, Heart, Loader2} from "lucide-react";
+import {ArrowLeft, Bookmark, Grid3X3, Heart, Loader2, Repeat2} from "lucide-react";
 import {useGetUserProfileQuery} from "@/store/apis/userApi.ts";
 import isFetchBaseQueryError from "@/store/isFetchBaseQueryError.ts";
 import ProfileHeader from "@/components/profile/ProfileHeader.tsx";
 import ProfileVideoGrid from "@/components/profile/ProfileVideoGrid.tsx";
-import CachedVideoGrid from "@/components/profile/CachedVideoGrid.tsx";
+import ProfileCollectionGrid from "@/components/profile/ProfileCollectionGrid.tsx";
 import ProfileFavoriteVideoGrid from "@/components/profile/ProfileFavoriteVideoGrid.tsx";
 import {cn} from "@/lib/utils.ts";
-import type {VideoDto} from "@/types/Video.ts";
 
-type ProfileTab = "videos" | "liked" | "saved";
+
+type ProfileTab = "videos" | "liked" | "saved" | "reposts";
 
 const ProfilePage = () => {
     const {username: rawUsername} = useParams<{ username: string }>();
@@ -23,7 +23,7 @@ const ProfilePage = () => {
     const [activeTab, setActiveTab] = useState<ProfileTab>("videos");
     const profile = data?.data;
 
-    const isLiked = useCallback((video: VideoDto) => video.isLiked, []);
+
 
     const backToFeedButton = (
         <Link
@@ -74,7 +74,7 @@ const ProfilePage = () => {
             {backToFeedButton}
             <ProfileHeader profile={profile}/>
 
-            <div className="flex items-center justify-center border-b">
+            <div className="flex flex-wrap items-center justify-center border-b">
                 <button
                     type="button"
                     onClick={() => setActiveTab("videos")}
@@ -101,6 +101,10 @@ const ProfilePage = () => {
                     <Heart size={16}/>
                     {t("profile.tabs.liked")}
                 </button>
+                <button type="button" onClick={() => setActiveTab("reposts")}
+                    className={cn("flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm", activeTab === "reposts" ? "border-foreground" : "border-transparent text-muted-foreground")}>
+                    <Repeat2 size={16}/>{t("profile.tabs.reposts")}
+                </button>
                 {profile.isOwnProfile && (
                     <button
                         type="button"
@@ -123,8 +127,9 @@ const ProfilePage = () => {
                     <ProfileVideoGrid userId={profile.id} username={profile.username}/>
                 )}
                 {activeTab === "liked" && (
-                    <CachedVideoGrid filter={isLiked} username={profile.username}/>
+                    <ProfileCollectionGrid key={`${profile.id}-liked`} userId={profile.id} username={profile.username} kind="liked"/>
                 )}
+                {activeTab === "reposts" && <ProfileCollectionGrid key={`${profile.id}-reposts`} userId={profile.id} username={profile.username} kind="reposts"/>}
                 {activeTab === "saved" && profile.isOwnProfile && (
                     <ProfileFavoriteVideoGrid
                         userId={profile.id}

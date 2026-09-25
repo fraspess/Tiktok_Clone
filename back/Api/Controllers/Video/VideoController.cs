@@ -27,8 +27,17 @@ namespace Api.Controllers.Video;
 
 [Route("api/videos")]
 [ApiController]
-public class VideoController(IMediator _mediator) : ControllerBase
+public class VideoController(IMediator _mediator, Application.Interfaces.IAppDbContext db) : ControllerBase
 {
+    private async Task<Guid> ResolveRepostId(string id)
+    {
+        var guid = Guid.TryParse(id, out var parsed) ? parsed : Guid.Empty;
+        var videoId = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
+            db.Videos.Where(v => v.ShortId == id || v.Id == guid).Select(v => v.Id));
+        if (videoId == Guid.Empty) throw new Domain.Exceptions.NotFoundException(Domain.Constants.ErrorCodes.VideoNotFound);
+        return videoId;
+    }
+
     /*[HttpGet("video/{fileName}")]
     public IActionResult GetVideoFileByFileName(string fileName)
     {
@@ -158,17 +167,17 @@ public class VideoController(IMediator _mediator) : ControllerBase
 
     [HttpPost("{videoId}/repost")]
     [Authorize]
-    public async Task<IActionResult> Repost(Guid videoId)
+    public async Task<IActionResult> Repost(string videoId)
     {
-        await _mediator.Send(new RepostVideoCommand(videoId));
+        await _mediator.Send(new RepostVideoCommand(await ResolveRepostId(videoId)));
         return Ok(ApiResponse<object>.Success(null!));
     }
 
     [HttpDelete("{videoId}/repost")]
     [Authorize]
-    public async Task<IActionResult> Unrepost(Guid videoId)
+    public async Task<IActionResult> Unrepost(string videoId)
     {
-        await _mediator.Send(new UnRepostVideoCommand(videoId));
+        await _mediator.Send(new UnRepostVideoCommand(await ResolveRepostId(videoId)));
         return Ok(ApiResponse<object>.Success(null!));
     }
 }

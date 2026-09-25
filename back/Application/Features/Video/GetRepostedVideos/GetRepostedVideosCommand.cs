@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Video.GetRepostedVideos;
 
-public record GetRepostedVideosCommand(Guid UserId, PaginationSettings PaginationSettings) : IRequest<PagedResult<SimpleVideoDto>>;
+public record GetRepostedVideosCommand(Guid UserId, PaginationSettings PaginationSettings) : IRequest<PagedResult<VideoDto>>;

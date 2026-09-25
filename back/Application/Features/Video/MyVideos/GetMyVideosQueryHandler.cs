@@ -22,7 +22,7 @@ internal class GetMyVideosQueryHandler(
         var videos = await appDbContext
             .Videos
             .IgnoreQueryFilters()
-            .Where(v => v.UserId == currentUser.Id!.Value)
+            .Where(v => v.UserId == currentUser.Id!.Value && !v.IsDeleted)
             .OrderByDescending(v => v.CreatedAt)
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.Settings, cancellationToken);

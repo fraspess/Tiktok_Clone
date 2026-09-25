@@ -1,6 +1,7 @@
 import {type FormEvent, useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {toast} from "sonner";
+import ReportContentDialog from "@/components/feed/ReportContentDialog.tsx";
 import {Heart, Loader2, Send, Trash2} from "lucide-react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -39,6 +40,7 @@ const CommentRow = ({
     const dispatch = useAppDispatch();
     const isAuth = useAppSelector((s) => s.auth.isAuth);
 
+    const [isReportOpen, setIsReportOpen] = useState(false);
     const [isLiked, setIsLiked] = useState(comment.isLiked);
     const [likesCount, setLikesCount] = useState(comment.likesCount);
     const [likeComment] = useLikeCommentMutation();
@@ -127,6 +129,7 @@ const CommentRow = ({
 
     return (
         <div className="flex flex-col gap-2">
+            <ReportContentDialog contentId={comment.id} contentType="Comment" open={isReportOpen} onOpenChange={setIsReportOpen}/>
             <div className="flex gap-3">
                 <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
                     {comment.avatarUrl ? (
@@ -161,6 +164,7 @@ const CommentRow = ({
                                     : t("comments.showReplies", {count: localReplyCount})}
                             </button>
                         )}
+                        {!comment.isOwn && <button type="button" onClick={() => isAuth ? setIsReportOpen(true) : dispatch(openModal())}>{t("report.reportButton")}</button>}
                         {comment.isOwn && (
                             <button
                                 type="button"

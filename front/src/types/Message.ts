@@ -10,4 +10,13 @@ export interface MessageDto {
     content: string;
     createdAt: string;
     isOwn: boolean;
+    isDelivered?: boolean;
+    isRead?: boolean;
+}
+
+export interface MessageReceipt {
+    conversationId: string;
+    messageId: string;
+    isDelivered: boolean;
+    isRead: boolean;
 }

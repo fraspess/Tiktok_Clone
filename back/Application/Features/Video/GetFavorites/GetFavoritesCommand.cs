@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Video.GetFavorites;
 
-public record GetFavoritesCommand(Guid userId, PaginationSettings PaginationSettings) : IRequest<PagedResult<SimpleVideoDto>>;
+public record GetFavoritesCommand(Guid userId, PaginationSettings PaginationSettings) : IRequest<PagedResult<VideoDto>>;

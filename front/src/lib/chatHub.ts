@@ -1,6 +1,6 @@
 import {HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
 import {API_BASE_URL} from "@/env.ts";
-import type {MessageDto} from "@/types/Message.ts";
+import type {MessageDto, MessageReceipt} from "@/types/Message.ts";
 
 function getChatHubUrl() {
     const baseUrl = API_BASE_URL || window.location.origin;
@@ -18,6 +18,7 @@ type PendingMessagesHandler = (messages: MessageDto[]) => void;
 
 const messageHandlers = new Set<MessageHandler>();
 const pendingHandlers = new Set<PendingMessagesHandler>();
+const receiptHandlers = new Set<(receipt: MessageReceipt) => void>();
 const statusListeners = new Set<(connected: boolean) => void>();
 
 function notifyStatus(connected: boolean) {
@@ -43,6 +44,7 @@ function ensureConnection(): HubConnection {
     connection.on("ReceivedPendingMessages", (messages: MessageDto[]) => {
         pendingHandlers.forEach((handler) => handler(messages));
     });
+    connection.on("MessageReceipt", (receipt: MessageReceipt) => receiptHandlers.forEach(handler => handler(receipt)));
     connection.onreconnecting(() => notifyStatus(false));
     connection.onreconnected(() => notifyStatus(true));
     connection.onclose(() => {
@@ -88,12 +90,14 @@ async function startSharedConnection(): Promise<void> {
 export function subscribeChatHub(options: {
     getAccessToken: () => string;
     onMessage?: MessageHandler;
+    onReceipt?: (receipt: MessageReceipt) => void;
     onPendingMessages?: PendingMessagesHandler;
     onStatusChange?: (connected: boolean) => void;
 }): {unsubscribe: () => void; connection: () => HubConnection | null} {
     accessTokenProvider = options.getAccessToken;
     subscriberCount += 1;
 
+    if (options.onReceipt) receiptHandlers.add(options.onReceipt);
     if (options.onMessage) messageHandlers.add(options.onMessage);
     if (options.onPendingMessages) pendingHandlers.add(options.onPendingMessages);
     if (options.onStatusChange) {
@@ -110,6 +114,7 @@ export function subscribeChatHub(options: {
     return {
         connection: () => sharedConnection,
         unsubscribe: () => {
+            if (options.onReceipt) receiptHandlers.delete(options.onReceipt);
             if (options.onMessage) messageHandlers.delete(options.onMessage);
             if (options.onPendingMessages) pendingHandlers.delete(options.onPendingMessages);
             if (options.onStatusChange) statusListeners.delete(options.onStatusChange);

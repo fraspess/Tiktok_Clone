@@ -1,5 +1,7 @@
 ﻿using Application.Services.Message;
 using Microsoft.AspNetCore.Authorization;
+using Domain.Constants;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Infrastructure.SignalR.Hubs;
@@ -9,7 +11,14 @@ public class ChatHub(IMessageService messageService) : Hub
 {
     public async Task SendMessage(Guid conversationId, string content)
     {
-        await messageService.SendAsync(Guid.Parse(Context.UserIdentifier!), conversationId, content);
+        try
+        {
+            await messageService.SendAsync(Guid.Parse(Context.UserIdentifier!), conversationId, content);
+        }
+        catch (NotAllowedException ex) when (ex.Message == ErrorCodes.MessagesNotAccepted)
+        {
+            throw new HubException(ErrorCodes.MessagesNotAccepted);
+        }
     }
 
     public override async Task OnConnectedAsync()

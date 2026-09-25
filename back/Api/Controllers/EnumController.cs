@@ -23,7 +23,8 @@ public class EnumController : ControllerBase
 
     private static readonly IEnumerable<object> _userReportReasons = GetEnumValuesWithDescription<UserReportReasons>();
     
-    private static readonly IEnumerable<object> _messagePrivacySettings = GetEnumValues<MessagePrivacy>();
+    private static readonly IEnumerable<object> _messagePrivacySettings = Enum.GetValues<MessagePrivacy>()
+        .Select(value => new { id = (int)value, name = value.ToString() }).ToList();
 
     private static IEnumerable<object> GetEnumValues<T>()
         where T : struct, Enum
@@ -41,6 +42,7 @@ public class EnumController : ControllerBase
             .Select(e => new
             {
                 id = Convert.ToInt32(e),
+                name = e.ToString(),
                 description = e.GetDescription()
             })
             .Where(e => e.id != 0)

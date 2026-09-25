@@ -25,7 +25,7 @@ const UserAvatar = ({username, avatar, size = "md", className}: UserAvatarProps)
     return (
         <div
             className={cn(
-                "shrink-0 overflow-hidden rounded-full bg-neutral-700 ring-1 ring-white/10",
+                "shrink-0 overflow-hidden rounded-full bg-muted text-muted-foreground ring-1 ring-border",
                 sizeClasses[size],
                 className
             )}
@@ -38,7 +38,7 @@ const UserAvatar = ({username, avatar, size = "md", className}: UserAvatarProps)
                     onError={() => setHasError(true)}
                 />
             ) : (
-                <div className="flex h-full w-full items-center justify-center font-semibold text-neutral-200">
+                <div className="flex h-full w-full items-center justify-center font-semibold">
                     {initial}
                 </div>
             )}

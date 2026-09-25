@@ -11,6 +11,7 @@ const videosCacheSlice = createSlice({
     name: "videosCache",
     initialState,
     reducers: {
+        removeVideo: (state, action: PayloadAction<string>) => { delete state.videos[action.payload]; },
         cacheVideos: (state, action: PayloadAction<VideoDto[]>) => {
             for (const v of action.payload) {
                 state.videos[v.id] = v;
@@ -25,5 +26,5 @@ const videosCacheSlice = createSlice({
     },
 });
 
-export const {cacheVideos, updateVideo} = videosCacheSlice.actions;
+export const {cacheVideos, updateVideo, removeVideo} = videosCacheSlice.actions;
 export default videosCacheSlice.reducer;
