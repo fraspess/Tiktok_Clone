@@ -63,7 +63,7 @@ public class EnumController : ControllerBase
             ContentTypes.Comment => _commentReportReasons,
             ContentTypes.User => _userReportReasons,
             ContentTypes.Video => _videoReportReasons,
-            _ => throw new BadRequestException("Невідомий contentType")
+            _ => throw new BadRequestException(ErrorCodes.InvalidContentType, "The content type is invalid.")
         }));
     }
 

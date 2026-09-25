@@ -46,7 +46,7 @@ public class MessageService(IAppDbContext appDbContext,
                           .FirstOrDefaultAsync(m =>
                               m.Id == messageId && m.SenderId != userId &&
                               m.Conversation.Participants.Any(p => p.UserId == userId))
-                      ?? throw new NotFoundException("Повідомлення не знайдено");
+                      ?? throw new NotFoundException(ErrorCodes.MessageNotFound, "Message not found.");
 
         if (message.IsDelivered) return;
         message.IsDelivered = true;
@@ -60,7 +60,7 @@ public class MessageService(IAppDbContext appDbContext,
                           .FirstOrDefaultAsync(m =>
                               m.Id == messageId && m.SenderId != userId &&
                               m.Conversation.Participants.Any(p => p.UserId == userId))
-                      ?? throw new NotFoundException("Повідомлення не знайдено");
+                      ?? throw new NotFoundException(ErrorCodes.MessageNotFound, "Message not found.");
 
         if (message.IsRead) return;
         message.IsDelivered = true;
@@ -81,7 +81,7 @@ public class MessageService(IAppDbContext appDbContext,
     {
         var conversationParticipants = await appDbContext.Conversations.Where(c => c.Id == conversationId)
             .Select(p => p.Participants).FirstOrDefaultAsync();
-        if (conversationParticipants is null) throw new NotFoundException("Чат не знайдено");
+        if (conversationParticipants is null) throw new NotFoundException(ErrorCodes.ConversationNotFound, "Conversation not found.");
         if (conversationParticipants.All(p => p.UserId != currentUser.Id!.Value)) throw new NotAllowedException(ErrorCodes.Forbidden);
 
         foreach (var recipient in conversationParticipants.Where(p => p.UserId != userId))

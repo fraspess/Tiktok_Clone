@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using Application.Dtos.User;
 using Application.Interfaces;
 using Application.Options;
+using Domain.Constants;
 using Domain.Exceptions;
 using Microsoft.Extensions.Options;
 
@@ -44,7 +45,7 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
     {
         var allowed = new[] { "video/mp4", "video/quicktime", "video/x-msvideo", "video/webm" };
         if (!allowed.Contains(contentType))
-            throw new BadRequestException("Тільки відео файли дозволені");
+            throw new BadRequestException(ErrorCodes.InvalidFileType, "Only video files are allowed.");
 
         var url = s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
         {

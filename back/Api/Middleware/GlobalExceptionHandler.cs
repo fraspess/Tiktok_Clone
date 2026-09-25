@@ -35,25 +35,25 @@ public class GlobalExceptionHandler
         {
             _logger.LogWarning(ex, "Не авторизований");
             context.Response.StatusCode = 401;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Message));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Code, ex.Message));
         }
         catch (NotFoundException ex)
         {
             _logger.LogInformation(ex, "Не знайдено");
             context.Response.StatusCode = 404;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Message));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Code, ex.Message));
         }
         catch (NotAllowedException ex)
         {
             _logger.LogWarning(ex, "Недостатньо прав");
             context.Response.StatusCode = 403;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object?>.ErrorWithPayload(ex.Payload, ex.Message));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object?>.ErrorWithPayload(ex.Payload, ex.Code, ex.Message));
         }
         catch (BadRequestException ex)
         {
             _logger.LogInformation(ex, "Поганий запит");
             context.Response.StatusCode = 400;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Message));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ex.Code, ex.Message));
         }
         catch (Exception ex)
         {
@@ -61,12 +61,12 @@ public class GlobalExceptionHandler
             {
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsJsonAsync(
-                    ApiResponse<object>.Error(null,$"Внутрішня помилка сервера: {ex.Message}"));
+                    ApiResponse<object>.Error(ErrorCodes.InternalServerError, $"An internal server error occurred: {ex.Message}"));
                 return;
             }
 
             context.Response.StatusCode = 500;
-            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ErrorCodes.InternalServerError,"Внутрішня помилка сервера"));
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ErrorCodes.InternalServerError, ErrorMessages.For(ErrorCodes.InternalServerError)));
         }
     }
 }

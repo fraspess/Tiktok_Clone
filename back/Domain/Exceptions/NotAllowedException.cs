@@ -1,14 +1,10 @@
 ﻿namespace Domain.Exceptions;
 
-public class NotAllowedException : Exception
+public class NotAllowedException : ApiException
 {
     public object? Payload { get; set; }
 
-    public NotAllowedException(string message)
-    {
-        
-    }
-    public NotAllowedException(string message, object? payload) : base(message)
+    public NotAllowedException(string code, string? message = null, object? payload = null) : base(code, message)
     {
         Payload = payload;
     }

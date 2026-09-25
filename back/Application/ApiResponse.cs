@@ -1,4 +1,6 @@
-﻿namespace Application;
+﻿using Domain.Constants;
+
+namespace Application;
 
 public class ApiResponse<T>
 {
@@ -19,13 +21,15 @@ public class ApiResponse<T>
         };
     }
 
-    public static ApiResponse<T> ErrorWithPayload(T data, string code)
+    public static ApiResponse<T> ErrorWithPayload(T data, string code, string? message = null)
     {
         return new ApiResponse<T>()
         {
             IsSuccess = false,
             Code = code,
             Data = data,
+            Message = message,
+            Errors = message != null ? [message] : null
         };
     }
     public static ApiResponse<T> Error(string code, string? message = null)
@@ -44,6 +48,7 @@ public class ApiResponse<T>
         return new ApiResponse<T>
         {
             IsSuccess = false,
+            Code = ErrorCodes.ValidationError,
             Message = message ?? "Validation failed",
             FieldErrors = fieldErrors
         };
