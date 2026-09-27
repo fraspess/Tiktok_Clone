@@ -1,0 +1,24 @@
+#cloud-config
+hostname: ${hostname}
+
+# SSH as the default "ubuntu" user
+%{ if ssh_public_key != "" ~}
+ssh_authorized_keys:
+  - ${ssh_public_key}
+%{ endif ~}
+
+# Lets Proxmox show the VM's IP and shut it down cleanly
+packages:
+  - qemu-guest-agent
+
+# The same install script the AWS instances get as user_data
+write_files:
+  - path: /root/install.sh
+    permissions: "0700"
+    encoding: b64
+    content: ${script_b64}
+
+# Output goes to /var/log/cloud-init-output.log, like on AWS
+runcmd:
+  - systemctl start qemu-guest-agent
+  - /root/install.sh

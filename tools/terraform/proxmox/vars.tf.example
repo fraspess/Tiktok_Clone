@@ -1,0 +1,145 @@
+// Proxmox API
+variable "proxmox_endpoint" {
+  type        = string
+  description = "Proxmox API URL, e.g. https://192.168.1.10:8006/"
+  default     = ""
+}
+
+variable "proxmox_api_token" {
+  type        = string
+  description = "API token as user@realm!tokenid=secret"
+  default     = ""
+}
+
+variable "proxmox_insecure" {
+  type        = bool
+  description = "Skip TLS verification, true for the node's default self-signed certificate"
+  default     = true
+}
+
+// SSH to the node, used to upload the cloud-init snippets
+variable "proxmox_ssh_user" {
+  type    = string
+  default = "root"
+}
+
+variable "proxmox_ssh_key_file" {
+  type        = string
+  description = "Unencrypted private key for SSH to the node, e.g. ~/.ssh/id_ed25519, leave empty to use ssh-agent"
+  default     = ""
+}
+
+// Where the VMs go
+variable "node_name" {
+  type    = string
+  default = "pve"
+}
+
+variable "vm_datastore" {
+  type        = string
+  description = "Storage for VM disks and the cloud-init drive"
+  default     = "local-lvm"
+}
+
+variable "files_datastore" {
+  type        = string
+  description = "Storage for the Ubuntu image and cloud-init snippets, needs the import and snippets content types"
+  default     = "local"
+}
+
+variable "network_bridge" {
+  type    = string
+  default = "vmbr0"
+}
+
+variable "ubuntu_image_url" {
+  type    = string
+  default = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+}
+
+// Network, static IPs so the master knows where the agent is
+variable "master_ip" {
+  type    = string
+  default = "192.168.1.50"
+}
+
+variable "agent_ip" {
+  type        = string
+  description = "Forward ports 80 and 443 on the router to this IP"
+  default     = "192.168.1.51"
+}
+
+variable "subnet_prefix" {
+  type    = number
+  default = 24
+}
+
+variable "gateway" {
+  type    = string
+  default = "192.168.1.1"
+}
+
+variable "dns_servers" {
+  type    = list(string)
+  default = ["1.1.1.1", "8.8.8.8"]
+}
+
+// Sizes, same as the AWS instances (t3.micro master, m7i-flex.large agent) but with 2 GB for Jenkins
+variable "master_cores" {
+  type    = number
+  default = 2
+}
+
+variable "master_memory" {
+  type        = number
+  description = "MB"
+  default     = 2048
+}
+
+variable "agent_cores" {
+  type    = number
+  default = 2
+}
+
+variable "agent_memory" {
+  type        = number
+  description = "MB, builds and runs the whole app stack"
+  default     = 8192
+}
+
+// Access and app
+variable "ssh_public_key" {
+  type        = string
+  description = "Public key for SSH into the VMs as the ubuntu user"
+  default     = ""
+}
+
+variable "jenkins_admin_password" {
+  type        = string
+  description = "Password for the Jenkins admin user"
+  default     = ""
+}
+
+variable "duckdns_subdomain" {
+  type        = string
+  description = "DuckDNS subdomain, must match server_name in front/nginx.server.conf"
+  default     = "much-more-demo"
+}
+
+variable "duckdns_token" {
+  type        = string
+  description = "DuckDNS token, used to point the subdomain at your public IP"
+  default     = ""
+}
+
+variable "letsencrypt_email" {
+  type        = string
+  description = "Optional email for the Let's Encrypt account, leave empty for none"
+  default     = ""
+}
+
+variable "letsencrypt_staging" {
+  type        = bool
+  description = "Use the Let's Encrypt staging server (untrusted cert, no rate limit) while testing"
+  default     = false
+}
