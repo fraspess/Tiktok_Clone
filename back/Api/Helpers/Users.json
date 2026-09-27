@@ -1,0 +1,68 @@
+[
+  {
+    "Email": "string@example.com",
+    "Username": "string",
+    "FirstName": "string",
+    "LastName": "string",
+    "Image": "https://randomuser.me/api/portraits/men/1.jpg",
+    "Password": "String!1",
+    "Roles": [
+      "Admin"
+    ]
+  },
+  {
+    "Email": "ivan@example.com",
+    "Username": "ivan",
+    "FirstName": "Іван",
+    "LastName": "Борисюк",
+    "Image": "https://randomuser.me/api/portraits/men/2.jpg",
+    "Password": "B!b123456",
+    "Roles": [
+      "User"
+    ]
+  },
+  {
+    "Email": "olena@example.com",
+    "Username": "olena",
+    "FirstName": "Олена",
+    "LastName": "Шаглінська",
+    "Image": "https://randomuser.me/api/portraits/women/1.jpg",
+    "Password": "Password1@",
+    "Roles": [
+      "User"
+    ]
+  },
+  {
+    "Email": "maria.k@example.com",
+    "Username": "maria.k3",
+    "FirstName": "Марія",
+    "LastName": "Коваль",
+    "Image": "https://randomuser.me/api/portraits/women/2.jpg",
+    "Password": "Maria2024!",
+    "Roles": [
+      "User"
+    ]
+  },
+  {
+    "Email": "andriy.l@example.com",
+    "Username": "andriy.l1",
+    "FirstName": "Андрій",
+    "LastName": "Литвин",
+    "Image": "https://randomuser.me/api/portraits/men/3.jpg",
+    "Password": "Andriy$123",
+    "Roles": [
+      "User"
+    ]
+  },
+  {
+    "Email": "natalia.z@example.com",
+    "Username": "natalia.z2",
+    "FirstName": "Наталія",
+    "LastName": "Заріцька",
+    "Image": "https://randomuser.me/api/portraits/women/3.jpg",
+    "Password": "NataPass1!",
+    "Roles": [
+      "User"
+    ]
+  }
+]

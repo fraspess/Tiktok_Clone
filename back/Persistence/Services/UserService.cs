@@ -1,0 +1,248 @@
+﻿using System.Globalization;
+using System.Net.Http.Json;
+using Application.Constants;
+using Application.Dtos.Token;
+using Application.Dtos.User;
+using Application.Interfaces;
+using Application.Mapper;
+using Application.Options;
+using Domain.Entities.Identity;
+using Domain.Constants;
+using Domain.Exceptions;
+using Google.Apis.Auth;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+
+namespace Persistence.Services;
+
+internal class UserService(
+    UserManager<UserEntity> userManager,
+    IJwtTokenService tokenService,
+    IImageService imageService,
+    IConfiguration configuration,
+    IEmailService emailService,
+    UserMapper mapper,
+    HttpClient httpClient,
+    ICurrentUser currentUser,
+    IOptions<GoogleOptions> options)
+    : IUserService
+{
+    private readonly GoogleOptions _googleOptions = options.Value;
+    private static string GetHtmlTemplate(string templateName)
+    {
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates", templateName);
+        return File.ReadAllText(path);
+    }
+
+    public async Task<TokenResponseDTO> Login(LoginUserDto dto)
+    {
+        var user =
+            await userManager.Users.FirstOrDefaultAsync(u => u.UserName == dto.Login || u.Email == dto.Login)
+            ?? throw new BadRequestException(ErrorCodes.InvalidCredentials);
+
+        var checkPassword = await userManager.CheckPasswordAsync(user, dto.Password);
+        if (!checkPassword) throw new BadRequestException(ErrorCodes.InvalidCredentials);
+
+        if (!user.EmailConfirmed) throw new NotAllowedException(ErrorCodes.EmailNotConfirmed, payload: new {email = user.Email});
+
+        if (user.IsBanned) throw new NotAllowedException(ErrorCodes.UserBanned);
+
+        return await tokenService.GenerateTokensAsync(user);
+    }
+
+    public async Task Register(RegisterUserDto dto)
+    {
+        var isEmailTaken = await userManager.Users.AnyAsync(u => u.Email == dto.Email);
+        if (isEmailTaken) throw new BadRequestException(ErrorCodes.EmailAlreadyExists);
+        var isUsernameTaken = await userManager.Users.AnyAsync(u => u.NormalizedUserName == dto.Username.ToUpper());
+        if (isUsernameTaken) throw new BadRequestException(ErrorCodes.UsernameAlreadyExists);
+
+        var user = mapper.ToEntity(dto);
+
+        var result = await userManager.CreateAsync(user, dto.Password);
+        if (result.Succeeded)
+        {
+
+            await userManager.AddToRoleAsync(user, RoleNames.USER_ROLE);
+
+            user.LastConfirmationEmailSentAt = DateTime.UtcNow;
+            await userManager.UpdateAsync(user);
+            await GenerateTokenAndSendConfirmationEmailAsync(user);
+        }
+        else
+        {
+            throw new Exception(ErrorCodes.InternalServerError);
+        }
+    }
+
+    public async Task UpdateTokenVersion(Guid userId)
+    {
+        var user = userManager.Users.FirstOrDefault(u => u.Id == userId)
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
+
+        var currentVersion = user.RefreshTokenVersion;
+        user.RefreshTokenVersion = currentVersion + 1;
+
+        await userManager.UpdateAsync(user);
+    }
+
+    public async Task ForgotPasswordAsync(string email)
+    {
+        var user = await userManager.FindByEmailAsync(email)
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
+
+        if (!await userManager.HasPasswordAsync(user))
+            throw new BadRequestException(ErrorCodes.CantResetPasswordExternal);
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        var resetLink = $"{configuration["Frontend:Url"]}/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+        var body = GetHtmlTemplate("ResetPassword.html");
+        body = body.Replace("{resetLink}", resetLink);
+
+        await emailService.SendEmailAsync(email, "Скидання пароля", body);
+    }
+
+    public async Task<TokenResponseDTO> ConfirmEmail(string email, string token)
+    {
+        var user = userManager.Users.FirstOrDefault(u => u.Email == email)
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
+
+        if (user.EmailConfirmed) throw new BadRequestException(ErrorCodes.EmailAlreadyConfirmed);
+
+        var result = await userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+            return await tokenService.GenerateTokensAsync(user);
+        throw new BadRequestException(ErrorCodes.InvalidToken);
+    }
+
+    // Скидає пароль і міняє версію токен на + 1 щоб інші токени стали недійсними
+    public async Task ResetPasswordAsync(ResetPasswordDto dto)
+    {
+        var user = userManager.Users.FirstOrDefault(u => u.Email == dto.Email)
+                   ?? throw new UnauthorizedException(ErrorCodes.UserNotFound);
+
+        var result = await userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
+
+        if (result.Succeeded)
+            await UpdateTokenVersion(user.Id);
+        else
+            throw new BadRequestException(ErrorCodes.InvalidToken);
+    }
+
+    public async Task ResendConfirmationEmailAsync(string email)
+    {
+        var user = await userManager.FindByEmailAsync(email)
+                   ?? throw new NotFoundException(ErrorCodes.UserNotFound);
+
+        if (user.EmailConfirmed) throw new BadRequestException(ErrorCodes.EmailAlreadyConfirmed);
+
+        if (user.LastConfirmationEmailSentAt.HasValue)
+        {
+            var timePassed = DateTime.UtcNow - user.LastConfirmationEmailSentAt.Value;
+            if (timePassed.TotalMinutes < 1)
+            {
+                //var remaining = 1 - (int)timePassed.TotalMinutes;
+                throw new BadRequestException(ErrorCodes.TooFast);
+            }
+        }
+
+        user.LastConfirmationEmailSentAt = DateTime.UtcNow;
+        await userManager.UpdateAsync(user);
+        await GenerateTokenAndSendConfirmationEmailAsync(user);
+    }
+
+
+    private async Task GenerateTokenAndSendConfirmationEmailAsync(UserEntity user)
+    {
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var body = GetHtmlTemplate("ConfirmEmail.html");
+        body = body.Replace("{confirmCode}", token);
+        await emailService.SendEmailAsync(user.Email!, "Confirm registration", body);
+    }
+
+    public async Task<TokenResponseDTO> GoogleAuth(string code)
+    {
+        var tokenResponse = await httpClient.PostAsync(
+            "https://oauth2.googleapis.com/token",
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                { "code", code },
+                {"client_id", _googleOptions.ClientId},
+                {"client_secret", _googleOptions.ClientSecret},
+                {"redirect_uri", "postmessage"},
+                {"grant_type", "authorization_code"}
+            }));
+
+        if (!tokenResponse.IsSuccessStatusCode)
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
+
+        var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<GoogleTokenExchangeResponse>();
+
+        if (tokenJson?.IdToken is null)
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
+        
+        var idToken = tokenJson.IdToken;
+                
+        GoogleJsonWebSignature.Payload payload;
+        try
+        {
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = [_googleOptions.ClientId]
+            };
+            payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+        }
+        catch (InvalidJwtException)
+        {
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
+        }
+
+        if (!payload.EmailVerified)
+            throw new UnauthorizedException(ErrorCodes.GoogleLoginFailed);
+
+        var existingUser = await userManager.FindByLoginAsync("Google", payload.Subject);
+        if (existingUser is not null)
+            return await tokenService.GenerateTokensAsync(existingUser);
+
+        var user = await userManager.FindByEmailAsync(payload.Email);
+        if (user is not null)
+        {
+            await userManager.AddLoginAsync(user, new UserLoginInfo(
+                "Google",
+                payload.Subject,
+                "Google"
+            ));
+
+            return await tokenService.GenerateTokensAsync(user);
+        }
+
+        var baseUsername = payload.Email.Split('@')[0];
+        var username = baseUsername;
+        var counter = 1;
+
+        while (await userManager.FindByNameAsync(username) is not null) username = $"{baseUsername}{counter++}";
+
+        user = new UserEntity
+        {
+            Email = payload.Email,
+            FirstName = payload.GivenName,
+            LastName = payload.FamilyName,
+            EmailConfirmed = true,
+            UserName = username
+        };
+
+        await userManager.CreateAsync(user);
+        if (!string.IsNullOrEmpty(payload.Picture)) await imageService.SaveImageAsync(payload.Picture, user.Id);
+
+        await userManager.AddToRoleAsync(user, RoleNames.USER_ROLE);
+        await userManager.AddLoginAsync(user, new UserLoginInfo(
+            "Google",
+            payload.Subject,
+            "Google"
+        ));
+
+        return await tokenService.GenerateTokensAsync(user);
+    }
+}

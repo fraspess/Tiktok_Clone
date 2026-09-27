@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <Compile Remove="Validators\**"/>
+        <EmbeddedResource Remove="Validators\**"/>
+        <None Remove="Validators\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Contracts\Contracts.csproj"/>
+        <ProjectReference Include="..\Domain\Domain.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation"/>
+        <PackageReference Include="Google.Apis.Auth"/>
+        <PackageReference Include="MailKit"/>
+        <PackageReference Include="MediatR"/>
+        <PackageReference Include="Serilog.AspNetCore"/>
+        <PackageReference Include="Serilog.Sinks.Console"/>
+        <PackageReference Include="Serilog.Sinks.File"/>
+        <PackageReference Include="SixLabors.ImageSharp"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
+        <PackageReference Include="System.Security.Cryptography.Xml"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
+        <PackageReference Include="Riok.Mapperly"/>
+        <PackageReference Include="AWSSDK.S3"/>
+        <PackageReference Include="Nanoid" />
+
+
+    </ItemGroup>
+
+</Project>

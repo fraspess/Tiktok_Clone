@@ -1,0 +1,49 @@
+import {configureStore} from '@reduxjs/toolkit'
+import {setupListeners} from '@reduxjs/toolkit/query'
+import authModalReducer from "@/store/slices/authModalSlice";
+import authReducer from "@/store/slices/authSlice"
+import playerReducer from "@/store/slices/playerSlice"
+import messagesDrawerReducer from "@/store/slices/messagesDrawerSlice"
+import videosCacheReducer from "@/store/slices/videosCacheSlice"
+import messagesReducer from "@/store/slices/messagesSlice"
+import followReducer from "@/store/slices/followSlice"
+import uploadsReducer from "@/store/slices/uploadsSlice"
+import {authApi} from "@/store/apis/authApi.ts";
+import {conversationApi} from "@/store/apis/conversationApi.ts";
+import {videoApi} from "@/store/apis/videoApi.ts";
+import {userApi} from "@/store/apis/userApi.ts";
+import {commentApi} from "@/store/apis/commentApi.ts";
+import {adminApi} from "@/store/apis/adminApi.ts";
+
+export const store = configureStore({
+    reducer: {
+        authModal: authModalReducer,
+        auth: authReducer,
+        player: playerReducer,
+        messagesDrawer: messagesDrawerReducer,
+        videosCache: videosCacheReducer,
+        messages: messagesReducer,
+        follow: followReducer,
+        uploads: uploadsReducer,
+        [authApi.reducerPath]: authApi.reducer,
+        [conversationApi.reducerPath]: conversationApi.reducer,
+        [videoApi.reducerPath]: videoApi.reducer,
+        [userApi.reducerPath]: userApi.reducer,
+        [commentApi.reducerPath]: commentApi.reducer,
+        [adminApi.reducerPath]: adminApi.reducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(
+            authApi.middleware,
+            conversationApi.middleware,
+            videoApi.middleware,
+            userApi.middleware,
+            commentApi.middleware,
+            adminApi.middleware,
+        ),
+})
+
+setupListeners(store.dispatch)
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

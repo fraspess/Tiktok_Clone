@@ -1,0 +1,44 @@
+﻿using Application.Dtos.User;
+using Application.Dtos.Video;
+using Domain.Entities.Video;
+using Microsoft.EntityFrameworkCore;
+
+namespace Application.Extensions;
+
+public static class VideoQueryExtensions
+{
+    public static IQueryable<VideoProjectionDto> ToProjectionDto(this IQueryable<VideoEntity> query,
+        Guid? currentUserId)
+    {
+        return query.Select(v => new VideoProjectionDto
+        {
+            Id = v.Id,
+            ShortId = v.ShortId,
+            Description = v.Description,
+            HashTags = v.HashTags.Select(h => h.HashTag.Tag).ToList(),
+            LikeCount = v.LikeCount,
+            CommentsCount = v.CommentCount,
+            FavoriteCount = v.FavoriteCount,
+            Status = v.Status,
+            IsBanned = v.IsBanned,
+            ProccessedInPercents = v.ProccessedInPercents,
+            Author = new UserAuthorDto
+            {
+                Id = v.Author.Id,
+                Username = v.Author.UserName,
+                IsFollowing = v.Author.Followers.Any(f => f.FollowerId == currentUserId)
+            },
+            IsFavorited = v.Favorites.Any(f => f.UserId == currentUserId),
+            IsLiked = v.Likes.Any(l => l.UserId == currentUserId),
+            IsReposted = v.Reposts.Any(r => r.UserId == currentUserId),
+            CreatedAt = v.CreatedAt,
+            ViewCount = v.ViewCount
+        });
+    }
+
+    public static async Task<Guid> GetIdFromShortIdAsync(this IQueryable<VideoEntity> query, string shortId, CancellationToken ct = default)
+    {
+        var id = Guid.TryParse(shortId, out var parsedId) ? parsedId : Guid.Empty;
+        return await query.Where(v => v.ShortId == shortId || v.Id == id).Select(v => v.Id).FirstOrDefaultAsync(ct);
+    }
+}

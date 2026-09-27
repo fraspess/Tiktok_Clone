@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+</head>
+<body>
+    <!-- <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:5189/hubs/chat", {
+                accessTokenFactory: () => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTlkYTExNS01YWE3LTcwMzYtYTdhMy1mN2JlNDNlMTY5NzQiLCJlbWFpbCI6InBhdmxvc2FtY2h5a0BnbWFpbC5jb20iLCJ1c2VybmFtZSI6InBhdmxvc2FtY2h5ayIsImltYWdlIjoiNTlmZjFiNTAtZjQxYS00YWQ2LTliODEtMmY3YjY2MzNiZmYyLndlYnAiLCJleHAiOjE3NzY4MDUzMjUsImlzcyI6IkZyYXNwZXNzIDopIiwiYXVkIjoiRnJhc3Blc3MgOikifQ.s3F-aUHDpswVRt3vchLiptj23D78E-ey3adhqmUIhQ0"
+            })
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceivedMessage", (message) => {
+            console.log("Received:", message);
+        });
+
+        connection.on("ReceivedPendingMessages", (messages) => {
+            console.log("Pending:", messages);
+        });
+
+        connection.start()
+            .then(() => {
+                console.log("Connected!");
+
+                connection.invoke("SendMessage", 
+                    "39f5c213-e7b0-4818-bb00-ba7bc1431c9b", 
+                    "hello world"
+                );
+            })
+            .catch(console.error);
+    </script> -->
+
+    <script>
+        const videoStatusConnection = new signalR.HubConnectionBuilder()
+        .withUrl("http://localhost:5189/hubs/video-process-status", {
+            accessTokenFactory: () => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTlkZTgwNy1kNjhkLTc5ZmMtYWFiNi1lZTY0YTViMDNkMjYiLCJlbWFpbCI6InN0cmluZ0BleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoic3RyaW5nIiwiaW1hZ2UiOiJlYjE0YzYyZS1jNWRlLTRiNTMtODhkOS01ZmM4ZGIxMjIzN2Eud2VicCIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzgwMTE0MCwiaXNzIjoiRnJhc3Blc3MgOikiLCJhdWQiOiJGcmFzcGVzcyA6KSJ9.TIRwq4HQ-ujDNdBTFJblCa08FzCW4vWHxCUyMLtY4vY"
+        })
+        .withAutomaticReconnect()
+        .build()
+
+        videoStatusConnection.on("SendVideoProcessingProgress", (message, progress) => {
+            console.log("Progress:", progress)
+        })
+        videoStatusConnection.on("SendVideoProcessingFailed", (video,message) => {
+            console.log("Failed:", message)
+        })
+        videoStatusConnection.on("SendVideoProcessingSucceded", (message) => {
+            console.log("Success:", message)
+        })
+
+        videoStatusConnection.start()
+        .then(() => {
+            console.log("Connected!");
+
+            
+        }).catch(console.error);
+        
+    </script>
+</body>
+</html>

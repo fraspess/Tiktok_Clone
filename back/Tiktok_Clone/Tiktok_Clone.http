@@ -1,6 +1,0 @@
-@Tiktok_Clone_HostAddress = http://localhost:5189
-
-GET {{Tiktok_Clone_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

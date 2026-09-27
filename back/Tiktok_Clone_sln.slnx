@@ -1,5 +1,11 @@
 <Solution>
-  <Project Path="Tiktok_Clone.BLL/Tiktok_Clone.BLL.csproj" />
-  <Project Path="Tiktok_Clone.DAL/Tiktok_Clone.DAL.csproj" />
-  <Project Path="Tiktok_Clone/Tiktok_Clone.csproj" />
+    <Folder Name="/Workers/">
+        <Project Path="VideoProcessor/VideoProcessor.csproj" Id="645e3dbe-1e86-4773-bd30-dafb53b97a67"/>
+    </Folder>
+    <Project Path="Contracts/Contracts.csproj" Id="43a45e20-694c-4e03-b857-b8db8147cea4"/>
+    <Project Path="Domain/Domain.csproj"/>
+    <Project Path="Api/Api.csproj"/>
+    <Project Path="Application/Application.csproj"/>
+    <Project Path="Infrastructure/Infrastructure.csproj" Id="c0f10511-3b3c-44a7-b4f8-bcc500bc42fb"/>
+    <Project Path="Persistence/Persistence.csproj" Id="ef7a4351-2539-44a3-9a29-00849a9a5516"/>
 </Solution>

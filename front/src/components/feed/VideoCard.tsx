@@ -1,0 +1,261 @@
+import {type MouseEvent, type RefObject, useEffect, useMemo, useRef, useState} from "react";
+import {useViewVideoMutation} from "@/store/apis/videoApi.ts";
+import Hls from "hls.js";
+import {Link} from "react-router-dom";
+import {Pause, Play, Volume2, VolumeX} from "lucide-react";
+import {useIntersectionObserver} from "@/hooks/useIntersectionObserver.ts";
+import VideoActionsSidebar from "@/components/feed/VideoActionsSidebar.tsx";
+import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
+import {setMuted} from "@/store/slices/playerSlice.ts";
+import type {VideoDto} from "@/types/Video.ts";
+
+interface VideoCardProps {
+    video: VideoDto;
+    containerRef: RefObject<HTMLDivElement | null>;
+}
+
+const VideoCard = ({video, containerRef}: VideoCardProps) => {
+    const [registerView] = useViewVideoMutation();
+    const viewedId = useRef<string | null>(null);
+    const recordView = () => {
+        if (!isVisible || viewedId.current === video.id) return;
+        viewedId.current = video.id;
+        void registerView(video.id).unwrap().catch(() => { viewedId.current = null; });
+    };
+    const sectionRef = useRef<HTMLDivElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const progressBarRef = useRef<HTMLDivElement>(null);
+    const dispatch = useAppDispatch();
+    const isMuted = useAppSelector((state) => state.player.isMuted);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [progress, setProgress] = useState(0);
+    const observerOptions = useMemo(
+        () => ({root: containerRef, threshold: 0.6}),
+        [containerRef]
+    );
+    const isVisible = useIntersectionObserver(sectionRef, observerOptions);
+
+
+    const retryCountRef = useRef(0);
+    const userUnmutedRef = useRef(false);
+
+    useEffect(() => {
+        const videoEl = videoRef.current;
+        if (!videoEl) return;
+        retryCountRef.current = 0;
+
+        let hls: Hls | null = null;
+
+        const attemptPlay = () => {
+            videoEl.play().catch(() => {
+                if (!videoEl.muted && !userUnmutedRef.current) {
+                    videoEl.muted = true;
+                    dispatch(setMuted(true));
+                }
+                videoEl.play().catch((err) => {
+                    console.warn("Video autoplay blocked or interrupted:", err);
+                });
+            });
+        };
+
+        if (!isVisible) {
+            videoEl.pause();
+            videoEl.removeAttribute("src");
+            videoEl.load();
+            return;
+        }
+
+        const isHlsSource = video.videoUrl.includes(".m3u8");
+
+        if (isHlsSource && Hls.isSupported()) {
+            hls = new Hls();
+
+            hls.on(Hls.Events.ERROR, (_event, data) => {
+                if (!data.fatal) return;
+
+                const canRetry = retryCountRef.current < 3;
+                retryCountRef.current += 1;
+
+                switch (data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        if (canRetry) hls?.startLoad();
+                        else hls?.destroy();
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        if (canRetry) hls?.recoverMediaError();
+                        else hls?.destroy();
+                        break;
+                    default:
+                        hls?.destroy();
+                        break;
+                }
+            });
+
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                attemptPlay();
+            });
+
+            hls.loadSource(video.videoUrl);
+            hls.attachMedia(videoEl);
+        } else {
+            videoEl.src = video.videoUrl;
+            attemptPlay();
+        }
+
+        return () => {
+            if (hls) hls.destroy();
+        };
+    }, [video.videoUrl, isVisible]);
+
+    useEffect(() => {
+        setProgress(0);
+    }, [video.id]);
+
+    useEffect(() => {
+        const videoEl = videoRef.current;
+        if (!videoEl) return;
+
+        let rafId: number;
+
+        const updateProgress = () => {
+            if (videoEl.duration) {
+                setProgress((videoEl.currentTime / videoEl.duration) * 100);
+            }
+            rafId = requestAnimationFrame(updateProgress);
+        };
+
+        rafId = requestAnimationFrame(updateProgress);
+
+        return () => cancelAnimationFrame(rafId);
+    }, []);
+
+    useEffect(() => {
+        const videoEl = videoRef.current;
+        if (!videoEl) return;
+
+        const handlePlay = () => setIsPlaying(true);
+        const handlePause = () => setIsPlaying(false);
+
+        videoEl.addEventListener("play", handlePlay);
+        videoEl.addEventListener("pause", handlePause);
+        return () => {
+            videoEl.removeEventListener("play", handlePlay);
+            videoEl.removeEventListener("pause", handlePause);
+        };
+    }, []);
+
+    const togglePlayPause = () => {
+        const videoEl = videoRef.current;
+        if (!videoEl) return;
+
+        if (videoEl.paused) {
+            videoEl.play().catch((err) => {
+                console.warn("Video play blocked or interrupted:", err);
+            });
+        } else {
+            videoEl.pause();
+        }
+    };
+
+    const handleSeek = (e: MouseEvent<HTMLDivElement>) => {
+        const videoEl = videoRef.current;
+        const bar = progressBarRef.current;
+        if (!videoEl || !bar || !videoEl.duration) return;
+
+        const rect = bar.getBoundingClientRect();
+        const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+        videoEl.currentTime = ratio * videoEl.duration;
+        setProgress(ratio * 100);
+    };
+
+
+    return (
+        <section
+            ref={sectionRef}
+            id={video.id}
+            className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-black md:bg-neutral-100 md:px-4 md:dark:bg-neutral-950"
+        >
+            <div
+                className="relative h-full w-full overflow-hidden bg-black md:aspect-[9/16] md:max-h-[85dvh] md:w-auto md:max-w-full md:rounded-2xl md:shadow-2xl">
+                <video
+                    ref={videoRef}
+                    poster={video.thumbnailUrl || undefined}
+                    className="h-full w-full object-cover"
+                    loop
+                    muted={isMuted}
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                    onPlaying={recordView}
+                    onClick={togglePlayPause}
+                />
+                {!isPlaying && (
+                    <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center md:hidden">
+                        <Play size={64} className="fill-white/80 text-white/80 drop-shadow-lg"/>
+                    </div>
+                )}
+                <button
+                    type="button"
+                    onClick={togglePlayPause}
+                    className="absolute left-4 top-4 z-20 hidden rounded-full bg-black/40 p-3 md:block text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
+                >
+                    {isPlaying ? <Pause size={26}/> : <Play size={26}/>}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => {
+                        const videoEl = videoRef.current;
+                        if (!videoEl) return;
+                        const next = !isMuted;
+                        videoEl.muted = next;
+                        if (!next) {
+                            userUnmutedRef.current = true;
+                            videoEl.play().catch(() => {});
+                        } else {
+                            userUnmutedRef.current = false;
+                        }
+                        dispatch(setMuted(next));
+                    }}
+                    className="absolute right-3 top-[calc(env(safe-area-inset-top,0px)+3.5rem)] z-20 rounded-full bg-black/40 p-2.5 md:right-4 md:top-4 md:p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
+                >
+                    {isMuted ? <VolumeX size={26}/> : <Volume2 size={26}/>}
+                </button>
+
+                <div className="absolute bottom-4 left-4 right-20 text-white [text-shadow:0_1px_4px_rgb(0_0_0/0.7)] md:right-4 md:[text-shadow:none]">
+                    {video.author?.username ? (
+                        <Link
+                            to={`/@${video.author.username}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-semibold hover:underline"
+                        >
+                            @{video.author.username}
+                        </Link>
+                    ) : (
+                        <p className="font-semibold">@unknown</p>
+                    )}
+                    {video.description && (
+                        <p className="mt-1 line-clamp-2 text-sm text-white/90">{video.description}</p>
+                    )}
+                </div>
+
+                <div
+                    ref={progressBarRef}
+                    onClick={handleSeek}
+                    className="absolute bottom-0 left-0 right-0 z-10 flex h-5 w-full cursor-pointer items-end px-0 md:h-3"
+                >
+                    <div className="h-1 w-full bg-white/30">
+                        <div
+                            className="h-full bg-white"
+                            style={{width: `${progress}%`}}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <VideoActionsSidebar video={video}/>
+        </section>
+    );
+};
+
+export default VideoCard;

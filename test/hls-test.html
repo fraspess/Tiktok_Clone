@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HLS Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.7/hls.min.js"></script>
+    <style>
+        body { background: #111; color: #eee; font-family: monospace; padding: 20px; }
+        input { width: 600px; padding: 8px; background: #222; color: #eee; border: 1px solid #444; }
+        button { padding: 8px 16px; background: #333; color: #eee; border: 1px solid #555; cursor: pointer; }
+        video { display: block; margin-top: 20px; width: 640px; background: #000; }
+        #log { margin-top: 20px; background: #1a1a1a; padding: 10px; height: 200px; overflow-y: auto; font-size: 12px; }
+        .error { color: #f55; }
+        .info { color: #5af; }
+    </style>
+</head>
+<body>
+    <h2>HLS Test</h2>
+    <input id="url" type="text" placeholder="http://192.168.50.228/uploads/.../master.m3u8" />
+    <button onclick="load()">Load</button>
+    <video id="video" controls></video>
+    <button onclick="document.getElementById('video').muted = false">🔊 Unmute</button>
+    <div id="log"></div>
+
+    <script>
+        let hls;
+
+        function log(msg, type = 'info') {
+            const div = document.getElementById('log');
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `${new Date().toISOString().slice(11,23)} | ${msg}`;
+            div.appendChild(line);
+            div.scrollTop = div.scrollHeight;
+        }
+
+        function load() {
+            const url = document.getElementById('url').value.trim();
+            if (!url) return;
+
+            if (hls) hls.destroy();
+
+            const video = document.getElementById('video');
+
+            if (Hls.isSupported()) {
+                hls = new Hls({ debug: false });
+                hls.loadSource(url);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => log('Manifest loaded, playing...'));
+                hls.on(Hls.Events.ERROR, (e, data) => {
+                    log(`${data.type} | ${data.details} | fatal: ${data.fatal}`, 'error');
+                    if (data.response) log(`HTTP ${data.response.code} ${data.response.url}`, 'error');
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                log('Using native HLS (Safari)');
+            } else {
+                log('HLS not supported', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

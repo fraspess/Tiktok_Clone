@@ -1,46 +1,49 @@
-
-
-import './App.css'
-import {type ILogin, useLoginMutation, useRefreshMutation} from "../store/apis/testApi.ts";
+import {Route, Routes} from 'react-router-dom'
+import HomePage from "@/pages/HomePage.tsx";
+import ProfilePage from "@/pages/ProfilePage.tsx";
+import ProfileVideoFeedPage from "@/pages/ProfileVideoFeedPage.tsx";
+import MainLayout from "@/components/layout/MainLayout.tsx";
+import UploadVideoPage from "@/pages/UploadVideoPage.tsx";
+import MyVideosPage from "@/pages/MyVideosPage.tsx";
+import ProtectedRoute from "@/routes/ProtectedRoute.tsx";
+import ResetPasswordPage from "@/pages/ResetPasswordPage.tsx";
+import FollowingPage from "@/pages/FollowingPage.tsx";
+import SearchPage from "@/pages/SearchPage.tsx";
+import MessagesPage from "@/pages/MessagesPage.tsx";
+import AdminPage from "@/pages/AdminPage.tsx";
+import AdminRoute from "@/routes/AdminRoute.tsx";
+import SharedVideoPage from "@/pages/SharedVideoPage.tsx";
+import {useVideoProcessingHub} from "@/hooks/useVideoProcessingHub.ts";
 
 function App() {
-  const [login] = useLoginMutation();
-  const [refresh] = useRefreshMutation();
+    useVideoProcessingHub();
 
-  const handleLogin = async () => {
-    const testData : ILogin = {
-      login: "admin@example.com",
-      password:"Admin123!"
-    };
-    try{
-      const response = await login(testData).unwrap();
-      console.log(response);
-    }
-    catch (e) {
-      console.error(e);
-    }
-  }
-    const handleRefresh = async () => {
-        try{
-          const response = await refresh().unwrap();
-          console.log(response);
-        }
-        catch (e) {
-          console.error(e);
-        }
-    }
-  return (
-    <>
-        <div style={{textAlign:"center"}}>
-          <button style={{width: "50%", height: "30px"}} onClick={handleLogin}>Login</button>
 
-        </div>
-        <div style={{textAlign:"center"}}>
-          <button style={{width: "50%", height: "30px", marginTop:"10px"}} onClick={handleRefresh}>Refresh</button>
-        </div>
+    return (
+        <>
+            <Routes>
+                <Route path="/" element={<MainLayout/>}>
+                    <Route index element={<HomePage/>}/>
+                    <Route path="search" element={<SearchPage/>}/>
+                    <Route path="video/:videoId" element={<SharedVideoPage/>}/>
+                    <Route path=":username" element={<ProfilePage/>}/>
+                    <Route path=":username/video/:videoId" element={<ProfileVideoFeedPage/>}/>
+                    <Route path=":username/:collection/video/:videoId" element={<ProfileVideoFeedPage/>}/>
+                    <Route path="reset-password" element={<ResetPasswordPage/>}/>
 
-    </>
-  )
+                    <Route element={<ProtectedRoute/>}>
+                        <Route path="upload" element={<UploadVideoPage/>}/>
+                        <Route path="studio" element={<MyVideosPage/>}/>
+                        <Route path="following" element={<FollowingPage/>}/>
+                        <Route path="messages" element={<MessagesPage/>}/>
+                    </Route>
+                    <Route element={<AdminRoute/>}>
+                        <Route path="admin" element={<AdminPage/>}/>
+                    </Route>
+                </Route>
+            </Routes>
+        </>
+    )
 }
 
-export default App
+export default App;

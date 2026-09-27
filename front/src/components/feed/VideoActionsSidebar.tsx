@@ -1,0 +1,258 @@
+import {useState, useEffect} from "react";
+import {Link} from "react-router-dom";
+import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2, Repeat2} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {toast} from "sonner";
+import type {VideoDto} from "@/types/Video.ts";
+import ReportVideoDialog from "@/components/feed/ReportVideoDialog.tsx";
+import CommentsDialog from "@/components/feed/CommentsDialog.tsx";
+import {formatCount} from "@/lib/utils.ts";
+import {useAppDispatch, useAppSelector} from "@/store/hooks.ts";
+import {openModal} from "@/store/slices/authModalSlice.ts";
+import {updateVideo} from "@/store/slices/videosCacheSlice.ts";
+import {useFollowUserMutation, useUnfollowUserMutation, useGetMeQuery} from "@/store/apis/userApi.ts";
+import {setFollowStatus} from "@/store/slices/followSlice.ts";
+import {
+    useRepostVideoMutation,
+    useUnrepostVideoMutation,
+    useFavoriteVideoMutation,
+    useLikeVideoMutation,
+    useUnfavoriteVideoMutation,
+    useUnlikeVideoMutation,
+} from "@/store/apis/videoApi.ts";
+
+interface VideoActionsSidebarProps {
+    video: VideoDto;
+}
+
+const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
+    const {t} = useTranslation();
+    const dispatch = useAppDispatch();
+    const isAuth = useAppSelector((s) => s.auth.isAuth);
+
+    const [isLiked, setIsLiked] = useState(video.isLiked);
+    const [likeCount, setLikeCount] = useState(video.likeCount);
+    const [isSaved, setIsSaved] = useState(video.isFavorited);
+    const [saveCount, setSaveCount] = useState(video.favoriteCount);
+    const [commentsCount, setCommentsCount] = useState(video.commentsCount);
+    const [isFollowing, setIsFollowing] = useState(video.author?.isFollowing ?? false);
+    const followOverride = useAppSelector((s) => s.follow.overrides[video.author?.id ?? ""]);
+    const [isReportOpen, setIsReportOpen] = useState(false);
+    const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+    const [repost, {isLoading: reposting}] = useRepostVideoMutation();
+    const [unrepost, {isLoading: unreposting}] = useUnrepostVideoMutation();
+    const cachedRepost = useAppSelector(s => s.videosCache.videos[video.id]?.isReposted);
+    const isReposted = cachedRepost ?? video.isReposted ?? false;
+    const [repostOverride, setRepostOverride] = useState<boolean | null>(null);
+    const reposted = repostOverride ?? isReposted;
+    const toggleRepost = async () => {
+        if (!requireAuth() || reposting || unreposting) return;
+        try {
+            await (reposted ? unrepost(video.id) : repost(video.id)).unwrap();
+            setRepostOverride(!reposted);
+            dispatch(updateVideo({id: video.id, changes: {isReposted: !reposted}}));
+        } catch { toast.error(t("feed.repostError")); }
+    };
+
+    const [likeVideo] = useLikeVideoMutation();
+    const [unlikeVideo] = useUnlikeVideoMutation();
+    const [favoriteVideo] = useFavoriteVideoMutation();
+    const [unfavoriteVideo] = useUnfavoriteVideoMutation();
+    const [followUser] = useFollowUserMutation();
+    const [unfollowUser] = useUnfollowUserMutation();
+    const {data: me} = useGetMeQuery(undefined, {skip: !isAuth});
+    const isOwnVideo = Boolean(me?.data.id && video.author?.id && me.data.id === video.author.id);
+
+    useEffect(() => {
+        if (followOverride !== undefined) {
+            setIsFollowing(followOverride);
+        }
+    }, [followOverride]);
+
+    const requireAuth = () => {
+        if (isAuth) return true;
+        dispatch(openModal());
+        return false;
+    };
+
+    const toggleLike = async () => {
+        if (!requireAuth()) return;
+
+        const nextLiked = !isLiked;
+        setIsLiked(nextLiked);
+        setLikeCount((prev) => (nextLiked ? prev + 1 : prev - 1));
+        dispatch(updateVideo({id: video.id, changes: {isLiked: nextLiked, likeCount: nextLiked ? video.likeCount + 1 : video.likeCount - 1}}));
+
+        try {
+            if (nextLiked) {
+                await likeVideo(video.id).unwrap();
+            } else {
+                await unlikeVideo(video.id).unwrap();
+            }
+        } catch {
+            setIsLiked(!nextLiked);
+            setLikeCount((prev) => (nextLiked ? prev - 1 : prev + 1));
+            dispatch(updateVideo({id: video.id, changes: {isLiked: !nextLiked, likeCount: nextLiked ? video.likeCount : video.likeCount}}));
+            toast.error(t("feed.likeError"));
+        }
+    };
+
+    const toggleSave = async () => {
+        if (!requireAuth()) return;
+
+        const nextSaved = !isSaved;
+        setIsSaved(nextSaved);
+        setSaveCount((prev) => (nextSaved ? prev + 1 : prev - 1));
+        dispatch(updateVideo({id: video.id, changes: {isFavorited: nextSaved, favoriteCount: nextSaved ? video.favoriteCount + 1 : video.favoriteCount - 1}}));
+
+        try {
+            if (nextSaved) {
+                await favoriteVideo(video.id).unwrap();
+            } else {
+                await unfavoriteVideo(video.id).unwrap();
+            }
+        } catch {
+            setIsSaved(!nextSaved);
+            setSaveCount((prev) => (nextSaved ? prev - 1 : prev + 1));
+            dispatch(updateVideo({id: video.id, changes: {isFavorited: !nextSaved, favoriteCount: nextSaved ? video.favoriteCount : video.favoriteCount}}));
+            toast.error(t("feed.saveError"));
+        }
+    };
+
+    const toggleFollow = async () => {
+        if (!requireAuth()) return;
+        if (!video.author?.id) return;
+
+        const nextFollowing = !isFollowing;
+        setIsFollowing(nextFollowing);
+        dispatch(setFollowStatus({userId: video.author.id, isFollowing: nextFollowing})); // ← додати
+
+        try {
+            if (nextFollowing) {
+                await followUser({followingId: video.author.id, username: video.author.username}).unwrap();
+            } else {
+                await unfollowUser({followingId: video.author.id, username: video.author.username}).unwrap();
+            }
+        } catch {
+            setIsFollowing(!nextFollowing);
+            dispatch(setFollowStatus({userId: video.author.id, isFollowing: !nextFollowing})); // ← додати
+            toast.error(t("feed.followError"));
+        }
+    };
+
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/video/${video.id}`;
+
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            toast.success(t("feed.shareSuccess"));
+        } catch {
+            toast.error(t("feed.shareError"));
+        }
+    };
+
+    return (
+        <div className="absolute bottom-16 right-2 z-20 flex flex-col items-center gap-3 md:static md:bottom-auto md:right-auto md:gap-5">
+
+            <div className="relative mb-1">
+                <Link
+                    to={video.author?.username ? `/@${video.author.username}` : "#"}
+                    className="block h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-neutral-700"
+                >
+                    {video.author?.avatar?.small ? (
+                        <img
+                            src={video.author.avatar.small}
+                            alt={video.author.username}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-black dark:text-white">
+                            {video.author?.username?.[0]?.toUpperCase() ?? "?"}
+                        </div>
+                    )}
+                </Link>
+                {!isOwnVideo && !isFollowing && (
+                    <button
+                        type="button"
+                        onClick={toggleFollow}
+                        className="absolute -bottom-2 left-1/2 flex h-6 w-6 -translate-x-1/2 md:-bottom-1.5 md:h-5 md:w-5 items-center justify-center rounded-full bg-red-500 text-white"
+                    >
+                        <Plus size={12} strokeWidth={3}/>
+                    </button>
+                )}
+            </div>
+
+            <button
+                type="button"
+                onClick={toggleLike}
+                className="flex flex-col items-center gap-1 text-white"
+            >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                    <Heart size={24} className={isLiked ? "fill-red-500 text-red-500" : "text-white"}/>
+                </span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(likeCount)}</span>
+            </button>
+
+            <button
+                type="button"
+                onClick={() => setIsCommentsOpen(true)}
+                className="flex flex-col items-center gap-1 text-white"
+            >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                    <MessageCircle size={24}/>
+                </span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(commentsCount)}</span>
+            </button>
+
+            <button
+                type="button"
+                onClick={toggleSave}
+                className="flex flex-col items-center gap-1 text-white"
+            >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                    <Bookmark size={24} className={isSaved ? "fill-white" : ""}/>
+                </span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(saveCount)}</span>
+            </button>
+
+            <button type="button" onClick={() => void toggleRepost()} disabled={reposting || unreposting}
+                aria-pressed={reposted} className="flex flex-col items-center gap-1 text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40"><Repeat2 size={24} className={reposted ? "text-yellow-400" : ""}/></span>
+                <span className="text-xs md:text-foreground">{t(reposted ? "feed.unrepost" : "feed.repost")}</span>
+            </button>
+            <button type="button" onClick={handleShare} className="flex flex-col items-center gap-1 text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                    <Share2 size={24}/>
+                </span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("feed.share")}</span>
+            </button>
+
+            <button
+                type="button"
+                onClick={() => {if (requireAuth()) setIsReportOpen(true);}}
+                className="flex flex-col items-center gap-1 text-white"
+            >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                    <Flag size={22}/>
+                </span>
+                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("report.reportButton")}</span>
+            </button>
+
+            <ReportVideoDialog
+                videoId={video.id}
+                open={isReportOpen}
+                onOpenChange={setIsReportOpen}
+            />
+
+            <CommentsDialog
+                videoId={video.id}
+                open={isCommentsOpen}
+                onOpenChange={setIsCommentsOpen}
+                onCommentsCountChange={(delta) => setCommentsCount((prev) => prev + delta)}
+            />
+        </div>
+    );
+};
+
+export default VideoActionsSidebar;
