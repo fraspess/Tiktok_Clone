@@ -1,0 +1,18 @@
+# Added on top of compose.server.yaml by tools/Jenkins.jenkinsfile,
+# so the deploy works without changing the app's compose file.
+# Relative paths resolve from the repo root, where compose.server.yaml is.
+services:
+    frontend:
+        # HTTPS certificate from install_jenkins_agent.sh, outside the Jenkins workspace
+        volumes:
+            - ${CERTBOT_DIR:-./certbot}/conf:/etc/letsencrypt:ro
+            - ${CERTBOT_DIR:-./certbot}/www:/var/www/certbot:ro
+
+    api:
+        # The production seeder creates the admin from AdminAccount and crashes without it
+        environment:
+            AdminAccount__Login: ${ADMIN_LOGIN}
+            AdminAccount__Password: ${ADMIN_PASSWORD}
+        # Email templates are read from /app/Templates, but the build doesn't copy them there
+        volumes:
+            - ./back/Api/Templates:/app/Templates:ro
