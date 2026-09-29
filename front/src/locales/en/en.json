@@ -282,7 +282,7 @@
     "likeError": "Couldn't like this comment. Please try again",
     "reply": "Reply",
     "replyPlaceholder": "Reply to {{username}}...",
-    "showReplies": "Show replies ({{count}})",
+    "showReplies": "Show replies",
     "hideReplies": "Hide replies",
     "loadMoreReplies": "Show more replies",
     "delete": "Delete"
@@ -332,6 +332,9 @@
     "userUnbanned": "User unbanned",
     "videoBanned": "Video banned",
     "videoUnbanned": "Video unbanned",
+    "deleteComment": "Delete comment",
+    "commentDeleted": "Comment deleted",
+    "commentDeleteError": "Failed to delete the comment. Please try again.",
     "banError": "Failed to ban. Please try again.",
     "unbanError": "Failed to unban. Please try again.",
     "loading": "Loading...",

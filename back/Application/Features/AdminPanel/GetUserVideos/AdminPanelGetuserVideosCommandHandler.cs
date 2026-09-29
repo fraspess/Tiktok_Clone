@@ -21,6 +21,8 @@ internal class AdminPanelGetuserVideosCommandHandler(
             .Videos
             .IgnoreQueryFilters()
             .Where(v => v.UserId == request.UserId && v.Status == VideoStatus.Processed)
+            .OrderByDescending(v => v.CreatedAt)
+            .ThenByDescending(v => v.Id)
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken);
 

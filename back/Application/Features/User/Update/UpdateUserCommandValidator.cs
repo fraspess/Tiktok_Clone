@@ -9,7 +9,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
     {
         RuleFor(x => x.dto).NotNull().DependentRules(() =>
         {
-            RuleFor(c => c.dto.Bio).MaximumLength(160)
+            RuleFor(c => c.dto.Bio).MaximumLength(UserConstants.BioMaxLength)
                 .WithErrorCode(ErrorCodes.TooLong);
         });
     }

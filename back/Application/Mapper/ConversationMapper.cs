@@ -3,7 +3,6 @@ using Application.Dtos.User;
 using Application.Interfaces;
 using Domain.Entities.Conversation;
 using Riok.Mapperly.Abstractions;
-using Serilog;
 
 namespace Application.Mapper;
 

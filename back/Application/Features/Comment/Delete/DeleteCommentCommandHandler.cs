@@ -13,8 +13,10 @@ public class DeleteCommentCommandHandler(IAppDbContext appDbContext, ICurrentUse
     {
         var comment = await appDbContext.Comments.FirstOrDefaultAsync(c => c.Id == request.CommentId, cancellationToken)
                       ?? throw new NotFoundException(ErrorCodes.CommentNotFound);
+        var count = 1;
         if (comment.UserId == user.Id)
         {
+            count = appDbContext.Comments.Count(c => c.ParentCommentId == request.CommentId);
             appDbContext.Comments.Remove(comment);
         }
         else
@@ -26,7 +28,7 @@ public class DeleteCommentCommandHandler(IAppDbContext appDbContext, ICurrentUse
         await appDbContext
             .Videos
             .Where(v => v.Id == comment.VideoId)
-            .ExecuteUpdateAsync(v => v.SetProperty(x => x.CommentCount, x => x.CommentCount - 1), cancellationToken: cancellationToken);
+            .ExecuteUpdateAsync(v => v.SetProperty(x => x.CommentCount, x => x.CommentCount - count), cancellationToken: cancellationToken);
         return Unit.Value;
     }
 }

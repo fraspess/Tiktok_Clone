@@ -19,7 +19,7 @@ internal class ChangeUsernameCommandHandler(
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken)
                    ?? throw new NotFoundException(ErrorCodes.UserNotFound);
 
-        if (user.LastUsernameChangedAt.HasValue && DateTime.Now <= user.LastUsernameChangedAt.Value.AddDays(7))
+        if (user.LastUsernameChangedAt.HasValue && DateTime.Now <= user.LastUsernameChangedAt.Value.AddDays(UserConstants.UsernameChangeCooldownDays))
             throw new BadRequestException(ErrorCodes.CooldownOnChangeUsername);
 
         if (await userManager.FindByNameAsync(request.newUsername) is not null)

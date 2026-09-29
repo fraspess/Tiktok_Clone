@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2, Repeat2} from "lucide-react";
 import {useTranslation} from "react-i18next";
@@ -39,6 +39,9 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     const followOverride = useAppSelector((s) => s.follow.overrides[video.author?.id ?? ""]);
     const [isReportOpen, setIsReportOpen] = useState(false);
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+    const handleCommentsCountChange = useCallback((delta: number) => {
+        setCommentsCount((prev) => prev + delta);
+    }, []);
 
     const [repost, {isLoading: reposting}] = useRepostVideoMutation();
     const [unrepost, {isLoading: unreposting}] = useUnrepostVideoMutation();
@@ -249,7 +252,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 videoId={video.id}
                 open={isCommentsOpen}
                 onOpenChange={setIsCommentsOpen}
-                onCommentsCountChange={(delta) => setCommentsCount((prev) => prev + delta)}
+                onCommentsCountChange={handleCommentsCountChange}
             />
         </div>
     );

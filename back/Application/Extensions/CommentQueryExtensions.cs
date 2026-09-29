@@ -15,8 +15,9 @@ public static class CommentQueryExtensions
             Id = c.Id,
             Text = c.Text,
             RepliesCount = c.Replies.Count,
-            OwnerUsername = "@" + c.Author.UserName,
+            AuthorUsername = "@" + c.Author.UserName,
             IsLiked = c.CommentLikes.Any(l => currentUserId.HasValue && l.UserId == currentUserId),
+            AuthorId = c.Author.Id,
             LikesCount = c.CommentLikes.Count,
             CreatedAt = c.CreatedAt,
             IsOwn = currentUserId.HasValue && currentUserId == c.UserId

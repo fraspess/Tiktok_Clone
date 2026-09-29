@@ -46,11 +46,9 @@ public static class OptionsDependencyInjection
             .BindConfiguration(RedisOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        
+
         services.AddOptions<LocalStorageOptions>()
-            .BindConfiguration("LocalStorage")
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            .BindConfiguration("LocalStorage");
         
         services.AddOptions<AdminAccountOptions>()
             .BindConfiguration("AdminAccount")

@@ -17,7 +17,9 @@ public static class UserQueryExtensions
             FollowingCount = u.Following.Count,
             IsFollowing = currentUserId.HasValue && u.Followers.Any(f => f.FollowerId == currentUserId),
             IsOwnProfile = currentUserId.HasValue && u.Id == currentUserId,
-            IsBanned = u.IsBanned
+            IsBanned = u.IsBanned,
+            LastName = u.LastName,
+            FirstName = u.FirstName,
         });
     }
 }
