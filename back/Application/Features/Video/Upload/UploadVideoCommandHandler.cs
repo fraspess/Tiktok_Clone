@@ -1,5 +1,4 @@
-﻿using Amazon.S3;
-using Application.Features.Video.Shared;
+﻿using Application.Features.Video.Shared;
 using Application.Interfaces;
 using Application.Services.HashTag;
 using Contracts;

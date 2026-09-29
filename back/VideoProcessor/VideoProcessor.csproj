@@ -11,13 +11,10 @@
         <PackageReference Include="FFMpegCore"/>
         <PackageReference Include="FFMpegCore.Extensions.Downloader"/>
 
-        <PackageReference Include="RabbitMQ.Client"/>
-
         <PackageReference Include="MassTransit"/>
         <PackageReference Include="MassTransit.RabbitMQ"/>
         <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
         <PackageReference Include="AWSSDK.S3"/>
-        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Contracts\Contracts.csproj"/>

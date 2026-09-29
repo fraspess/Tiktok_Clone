@@ -15,7 +15,7 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage(ErrorCodes.PasswordRequired)
-            .MinimumLength(6).WithErrorCode(ErrorCodes.TooShort)
+            .MinimumLength(UserConstants.PasswordMinLength).WithErrorCode(ErrorCodes.TooShort)
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$").WithErrorCode(ErrorCodes.WeakPassword);
 
         RuleFor(x => x.Username).IsValidUsername();

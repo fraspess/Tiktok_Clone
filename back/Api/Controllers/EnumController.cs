@@ -16,12 +16,12 @@ public class EnumController : ControllerBase
     private static readonly IEnumerable<object> _contentTypes = GetEnumValues<ContentTypes>();
 
     private static readonly IEnumerable<object>
-        _videoReportReasons = GetEnumValuesWithDescription<VideoReportReasons>();
+        _videoReportReasons = GetEnumValues<VideoReportReasons>();
 
     private static readonly IEnumerable<object> _commentReportReasons =
-        GetEnumValuesWithDescription<CommentReportReasons>();
+        GetEnumValues<CommentReportReasons>();
 
-    private static readonly IEnumerable<object> _userReportReasons = GetEnumValuesWithDescription<UserReportReasons>();
+    private static readonly IEnumerable<object> _userReportReasons = GetEnumValues<UserReportReasons>();
     
     private static readonly IEnumerable<object> _messagePrivacySettings = Enum.GetValues<MessagePrivacy>()
         .Select(value => new { id = (int)value, name = value.ToString() }).ToList();
@@ -30,22 +30,7 @@ public class EnumController : ControllerBase
         where T : struct, Enum
     {
         return Enum.GetValues<T>()
-            .Select(e => new { id = Convert.ToInt32(e), name = e.ToString() })
-            .Where(e => e.id != 0)
-            .ToList();
-    }
-
-    private static IEnumerable<object> GetEnumValuesWithDescription<T>()
-        where T : struct, Enum
-    {
-        return Enum.GetValues<T>()
-            .Select(e => new
-            {
-                id = Convert.ToInt32(e),
-                name = e.ToString(),
-                description = e.GetDescription()
-            })
-            .Where(e => e.id != 0)
+            .Select(e => new { name = e.ToString() })
             .ToList();
     }
 

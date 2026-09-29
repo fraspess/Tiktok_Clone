@@ -18,7 +18,7 @@ public class GetCommentsQueryHandler(CommentMapper mapper, ICurrentUser currentU
 	    .Where(c => c.VideoId == videoId && c.ParentCommentId == null)
             .ToProjectionDto(currentUser.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken: cancellationToken);
-
+        
         var result = comments.MapItems(mapper.ToDto);
         return result;
     }

@@ -18,7 +18,7 @@ export default function ReportContentDialog({contentId, contentType, open, onOpe
     const [details, setDetails] = useState("");
     const [error, setError] = useState("");
     const reasons = currentData?.data ?? [];
-    const selected = reasons.find(item => String(item.id) === reason);
+    const selected = reasons.find(item => item.name === reason);
     const changeOpen = (next: boolean) => {
         if (isLoading) return;
         setReason(""); setDetails(""); setError(""); onOpenChange(next);
@@ -27,7 +27,7 @@ export default function ReportContentDialog({contentId, contentType, open, onOpe
         if (!selected) { setError(t("report.selectReasonError")); return; }
         if (selected.name === "Other" && !details.trim()) { setError(t("report.customReasonRequiredError")); return; }
         try {
-            await submit({contentId, contentType, reason: selected.id, customReason: details.trim() || undefined}).unwrap();
+            await submit({contentId, contentType, reason: selected.name, customReason: details.trim() || undefined}).unwrap();
             toast.success(t("report.success"));
             setReason(""); setDetails(""); setError(""); onOpenChange(false);
         } catch (err) {
@@ -41,10 +41,10 @@ export default function ReportContentDialog({contentId, contentType, open, onOpe
             <div role="alert">{t("report.reasonsError")} <Button onClick={() => void refetch()}>{t("chat.privacy.retry")}</Button></div> :
             <fieldset className="max-h-64 space-y-2 overflow-y-auto" disabled={isLoading}>
                 <legend className="sr-only">{t("report.chooseReason")}</legend>
-                {reasons.map(item => <label key={item.id} className="flex items-center gap-3 text-sm">
-                    <input type="radio" name={`report-${contentType}-${contentId}`} value={item.id} checked={reason === String(item.id)}
-                        onChange={() => {setReason(String(item.id)); setError("");}}/>
-                    {t(`report.reasonNames.${item.name}`, {defaultValue: item.description || item.name || t("admin.unknownReason")})}
+                {reasons.map(item => <label key={item.name} className="flex items-center gap-3 text-sm">
+                    <input type="radio" name={`report-${contentType}-${contentId}`} value={item.name} checked={reason === item.name}
+                        onChange={() => {setReason(item.name); setError("");}}/>
+                    {t(`report.reasonNames.${item.name}`, {defaultValue: item.name})}
                 </label>)}
             </fieldset>}
         <label className="space-y-1 text-sm">{t(selected?.name === "Other" ? "report.requiredDetails" : "report.customReasonLabel")}

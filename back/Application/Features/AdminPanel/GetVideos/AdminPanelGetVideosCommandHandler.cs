@@ -26,6 +26,8 @@ internal class AdminPanelGetVideosCommandHandler(IAppDbContext appDbContext, Vid
         }
 
         var videos = await videosQuery
+            .OrderByDescending(v => v.CreatedAt)
+            .ThenByDescending(v => v.Id)
             .ToProjectionDto(user.Id)
             .ToPagedResultAsync(request.PaginationSettings, cancellationToken);
 

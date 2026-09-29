@@ -8,7 +8,7 @@ public class ReportEntity : AuditableEntity
     public Guid SenderId { get; set; }
     public UserEntity Sender { get; init; } = null!;
 
-    public int? Reason { get; set; }
+    [MaxLength(64)] public string? Reason { get; set; }
     [MaxLength(255)] public string? OtherReason { get; set; }
 
     public ContentTypes ContentType { get; set; }

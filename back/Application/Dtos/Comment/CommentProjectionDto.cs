@@ -7,8 +7,9 @@ public class CommentProjectionDto
 
     public int RepliesCount { get; set; }
 
-    public string OwnerUsername { get; set; } = string.Empty;
-
+    public string AuthorUsername { get; set; } = string.Empty;
+    
+    public Guid AuthorId { get; set; }
     public bool IsLiked { get; set; }
 
     public int LikesCount { get; set; }

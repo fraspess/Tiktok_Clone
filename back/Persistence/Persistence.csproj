@@ -18,6 +18,9 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"/>
+        <PackageReference Include="Google.Apis.Auth"/>
+        <PackageReference Include="Nanoid"/>
+        <PackageReference Include="Serilog"/>
 
 
     </ItemGroup>
