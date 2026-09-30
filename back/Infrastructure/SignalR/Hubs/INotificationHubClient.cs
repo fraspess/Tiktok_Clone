@@ -1,9 +1,8 @@
-using Application.Dtos.User;
-using Domain;
+using Application.Dtos.Notification;
 
 namespace Infrastructure.SignalR.Hubs;
 
 public interface INotificationHubClient
 {
-    Task SendNotification(NotificationType type, SimpleUserDto user);
+    Task ReceiveNotification(NotificationDto notification);
 }

@@ -1,6 +1,8 @@
 ﻿using Application.Dtos.Message;
 using Application.Interfaces;
 using Application.Mapper;
+using Application.Services.Notification;
+using Domain;
 using Domain.Entities.Message;
 using Domain.Constants;
 using Domain.Entities.Identity;
@@ -16,7 +18,8 @@ public class MessageService(IAppDbContext appDbContext,
     UserManager<UserEntity> userManager,
     IStorageService storageService,
     ICurrentUser currentUser,
-    MessagePrivacyService messagePrivacy
+    MessagePrivacyService messagePrivacy,
+    INotificationService notifications
     )
     : IMessageService
 {
@@ -62,6 +65,10 @@ public class MessageService(IAppDbContext appDbContext,
                               m.Conversation.Participants.Any(p => p.UserId == userId))
                       ?? throw new NotFoundException(ErrorCodes.MessageNotFound, "Message not found.");
 
+        await appDbContext.Notifications
+            .Where(n => n.RecipientId == userId && n.Type == NotificationType.NewDMMessage &&
+                        n.ResourceId == messageId && n.ReadAt == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.ReadAt, DateTime.UtcNow));
         if (message.IsRead) return;
         message.IsDelivered = true;
         message.IsRead = true;
@@ -93,13 +100,18 @@ public class MessageService(IAppDbContext appDbContext,
         
         var newMessage = new MessageEntity
         {
+            Id = Guid.NewGuid(),
             SenderId = userId,
             ConversationId = conversationId,
             Content = content
         };
 
         await appDbContext.Messages.AddAsync(newMessage);
+        var pendingNotifications = conversationParticipants.Where(p => p.UserId != userId)
+            .Select(p => notifications.Create(p.UserId, userId, NotificationType.NewDMMessage,
+                newMessage.Id, conversationId)).ToList();
         await appDbContext.SaveChangesAsync();
+        await notifications.PublishAsync(pendingNotifications);
 
         var dto = new MessageDto
         {

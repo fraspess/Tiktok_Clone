@@ -1,8 +1,7 @@
 ﻿using Application.Interfaces;
-using Application.Mapper;
+using Application.Services.Notification;
 using Domain;
 using Domain.Constants;
-using Domain.Entities.Notification;
 using Domain.Entities.Video;
 using Domain.Exceptions;
 using MediatR;
@@ -13,8 +12,7 @@ namespace Application.Features.Video.Like;
 internal class LikeVideoCommandHandler(
     ICurrentUser user,
     IAppDbContext appDbContext,
-    INotifier notifier,
-    NotificationMapper mapper)
+    INotificationService notifications)
     : IRequestHandler<LikeVideoCommand, Unit>
 {
     public async Task<Unit> Handle(LikeVideoCommand request, CancellationToken cancellationToken)
@@ -35,22 +33,15 @@ internal class LikeVideoCommandHandler(
             VideoId = video.Id
         }, cancellationToken);
         
-        var notification = new NotificationEntity
-        {
-            ActorId = user.Id,
-            RecipientId = video.Author!.Id,
-            Type = NotificationType.YourVideoLiked,
-            ResourceId = video.Id
-        };
-        appDbContext.Notifications.Add(notification);
+        var notification = notifications.Create(video.Author!.Id, user.Id!.Value,
+            NotificationType.YourVideoLiked, video.Id);
         await appDbContext.SaveChangesAsync(cancellationToken);
         
         await appDbContext.Videos
             .Where(v => v.Id == video.Id)
             .ExecuteUpdateAsync(v => v.SetProperty(x => x.LikeCount, x => x.LikeCount + 1), cancellationToken);
         
-        var dto = mapper.ToDto(notification);
-        await notifier.SendNotificationAsync(dto);
+        await notifications.PublishAsync([notification], cancellationToken);
         return Unit.Value;
     }
 }

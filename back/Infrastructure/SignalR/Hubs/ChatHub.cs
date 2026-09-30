@@ -21,13 +21,6 @@ public class ChatHub(IMessageService messageService) : Hub
         }
     }
 
-    public override async Task OnConnectedAsync()
-    {
-        var userId = Context.UserIdentifier!;
-        await messageService.FlushPendingAsync(Guid.Parse(userId));
-        await base.OnConnectedAsync();
-    }
-
     public async Task MarkAsDelivered(Guid messageId)
     {
         await messageService.MarkAsDeliveredAsync(Guid.Parse(Context.UserIdentifier!), messageId);

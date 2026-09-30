@@ -8,6 +8,7 @@ public enum NotificationType
     NewDMMessage,
     YourVideoReposted,
     YourVideoCommented,
-    YourCommentReplied
+    YourCommentReplied,
+    NewFollower
     
 }

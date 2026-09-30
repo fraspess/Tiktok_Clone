@@ -85,6 +85,7 @@ const MessagesPage = () => {
     const [isMessagesNotAcceptedOpen, setIsMessagesNotAcceptedOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [newConversation, setNewConversation] = useState<ConversationDto | null>(null);
+    const openedLocationKey = useRef<string | null>(null);
     const [getMessages] = useLazyGetMessagesQuery();
     const [searchConversations] = useLazySearchConversationsQuery();
     const {data: currentUserResponse} = useGetCurrentUserQuery(undefined, {skip: !isAuth});
@@ -287,12 +288,12 @@ const MessagesPage = () => {
 
     useEffect(() => {
         const conv = (location.state as { conversation?: ConversationDto } | null)?.conversation;
-        if (conv) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
+        if (conv && openedLocationKey.current !== location.key) {
+            openedLocationKey.current = location.key;
             setNewConversation(conv);
             handleSelectConversation(conv);
         }
-    }, []);
+    }, [location.key, location.state, handleSelectConversation]);
 
     if (!isAuth) {
         return (

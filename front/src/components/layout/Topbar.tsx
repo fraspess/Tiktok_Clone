@@ -23,6 +23,7 @@ import {logout as logoutAction} from "@/store/slices/authSlice.ts";
 import {cn} from "@/lib/utils.ts";
 import {hasAdminRole} from "@/lib/jwt.ts";
 import UserAvatar from "@/components/chat/UserAvatar.tsx";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 interface TopbarProps {
     /** true — на мобільці панель накладається поверх відео (стрічка), false — окрема смужка над контентом */
@@ -104,6 +105,7 @@ const Topbar = ({overlay = false}: TopbarProps) => {
                             <Link to="/admin"><ShieldCheck className="h-4 w-4"/></Link>
                         </Button>
                     )}
+                    <NotificationBell/>
                     <div ref={accountMenuRef} className="relative">
                         <Button
                             type="button"

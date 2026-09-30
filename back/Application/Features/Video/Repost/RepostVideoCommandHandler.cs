@@ -1,8 +1,7 @@
 using Application.Interfaces;
-using Application.Mapper;
+using Application.Services.Notification;
 using Domain;
 using Domain.Constants;
-using Domain.Entities.Notification;
 using Domain.Entities.Video;
 using Domain.Exceptions;
 using MediatR;
@@ -13,8 +12,7 @@ namespace Application.Features.Video.Repost;
 public class RepostVideoCommandHandler(
     IAppDbContext appDbContext,
     ICurrentUser currentUser,
-    INotifier notifier,
-    NotificationMapper notificationMapper)
+    INotificationService notifications)
     : IRequestHandler<RepostVideoCommand, Unit>
 {
     public async Task<Unit> Handle(RepostVideoCommand request, CancellationToken cancellationToken)
@@ -36,18 +34,10 @@ public class RepostVideoCommandHandler(
 
         appDbContext.VideoReposts.Add(videoRepost);
 
-        var notification = new NotificationEntity
-        {
-            RecipientId = video.Author!.Id,
-            ActorId = currentUser.Id,
-            ResourceId = video.Id,
-            Type = NotificationType.YourVideoReposted
-        };
-
-        appDbContext.Notifications.Add(notification);
+        var notification = notifications.Create(video.Author!.Id, currentUser.Id!.Value,
+            NotificationType.YourVideoReposted, video.Id);
         await appDbContext.SaveChangesAsync(cancellationToken);
-        var dto = notificationMapper.ToDto(notification);
-        await notifier.SendNotificationAsync(dto);
+        await notifications.PublishAsync([notification], cancellationToken);
 
         return Unit.Value;
     }

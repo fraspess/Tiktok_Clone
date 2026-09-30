@@ -1,4 +1,5 @@
 using Domain;
+using Application.Dtos.User;
 
 namespace Application.Dtos.Notification;
 
@@ -17,4 +18,6 @@ public class NotificationDto
     public Guid? ConversationId { get; set; }
     
     public DateTime? ReadAt { get; set; }
+    public SimpleUserDto? Actor { get; set; }
+    public string? VideoShortId { get; set; }
 }

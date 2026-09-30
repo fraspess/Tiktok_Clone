@@ -4,6 +4,7 @@ using Application.Mapper;
 using Application.Options;
 using Application.Services.HashTag;
 using Application.Services.Message;
+using Application.Services.Notification;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ public static class ApplicationDependencyInjection
         this IServiceCollection services, IConfiguration config)
     {
         services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<MessagePrivacyService>();
         services.AddScoped<IHashTagService, HashTagService>();
 
@@ -33,7 +35,6 @@ public static class ApplicationDependencyInjection
         services.AddScoped<ConversationMapper>();
         services.AddScoped<MessageMapper>();
         services.AddScoped<CommentMapper>();
-        services.AddScoped<NotificationMapper>();
         
         services.AddConfigOptions(config);
 
