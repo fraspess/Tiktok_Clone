@@ -34,7 +34,7 @@ export const useVideoProcessingHub = () => {
             }
         });
 
-        connection.on("SendVideoProcessingSucceded", (videoId: string) => {
+        connection.on("SendVideoProcessingSucceeded", (videoId: string) => {
             const {items} = (store.getState() as { uploads: UploadsState }).uploads;
             const item = items.find((i) => i.videoId === videoId);
             if (item) URL.revokeObjectURL(item.previewUrl);

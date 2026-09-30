@@ -20,6 +20,9 @@ export const conversationApi = createApi({
     reducerPath: "conversationApi",
     baseQuery: baseQueryWithReauth,
     endpoints: (build) => ({
+        getConversation: build.query<ApiResponse<ConversationDto>, string>({
+            query: id => `api/conversations/${id}`,
+        }),
         getConversations: build.query<ApiResponse<PagedResult<ConversationDto>>, PaginationParams>({
             query: ({pageNumber, pageSize}) => ({
                 url: `api/conversations?pageNumber=${pageNumber}&pageSize=${pageSize}`,
@@ -47,6 +50,7 @@ export const conversationApi = createApi({
 });
 
 export const {
+    useLazyGetConversationQuery,
     useLazyGetConversationsQuery,
     useLazyGetMessagesQuery,
     useCreateConversationMutation,

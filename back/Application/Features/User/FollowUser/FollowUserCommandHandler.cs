@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Identity;
+using Application.Services.Notification;
+using Domain;
 using Domain.Constants;
 using Domain.Exceptions;
 using MediatR;
@@ -11,7 +13,8 @@ namespace Application.Features.User.FollowUser;
 public class FollowUserCommandHandler(
     UserManager<UserEntity> userManager,
     ICurrentUser currentUser,
-    IAppDbContext appDbContext) : IRequestHandler<FollowUserCommand, Unit>
+    IAppDbContext appDbContext,
+    INotificationService notifications) : IRequestHandler<FollowUserCommand, Unit>
 {
     public async Task<Unit> Handle(FollowUserCommand request, CancellationToken cancellationToken)
     {
@@ -32,7 +35,9 @@ public class FollowUserCommandHandler(
             FollowerId = currentUser.Id!.Value
         });
 
+        var notification = notifications.Create(request.FollowingId, currentUser.Id!.Value, NotificationType.NewFollower);
         await appDbContext.SaveChangesAsync(cancellationToken);
+        await notifications.PublishAsync([notification], cancellationToken);
         return Unit.Value;
     }
 }

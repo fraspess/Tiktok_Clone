@@ -4,6 +4,7 @@ using Domain.Entities.Favorite;
 using Domain.Entities.HashTags;
 using Domain.Entities.Identity;
 using Domain.Entities.Message;
+using Domain.Entities.Notification;
 using Domain.Entities.Report;
 using Domain.Entities.Video;
 using Microsoft.AspNetCore.Identity;
@@ -29,6 +30,8 @@ public interface IAppDbContext
     public DbSet<VideoRepostEntity> VideoReposts { get; set; }
 
     public DbSet<FavoriteEntity> Favorites { get; set; }
+    
+    public DbSet<NotificationEntity> Notifications { get; set; }
 
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
