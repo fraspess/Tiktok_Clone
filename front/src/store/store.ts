@@ -1,4 +1,4 @@
-import {configureStore} from '@reduxjs/toolkit'
+import {configureStore, createListenerMiddleware} from '@reduxjs/toolkit'
 import {setupListeners} from '@reduxjs/toolkit/query'
 import authModalReducer from "@/store/slices/authModalSlice";
 import authReducer from "@/store/slices/authSlice"
@@ -14,6 +14,14 @@ import {videoApi} from "@/store/apis/videoApi.ts";
 import {userApi} from "@/store/apis/userApi.ts";
 import {commentApi} from "@/store/apis/commentApi.ts";
 import {adminApi} from "@/store/apis/adminApi.ts";
+import {notificationApi} from "@/store/apis/notificationApi";
+import {logout} from "@/store/slices/authSlice";
+
+const notificationSessionListener = createListenerMiddleware();
+notificationSessionListener.startListening({
+    actionCreator: logout,
+    effect: (_action, api) => { api.dispatch(notificationApi.util.resetApiState()); },
+});
 
 export const store = configureStore({
     reducer: {
@@ -31,15 +39,17 @@ export const store = configureStore({
         [userApi.reducerPath]: userApi.reducer,
         [commentApi.reducerPath]: commentApi.reducer,
         [adminApi.reducerPath]: adminApi.reducer,
+        [notificationApi.reducerPath]: notificationApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(
+        getDefaultMiddleware().prepend(notificationSessionListener.middleware).concat(
             authApi.middleware,
             conversationApi.middleware,
             videoApi.middleware,
             userApi.middleware,
             commentApi.middleware,
             adminApi.middleware,
+            notificationApi.middleware,
         ),
 })
 

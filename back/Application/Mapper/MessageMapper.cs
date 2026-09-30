@@ -1,4 +1,5 @@
 ﻿using Application.Dtos.Message;
+using Application.Dtos.User;
 using Application.Interfaces;
 using Domain.Entities.Message;
 using Riok.Mapperly.Abstractions;
@@ -14,7 +15,7 @@ public partial class MessageMapper(IStorageService storageService)
     public partial MessageDto ToDto(MessageEntity source);
 
     [UserMapping(Default = false)]
-    private object GetUserAvatar(Guid id)
+    private AvatarDto GetUserAvatar(Guid id)
     {
         return storageService.GetUserAvatar(id);
     }

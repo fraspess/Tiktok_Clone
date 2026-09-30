@@ -19,6 +19,7 @@ public partial class UserMapper(IStorageService storageService, ICurrentUser cur
     [MapProperty(nameof(RegisterUserDto.Username), nameof(UserEntity.UserName))]
     public partial UserEntity ToEntity(RegisterUserDto dto);
 
+    [MapProperty(nameof(UserEntity.UserName), nameof(GetUserAdminDto.Username))]
     public partial GetUserAdminDto ToGetUserAdminDto(UserEntity source);
 
     [MapProperty(nameof(UserProjectionDto.Id), nameof(SimpleUserDto.Avatar), Use = nameof(AvatarUrl))]

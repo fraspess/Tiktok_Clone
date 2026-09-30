@@ -23,19 +23,45 @@ public class SendReportCommandValidator : AbstractValidator<SendReportCommand>
                     .MaximumLength(255).WithErrorCode(ErrorCodes.TooLong)
                     .When(c => !string.IsNullOrWhiteSpace(c.Dto.CustomReason));
 
+                RuleFor(c => c.Dto.Reason)
+                    .MaximumLength(64).WithErrorCode(ErrorCodes.TooLong)
+                    .When(c => !string.IsNullOrWhiteSpace(c.Dto.Reason));
+
                 RuleFor(c => c.Dto)
-                    .Must(dto => dto.Reason.HasValue || !string.IsNullOrWhiteSpace(dto.CustomReason))
+                    .Must(dto => !string.IsNullOrWhiteSpace(dto.Reason) || !string.IsNullOrWhiteSpace(dto.CustomReason))
                     .WithMessage("Необхідно вказати причину скарги");
 
                 RuleFor(c => c.Dto)
-                    .Must(dto => !dto.Reason.HasValue || dto.ContentType switch
-                    {
-                        ContentTypes.Video => Enum.IsDefined(typeof(VideoReportReasons), dto.Reason.Value),
-                        ContentTypes.User => Enum.IsDefined(typeof(UserReportReasons), dto.Reason.Value),
-                        ContentTypes.Comment => Enum.IsDefined(typeof(CommentReportReasons), dto.Reason.Value),
-                        _ => false
-                    })
+                    .Must(dto => dto.Reason is null || IsValidReason(dto.ContentType, dto.Reason))
                     .WithMessage("Невірна причина скарги");
+
+                RuleFor(c => c.Dto)
+                    .Must(dto => !string.Equals(dto.Reason, nameof(VideoReportReasons.Other), StringComparison.OrdinalIgnoreCase)
+                                 || !string.IsNullOrWhiteSpace(dto.CustomReason))
+                    .WithMessage("Для причини Other необхідно додати пояснення");
+
             });
+        
+        
+    }
+
+    private static bool IsValidReason(ContentTypes contentType, string reason)
+    {
+        return contentType switch
+        {
+            ContentTypes.Video =>
+                Enum.GetNames<VideoReportReasons>()
+                    .Contains(reason, StringComparer.OrdinalIgnoreCase),
+
+            ContentTypes.User =>
+                Enum.GetNames<UserReportReasons>()
+                    .Contains(reason, StringComparer.OrdinalIgnoreCase),
+
+            ContentTypes.Comment =>
+                Enum.GetNames<CommentReportReasons>()
+                    .Contains(reason, StringComparer.OrdinalIgnoreCase),
+
+            _ => false
+        };
     }
 }

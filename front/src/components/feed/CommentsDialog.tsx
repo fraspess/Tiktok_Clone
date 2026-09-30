@@ -1,4 +1,4 @@
-import {type FormEvent, useEffect, useMemo, useState} from "react";
+import {type FormEvent, memo, useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {toast} from "sonner";
 import ReportContentDialog from "@/components/feed/ReportContentDialog.tsx";
@@ -28,10 +28,10 @@ const PAGE_SIZE = 20;
 const REPLIES_PAGE_SIZE = 5;
 
 const CommentRow = ({
-    comment,
-    videoId,
-    onDeleted,
-}: {
+                        comment,
+                        videoId,
+                        onDeleted,
+                    }: {
     comment: CommentDto;
     videoId: string;
     onDeleted: () => void;
@@ -55,7 +55,6 @@ const CommentRow = ({
     const [isReplying, setIsReplying] = useState(false);
     const [replyText, setReplyText] = useState("");
     const [createComment, {isLoading: isSendingReply}] = useCreateCommentMutation();
-    const [localReplyCount, setLocalReplyCount] = useState(comment.repliesCount);
 
     useEffect(() => {
         setIsLiked(comment.isLiked);
@@ -81,7 +80,11 @@ const CommentRow = ({
 
     const loadReplies = async (page: number) => {
         try {
-            const res = await fetchReplies({commentId: comment.id, pageNumber: page, pageSize: REPLIES_PAGE_SIZE}).unwrap();
+            const res = await fetchReplies({
+                commentId: comment.id,
+                pageNumber: page,
+                pageSize: REPLIES_PAGE_SIZE
+            }).unwrap();
             setReplies((prev) => (page === 1 ? res.data.items : [...prev, ...res.data.items]));
             setHasMoreReplies(res.data.metadata.hasNext);
             setRepliesPage(page);
@@ -97,7 +100,6 @@ const CommentRow = ({
             void loadReplies(1);
         }
     };
-
     const handleDelete = async () => {
         try {
             await deleteComment({commentId: comment.id, videoId}).unwrap();
@@ -119,7 +121,6 @@ const CommentRow = ({
             await createComment({text, videoId, parentCommentId: comment.id}).unwrap();
             setReplyText("");
             setIsReplying(false);
-            setLocalReplyCount((prev) => prev + 1);
             setRepliesOpen(true);
             void loadReplies(1);
         } catch {
@@ -129,20 +130,22 @@ const CommentRow = ({
 
     return (
         <div className="flex flex-col gap-2">
-            <ReportContentDialog contentId={comment.id} contentType="Comment" open={isReportOpen} onOpenChange={setIsReportOpen}/>
+            <ReportContentDialog contentId={comment.id} contentType="Comment" open={isReportOpen}
+                                 onOpenChange={setIsReportOpen}/>
             <div className="flex gap-3">
                 <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
-                    {comment.avatarUrl ? (
-                        <img src={comment.avatarUrl} alt={comment.ownerUsername} className="h-full w-full object-cover"/>
+                    {comment.avatarUrl?.medium ? (
+                        <img src={comment.avatarUrl?.medium} alt={comment.authorUsername}
+                             className="h-full w-full object-cover"/>
                     ) : (
                         <div className="flex h-full w-full items-center justify-center text-xs font-semibold">
-                            {comment.ownerUsername?.[0]?.toUpperCase() ?? "?"}
+                            {comment.authorUsername?.[0]?.toUpperCase() ?? "?"}
                         </div>
                     )}
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-semibold">{comment.ownerUsername}</span>
+                        <span className="text-sm font-semibold">{comment.authorUsername}</span>
                         <span className="text-xs text-muted-foreground">
                             {formatRelativeTime(comment.createdAt, i18n.language)}
                         </span>
@@ -157,14 +160,15 @@ const CommentRow = ({
                         >
                             {t("comments.reply")}
                         </button>
-                        {localReplyCount > 0 && (
-                            <button type="button" onClick={handleToggleReplies} className="font-medium hover:text-foreground">
-                                {repliesOpen
-                                    ? t("comments.hideReplies")
-                                    : t("comments.showReplies", {count: localReplyCount})}
-                            </button>
-                        )}
-                        {!comment.isOwn && <button type="button" onClick={() => isAuth ? setIsReportOpen(true) : dispatch(openModal())}>{t("report.reportButton")}</button>}
+                        <button
+                            type="button"
+                            onClick={handleToggleReplies}
+                            className="font-medium hover:text-foreground"
+                        >
+                            {repliesOpen ? t("comments.hideReplies") : t("comments.showReplies")}
+                        </button>
+                        {!comment.isOwn && <button type="button"
+                                                   onClick={() => isAuth ? setIsReportOpen(true) : dispatch(openModal())}>{t("report.reportButton")}</button>}
                         {comment.isOwn && (
                             <button
                                 type="button"
@@ -184,12 +188,13 @@ const CommentRow = ({
                                 autoFocus
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
-                                placeholder={t("comments.replyPlaceholder", {username: comment.ownerUsername})}
+                                placeholder={t("comments.replyPlaceholder", {username: comment.authorUsername})}
                                 maxLength={500}
                                 className="w-full min-w-0 rounded-full border border-input bg-transparent px-3 py-1.5 text-base md:text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                             />
                             <Button type="submit" size="icon-sm" disabled={isSendingReply || !replyText.trim()}>
-                                {isSendingReply ? <Loader2 className="h-4 w-4 animate-spin"/> : <Send className="h-4 w-4"/>}
+                                {isSendingReply ? <Loader2 className="h-4 w-4 animate-spin"/> :
+                                    <Send className="h-4 w-4"/>}
                             </Button>
                         </form>
                     )}
@@ -299,7 +304,8 @@ const CommentsDialog = ({videoId, open, onOpenChange, onCommentsCountChange}: Co
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="flex h-[75dvh] max-h-[85dvh] flex-col max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:h-auto sm:max-h-[85vh] sm:max-w-lg">
+            <DialogContent
+                className="flex h-[85dvh] max-h-[42rem] flex-col max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:h-[75dvh] sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>{t("comments.title")}</DialogTitle>
                 </DialogHeader>
@@ -358,4 +364,4 @@ const CommentsDialog = ({videoId, open, onOpenChange, onCommentsCountChange}: Co
     );
 };
 
-export default CommentsDialog;
+export default memo(CommentsDialog);

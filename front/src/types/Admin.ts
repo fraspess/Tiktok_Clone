@@ -67,7 +67,7 @@ export interface AdminReportDto {
 export type ReportType = "Video" | "Comment" | "User";
 
 export interface EnumValueDto {
-    id: number;
+    name: string;
+    id?: number;
     description?: string;
-    name?: string;
 }

@@ -109,7 +109,7 @@ jobs:
                 remote {
                   url('https://github.com/fraspess/Tiktok_Clone.git')
                 }
-                branches('*/develop')
+                branches('*/main')
               }
             }
             scriptPath('tools/Jenkins.jenkinsfile')

@@ -77,12 +77,18 @@ internal class AdminPanelGetReportsCommandHandler(
             Id = r.Id,
             CreatedAt = r.CreatedAt,
             Status = r.Status,
-            Reason = r.OtherReason ?? (r.Reason.HasValue
+            Reason = r.OtherReason ?? (!string.IsNullOrWhiteSpace(r.Reason)
                 ? r.ContentType switch
                 {
-                    ContentTypes.Video => ((VideoReportReasons)r.Reason.Value).GetDescription(),
-                    ContentTypes.User => ((UserReportReasons)r.Reason.Value).GetDescription(),
-                    ContentTypes.Comment => ((CommentReportReasons)r.Reason.Value).GetDescription(),
+                    ContentTypes.Video when Enum.TryParse<VideoReportReasons>(
+                        r.Reason, true, out var videoReason) => videoReason.GetDescription(),
+                    
+                    ContentTypes.User when Enum.TryParse<UserReportReasons>(
+                        r.Reason, true, out var userReason) => userReason.GetDescription(),
+                    
+                    ContentTypes.Comment when Enum.TryParse<CommentReportReasons>(
+                        r.Reason, true, out var commentReason) => commentReason.GetDescription(),
+                    
                     _ => null
                 }
                 : null),

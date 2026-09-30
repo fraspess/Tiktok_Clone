@@ -96,6 +96,27 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RecipientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ActorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    ResourceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ConversationId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ReadAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -207,7 +228,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SenderId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Reason = table.Column<int>(type: "integer", nullable: true),
+                    Reason = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     OtherReason = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     ContentType = table.Column<int>(type: "integer", nullable: false),
                     ContentId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -259,7 +280,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ShortId = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Description = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProccessedInPercents = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
@@ -479,6 +500,35 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "VideoReposts",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    VideoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VideoReposts", x => new { x.VideoId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_VideoReposts_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VideoReposts_Videos_VideoId",
+                        column: x => x.VideoId,
+                        principalTable: "Videos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "VideoViews",
                 columns: table => new
                 {
@@ -635,6 +685,11 @@ namespace Persistence.Migrations
                 column: "SenderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_RecipientId_ReadAt_CreatedAt",
+                table: "Notifications",
+                columns: new[] { "RecipientId", "ReadAt", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reports_SenderId_ContentId",
                 table: "Reports",
                 columns: new[] { "SenderId", "ContentId" },
@@ -660,6 +715,11 @@ namespace Persistence.Migrations
                 name: "IX_VideoLikes_VideoId",
                 table: "VideoLikes",
                 column: "VideoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoReposts_UserId",
+                table: "VideoReposts",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Videos_ShortId",
@@ -714,6 +774,9 @@ namespace Persistence.Migrations
                 name: "Messages");
 
             migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
                 name: "Reports");
 
             migrationBuilder.DropTable(
@@ -724,6 +787,9 @@ namespace Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "VideoLikes");
+
+            migrationBuilder.DropTable(
+                name: "VideoReposts");
 
             migrationBuilder.DropTable(
                 name: "VideoViews");

@@ -11,4 +11,6 @@ public class UserProjectionDto
     public bool IsFollowing { get; set; }
     public bool IsOwnProfile { get; set; }
     public bool IsBanned { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }

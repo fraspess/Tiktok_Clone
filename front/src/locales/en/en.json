@@ -1,4 +1,29 @@
 {
+  "notifications": {
+    "title": "Notifications",
+    "unreadLabel": "Notifications ({{count}} unread)",
+    "markAllRead": "Mark all read",
+    "unread": "Unread",
+    "loading": "Loading notifications",
+    "empty": "You're all caught up. New activity will appear here.",
+    "loadError": "Couldn't load notifications.",
+    "actionError": "Couldn't open or update this notification. Please try again.",
+    "unavailable": "This content is no longer available.",
+    "retry": "Try again",
+    "loadMore": "Load more",
+    "someone": "Someone",
+    "activity": "interacted with you",
+    "events": {
+      "YourVideoLiked": "liked your video",
+      "YourCommentLiked": "liked your comment",
+      "YourVideoAddedToFavorites": "saved your video",
+      "NewDMMessage": "sent you a message",
+      "YourVideoReposted": "reposted your video",
+      "YourVideoCommented": "commented on your video",
+      "YourCommentReplied": "replied to your comment",
+      "NewFollower": "started following you"
+    }
+  },
   "auth": {
     "signInTitle": "Sign in",
     "signUpTitle": "Sign up",
@@ -282,7 +307,7 @@
     "likeError": "Couldn't like this comment. Please try again",
     "reply": "Reply",
     "replyPlaceholder": "Reply to {{username}}...",
-    "showReplies": "Show replies ({{count}})",
+    "showReplies": "Show replies",
     "hideReplies": "Hide replies",
     "loadMoreReplies": "Show more replies",
     "delete": "Delete"
@@ -332,6 +357,9 @@
     "userUnbanned": "User unbanned",
     "videoBanned": "Video banned",
     "videoUnbanned": "Video unbanned",
+    "deleteComment": "Delete comment",
+    "commentDeleted": "Comment deleted",
+    "commentDeleteError": "Failed to delete the comment. Please try again.",
     "banError": "Failed to ban. Please try again.",
     "unbanError": "Failed to unban. Please try again.",
     "loading": "Loading...",

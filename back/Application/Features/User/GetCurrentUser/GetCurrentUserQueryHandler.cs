@@ -8,7 +8,6 @@ using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Cms;
 
 namespace Application.Features.User.GetCurrentUser;
 

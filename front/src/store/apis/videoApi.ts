@@ -20,7 +20,7 @@ interface UserVideosParams {
 
 export interface ReportVideoParams {
     contentId: string;
-    reason?: number;
+    reason?: string;
     customReason?: string;
 }
 

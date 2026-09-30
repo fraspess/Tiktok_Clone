@@ -27,12 +27,12 @@ export interface GetAdminVideosParams extends PageParams {
 
 export interface BanUserParams {
     id: string;
-    reason: number;
+    reason: string;
 }
 
 export interface BanVideoParams {
     id: string;
-    reason: number;
+    reason: string;
 }
 
 export interface GetReportsParams extends PageParams {
@@ -130,7 +130,7 @@ export const adminApi = createApi({
                 url: `api/admin-panel/comments/${id}`,
                 method: "delete",
             }),
-            invalidatesTags: (_result, _err, id) => [{type: "AdminReports", id}],
+            invalidatesTags: () => [{type: "AdminReports", id: "Comment"}],
         }),
         markReportAsResolved: build.mutation<ApiResponse<null>, string>({
             query: (id) => ({

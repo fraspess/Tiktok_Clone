@@ -2,7 +2,7 @@
 
 public class PaginationSettings
 {
-    private const int _maxPageSize = 20;
+    private const int _maxPageSize = 50;
     private const int _minPageNumber = 1;
     private const int _minPageSize = 1;
     private int _pageSize = 5;

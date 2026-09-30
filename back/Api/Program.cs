@@ -91,6 +91,7 @@ try
     app.MapControllers();
     app.MapHub<ChatHub>("/hubs/chat");
     app.MapHub<VideoProcessingHub>("/hubs/video-process-status");
+    app.MapHub<NotificationHubClient>("/hubs/notification");
 
     if (app.Environment.IsDevelopment())
     {
