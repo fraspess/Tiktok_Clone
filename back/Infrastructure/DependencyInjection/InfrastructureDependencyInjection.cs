@@ -7,14 +7,13 @@ using Contracts;
 using Infrastructure.RabbitMQ;
 using Infrastructure.RabbitMQ.Consumers;
 using Infrastructure.Services;
-using Infrastructure.Services.Storage;
 using Infrastructure.Services.Email;
 using Infrastructure.Services.Images;
+using Infrastructure.Services.Storage;
 using Infrastructure.Services.Token;
 using Infrastructure.SignalR;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,10 +27,7 @@ public static class InfrastructureDependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services, WebApplicationBuilder builder, IConfiguration config)
     {
-        services.AddSignalR(options =>
-        {
-            options.EnableDetailedErrors = true;
-        });
+        services.AddSignalR(options => { options.EnableDetailedErrors = true; });
         services.AddScoped<IEmailService, EmailService>();
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -42,8 +38,9 @@ public static class InfrastructureDependencyInjection
         services.AddScoped(typeof(IEventBus<>), typeof(EventBus<>));
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<HttpClient>();
-        
-        if (builder.Environment.IsDevelopment())
+
+        var isTesting = builder.Environment.IsEnvironment("Testing");
+        if (builder.Environment.IsDevelopment() || isTesting)
         {
             builder.Services.Configure<LocalStorageOptions>(builder.Configuration.GetSection("LocalStorage"));
             builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
@@ -55,25 +52,26 @@ public static class InfrastructureDependencyInjection
             builder.Services.AddScoped<IStorageService, S3StorageService>();
             services.AddScoped<IImageService, ImageService>();
         }
-        
-        services.AddMassTransit(x =>
-        {
-            x.AddConsumer<VideoProcessedConsumer>();
-            x.AddConsumer<VideoProcessingProgressConsumer>();
-            x.AddConsumer<VideoProcessingFailedConsumer>();
 
-            x.UsingRabbitMq((ctx, cfg) =>
+        if (!isTesting)
+            services.AddMassTransit(x =>
             {
-                var options = ctx.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
-                cfg.Host(options.HostName, h =>
-                {
-                    h.Username(options.UserName);
-                    h.Password(options.Password);
-                });
+                x.AddConsumer<VideoProcessedConsumer>();
+                x.AddConsumer<VideoProcessingProgressConsumer>();
+                x.AddConsumer<VideoProcessingFailedConsumer>();
 
-                cfg.ConfigureEndpoints(ctx);
+                x.UsingRabbitMq((ctx, cfg) =>
+                {
+                    var options = ctx.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
+                    cfg.Host(options.HostName, h =>
+                    {
+                        h.Username(options.UserName);
+                        h.Password(options.Password);
+                    });
+
+                    cfg.ConfigureEndpoints(ctx);
+                });
             });
-        });
 
         services.AddHttpContextAccessor();
 
@@ -100,21 +98,25 @@ public static class InfrastructureDependencyInjection
             return new AmazonS3Client(credentials, config1);
         });
 
-        var redisOptions = config.GetSection(RedisOptions.SectionName).Get<RedisOptions>()!;
-        services.AddStackExchangeRedisCache(options =>
+        if (!isTesting)
         {
-            options.Configuration = redisOptions.ConnectionString;
-            options.InstanceName = redisOptions.InstanceName;
-        });
+            var redisOptions = config.GetSection(RedisOptions.SectionName).Get<RedisOptions>()!;
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisOptions.ConnectionString;
+                options.InstanceName = redisOptions.InstanceName;
+            });
 
-        services.AddSingleton<IConnectionMultiplexer>(_ =>
-        {
-            var configOptions = ConfigurationOptions.Parse(redisOptions.ConnectionString);
-            configOptions.AbortOnConnectFail = false;
-            return ConnectionMultiplexer.Connect(configOptions);
-        });
+            services.AddSingleton<IConnectionMultiplexer>(_ =>
+            {
+                var configOptions = ConfigurationOptions.Parse(redisOptions.ConnectionString);
+                configOptions.AbortOnConnectFail = false;
+                return ConnectionMultiplexer.Connect(configOptions);
+            });
+        }
+
         services.AddScoped<ICacheService, CacheService>();
-        
+
         return services;
     }
 }

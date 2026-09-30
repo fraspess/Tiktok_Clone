@@ -4,6 +4,7 @@
     </Folder>
     <Project Path="Contracts/Contracts.csproj" Id="43a45e20-694c-4e03-b857-b8db8147cea4" />
     <Project Path="Domain/Domain.csproj" />
+    <Project Path="Api.Tests/Api.Tests.csproj" />
     <Project Path="Api/Api.csproj" />
     <Project Path="Application.Tests/Application.Tests.csproj" />
     <Project Path="Application/Application.csproj" />
