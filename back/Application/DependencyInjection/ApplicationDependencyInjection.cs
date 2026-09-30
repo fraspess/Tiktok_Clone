@@ -33,6 +33,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<ConversationMapper>();
         services.AddScoped<MessageMapper>();
         services.AddScoped<CommentMapper>();
+        services.AddScoped<NotificationMapper>();
         
         services.AddConfigOptions(config);
 

@@ -2,7 +2,7 @@
 
 public interface IVideoHubClient
 {
-    Task SendVideoProcessingSucceded(Guid videoId);
+    Task SendVideoProcessingSucceeded(Guid videoId);
 
     Task SendVideoProcessingProgress(Guid videoId, int progress);
 

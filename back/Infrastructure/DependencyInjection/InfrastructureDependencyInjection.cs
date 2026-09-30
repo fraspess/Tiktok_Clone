@@ -12,6 +12,7 @@ using Infrastructure.Services.Email;
 using Infrastructure.Services.Images;
 using Infrastructure.Services.Token;
 using Infrastructure.SignalR;
+using Infrastructure.SignalR.Hubs;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,6 +40,7 @@ public static class InfrastructureDependencyInjection
 
         services.AddScoped<IChatNotifier, ChatNotifier>();
         services.AddScoped<IVideoProcessingNotifier, VideoProcessingNotifier>();
+        services.AddScoped<INotifier, Notifier>();
         services.AddScoped(typeof(IEventBus<>), typeof(EventBus<>));
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<HttpClient>();

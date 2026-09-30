@@ -19,6 +19,6 @@ internal class VideoProcessingNotifier(IHubContext<VideoProcessingHub, IVideoHub
 
     public async Task SendVideoProcessSucceded(Guid videoId, Guid userId)
     {
-        await hub.Clients.User(userId.ToString()).SendVideoProcessingSucceded(videoId);
+        await hub.Clients.User(userId.ToString()).SendVideoProcessingSucceeded(videoId);
     }
 }
