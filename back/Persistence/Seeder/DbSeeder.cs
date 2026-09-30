@@ -65,6 +65,13 @@ public static class DbSeeder
                 Log.Error("Failed to seed role {AdminUser}. Errors : {Errors}",
                     adminUser,
                     string.Join(", ", result.Errors.Select(e => e.Description)));
+
+            var result2 = await userManager.AddToRoleAsync(adminUser, RoleNames.ADMIN_ROLE);
+            
+            if(!result2.Succeeded)
+                Log.Error("Failed to add admin role {AdminUser}. Errors: {Errors}",
+                    adminUser,
+                    string.Join(",", result.Errors.Select(e => e. Description)));
         }
     }
 
