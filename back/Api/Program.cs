@@ -1,21 +1,21 @@
+using System.Text;
 using Api.DependencyInjection;
 using Api.Middleware;
 using Application.DependencyInjection;
-using Application.Interfaces;
 using Application.Options;
+using DotNetEnv;
 using Infrastructure.DependencyInjection;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
 using Persistence;
 using Persistence.DependencyInjection;
 using Persistence.Seeder;
 using Serilog;
 using Serilog.Events;
 
-Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.OutputEncoding = Encoding.UTF8;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -25,7 +25,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    DotNetEnv.Env.Load();
+    Env.Load();
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -52,14 +52,14 @@ try
     app.UseSerilogRequestLogging();
 
     app.UseCors();
-    
+
 
     var localStorageOptions = app.Configuration.GetSection("LocalStorage").Get<LocalStorageOptions>();
     if (app.Environment.IsDevelopment() && localStorageOptions is not null)
     {
         var absoluteRoot = Path.GetFullPath(localStorageOptions.RootPath);
         Directory.CreateDirectory(absoluteRoot);
-        var uploadsRoot =  Path.Combine(absoluteRoot, "uploads");
+        var uploadsRoot = Path.Combine(absoluteRoot, "uploads");
         Directory.CreateDirectory(uploadsRoot);
         app.UseStaticFiles(new StaticFileOptions
         {
@@ -75,7 +75,7 @@ try
                 }
             }
         });
-        
+
         var avatarsRoot = Path.Combine(absoluteRoot, "avatars");
         Directory.CreateDirectory(avatarsRoot);
         app.UseStaticFiles(new StaticFileOptions
@@ -93,17 +93,18 @@ try
     app.MapHub<VideoProcessingHub>("/hubs/video-process-status");
     app.MapHub<NotificationHubClient>("/hubs/notification");
 
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
     {
         await app.SeedDataAsync();
     }
-    else
+    else if (!app.Environment.IsEnvironment("Testing"))
     {
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await context.Database.MigrateAsync();
         await app.ProductionSeed();
     }
+
     app.Run();
 }
 catch (Exception ex)
@@ -114,3 +115,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program;
