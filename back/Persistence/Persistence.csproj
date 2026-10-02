@@ -21,6 +21,7 @@
         <PackageReference Include="Google.Apis.Auth"/>
         <PackageReference Include="Nanoid"/>
         <PackageReference Include="Serilog"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting"/>
 
 
     </ItemGroup>

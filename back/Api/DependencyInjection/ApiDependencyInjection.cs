@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json.Serialization;
 using Api.Filters;
 using Api.RateLimiting;
-using Microsoft.AspNetCore.OpenApi;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 
 namespace Api.DependencyInjection;
 
@@ -16,8 +15,11 @@ public static class ApiDependencyInjection
     {
         services.AddControllers(opt =>
             {
-                opt.Filters.AddService<RateLimitFilter>();
-                opt.Filters.Add<NullActionFilter>();
+                if (env.IsProduction())
+                {
+                    opt.Filters.AddService<RateLimitFilter>();
+                    opt.Filters.Add<NullActionFilter>();
+                }
             })
             .ConfigureApiBehaviorOptions(opt => { opt.SuppressModelStateInvalidFilter = true; })
             .AddJsonOptions(opts => { opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
@@ -50,14 +52,11 @@ public static class ApiDependencyInjection
                     {
                         var tokenType = context.Principal?.FindFirst("type")?.Value;
 
-                        if (tokenType != "access")
-                        {
-                            context.Fail("Invalid token type.");
-                        }
+                        if (tokenType != "access") context.Fail("Invalid token type.");
 
                         return Task.CompletedTask;
                     },
-                    
+
                     OnMessageReceived = context =>
                     {
                         var accessToken = context.Request.Query["access_token"];
@@ -102,7 +101,7 @@ public static class ApiDependencyInjection
             });
 
         services.AddHealthChecks();
- 
+
         services.AddSwaggerGen(opt =>
         {
             opt.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
@@ -121,8 +120,11 @@ public static class ApiDependencyInjection
             opt.UseInlineDefinitionsForEnums();
         });
 
-        services.AddSingleton<SlidingWindowRateLimiter>();
-        services.AddScoped<RateLimitFilter>();
+        if (env.IsProduction())
+        {
+            services.AddSingleton<SlidingWindowRateLimiter>();
+            services.AddScoped<RateLimitFilter>();
+        }
 
 
         return services;

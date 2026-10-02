@@ -57,7 +57,8 @@ public class GlobalExceptionHandler
         }
         catch (Exception ex)
         {
-            if (webHostEnvironment.IsDevelopment())
+            if (webHostEnvironment.IsDevelopment()
+                || webHostEnvironment.IsEnvironment("Testing"))
             {
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsJsonAsync(

@@ -92,7 +92,7 @@ try
     app.MapHub<ChatHub>("/hubs/chat");
     app.MapHub<VideoProcessingHub>("/hubs/video-process-status");
 
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
     {
         await app.SeedDataAsync();
     }
