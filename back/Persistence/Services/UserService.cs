@@ -13,6 +13,7 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace Persistence.Services;
@@ -26,13 +27,16 @@ internal class UserService(
     UserMapper mapper,
     HttpClient httpClient,
     ICurrentUser currentUser,
-    IOptions<GoogleOptions> options)
+    IOptions<GoogleOptions> options,
+    IHostEnvironment hostEnvironment)
     : IUserService
 {
     private readonly GoogleOptions _googleOptions = options.Value;
-    private static string GetHtmlTemplate(string templateName)
+    private readonly string _templateRoot = hostEnvironment.ContentRootPath;
+
+    private string GetHtmlTemplate(string templateName)
     {
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates", templateName);
+        var path = Path.Combine(_templateRoot, "Templates", templateName);
         return File.ReadAllText(path);
     }
 
