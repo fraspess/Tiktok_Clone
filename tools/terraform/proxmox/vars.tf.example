@@ -65,7 +65,7 @@ variable "master_ip" {
 
 variable "agent_ip" {
   type        = string
-  description = "Forward ports 80 and 443 on the router to this IP"
+  description = "Forward ports 80 and 443 on the router to this IP, unless lan_only is set"
   default     = "192.168.1.51"
 }
 
@@ -141,5 +141,11 @@ variable "letsencrypt_email" {
 variable "letsencrypt_staging" {
   type        = bool
   description = "Use the Let's Encrypt staging server (untrusted cert, no rate limit) while testing"
+  default     = false
+}
+
+variable "lan_only" {
+  type        = bool
+  description = "Open the site only inside the LAN, without port forwarding: DuckDNS points at agent_ip and the certificate uses the DNS-01 challenge"
   default     = false
 }

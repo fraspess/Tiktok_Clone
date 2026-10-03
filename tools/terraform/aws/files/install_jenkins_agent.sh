@@ -56,24 +56,58 @@ echo "Waiting for master to connect via SSH..."
 # HTTPS certificate for the frontend
 sudo mkdir -p $${CERTBOT_DIR}/conf $${CERTBOT_DIR}/www
 
+%{ if duckdns_ip != "" ~}
+# LAN only: DuckDNS points at a private IP that Let's Encrypt can't reach, so the
+# certificate uses the DNS-01 challenge, a TXT record set through the DuckDNS API
+sudo mkdir -p $${CERTBOT_DIR}/hooks
+sudo tee $${CERTBOT_DIR}/hooks/duckdns.sh > /dev/null <<'EOF'
+#!/bin/sh
+# certbot hook: "auth" sets the TXT record, "cleanup" clears it
+if [ "$1" = "cleanup" ]; then
+  q="txt=removed&clear=true"
+else
+  q="txt=$CERTBOT_VALIDATION"
+fi
+wget -qO- "https://www.duckdns.org/update?domains=${duckdns_subdomain}&token=${duckdns_token}&$q" | grep -q OK || exit 1
+# Let the record reach Let's Encrypt's resolvers (DuckDNS TTL is 60s)
+[ "$1" = "cleanup" ] || sleep 60
+EOF
+sudo chmod 700 $${CERTBOT_DIR}/hooks/duckdns.sh
+
+# Renew daily with the same hooks (certbot saves them in the renewal config),
+# then reload nginx. certbot only renews when < 30 days are left.
+sudo tee /etc/cron.d/certbot-renew > /dev/null <<EOF
+0 3 * * * root docker run --rm -v $${CERTBOT_DIR}/conf:/etc/letsencrypt -v $${CERTBOT_DIR}/hooks:/hooks:ro certbot/certbot renew --quiet && docker exec tiktok-frontend-1 nginx -s reload
+EOF
+%{ else ~}
 # Renew daily through the running frontend (nginx serves /.well-known/acme-challenge/
 # from the www dir), then reload nginx. certbot only renews when < 30 days are left.
 sudo tee /etc/cron.d/certbot-renew > /dev/null <<EOF
 0 3 * * * root docker run --rm -v $${CERTBOT_DIR}/conf:/etc/letsencrypt -v $${CERTBOT_DIR}/www:/var/www/certbot certbot/certbot renew --webroot -w /var/www/certbot --quiet && docker exec tiktok-frontend-1 nginx -s reload
 EOF
+%{ endif ~}
 
 # The public IP changes after a stop/start, so update DuckDNS on every boot too
 sudo tee /etc/cron.d/duckdns > /dev/null <<EOF
-@reboot root sleep 30 && curl -fsS "https://www.duckdns.org/update?domains=${duckdns_subdomain}&token=${duckdns_token}&ip=" > /dev/null
+@reboot root sleep 30 && curl -fsS "https://www.duckdns.org/update?domains=${duckdns_subdomain}&token=${duckdns_token}&ip=${duckdns_ip}" > /dev/null
 EOF
 sudo chmod 600 /etc/cron.d/duckdns
 
 # Point DuckDNS at this server (empty ip= means the IP the request comes from)
-if [ "$(curl -fsS "https://www.duckdns.org/update?domains=${duckdns_subdomain}&token=${duckdns_token}&ip=")" != "OK" ]; then
+if [ "$(curl -fsS "https://www.duckdns.org/update?domains=${duckdns_subdomain}&token=${duckdns_token}&ip=${duckdns_ip}")" != "OK" ]; then
   echo "DuckDNS update failed, check duckdns_subdomain and duckdns_token" >&2
   exit 1
 fi
 
+%{ if duckdns_ip != "" ~}
+sudo docker run --rm \
+  -v $${CERTBOT_DIR}/conf:/etc/letsencrypt \
+  -v $${CERTBOT_DIR}/hooks:/hooks:ro \
+  certbot/certbot certonly --manual --preferred-challenges dns -d "$${DOMAIN}" \
+    --manual-auth-hook "/hooks/duckdns.sh auth" --manual-cleanup-hook "/hooks/duckdns.sh cleanup" \
+    %{ if letsencrypt_email != "" }--email "${letsencrypt_email}"%{ else }--register-unsafely-without-email%{ endif } \
+    --agree-tos --no-eff-email --non-interactive %{ if letsencrypt_staging }--staging%{ endif }
+%{ else ~}
 # Wait until the domain resolves to this server, then let Let's Encrypt's
 # DNS cache (DuckDNS TTL is 60s) expire
 PUBLIC_IP=$(curl -fsS https://checkip.amazonaws.com)
@@ -95,5 +129,6 @@ sudo docker run --rm -p 80:80 \
   certbot/certbot certonly --standalone -d "$${DOMAIN}" \
     %{ if letsencrypt_email != "" }--email "${letsencrypt_email}"%{ else }--register-unsafely-without-email%{ endif } \
     --agree-tos --no-eff-email --non-interactive %{ if letsencrypt_staging }--staging%{ endif }
+%{ endif ~}
 
 echo "--- HTTPS certificate for $${DOMAIN} is in $${CERTBOT_DIR}/conf ---"
