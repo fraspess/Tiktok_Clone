@@ -18,8 +18,8 @@ const sizeClasses = {
 
 const UserAvatar = ({username, avatar, size = "md", className}: UserAvatarProps) => {
     const avatarUrl = getAvatarUrl(avatar);
-    const [hasError, setHasError] = useState(false);
-    const showImage = Boolean(avatarUrl) && !hasError;
+    const [failedUrl, setFailedUrl] = useState<string | null>(null);
+    const showImage = Boolean(avatarUrl) && avatarUrl !== failedUrl;
     const initial = username?.trim()?.[0]?.toUpperCase() || "?";
 
     return (
@@ -35,7 +35,7 @@ const UserAvatar = ({username, avatar, size = "md", className}: UserAvatarProps)
                     src={avatarUrl!}
                     alt={username}
                     className="h-full w-full object-cover"
-                    onError={() => setHasError(true)}
+                    onError={() => setFailedUrl(avatarUrl)}
                 />
             ) : (
                 <div className="flex h-full w-full items-center justify-center font-semibold">

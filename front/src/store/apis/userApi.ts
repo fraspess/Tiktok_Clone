@@ -84,7 +84,10 @@ export const userApi = createApi({
                 method: "PATCH",
                 body: formData,
             }),
-            invalidatesTags: (_result, _error, {username}) => [{type: "UserProfile", id: username}],
+            invalidatesTags: (_result, error, {username}) => error ? [] : [
+                {type: "UserProfile", id: username},
+                {type: "UserProfile", id: "ME"},
+            ],
         }),
         changeUsername: build.mutation<ApiResponse<null>, ChangeUsernameParams>({
             query: ({newUsername}) => ({
