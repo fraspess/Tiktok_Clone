@@ -156,7 +156,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     };
 
     return (
-        <div className="absolute bottom-16 right-2 z-20 flex flex-col items-center gap-3 md:static md:bottom-auto md:right-auto md:gap-5">
+        <div className="video-actions absolute z-20 flex flex-col items-center md:static md:gap-5">
 
             <div className="relative mb-1">
                 <Link
@@ -191,7 +191,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 onClick={toggleLike}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
                     <Heart size={24} className={isLiked ? "fill-red-500 text-red-500" : "text-white"}/>
                 </span>
                 <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(likeCount)}</span>
@@ -202,7 +202,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 onClick={() => setIsCommentsOpen(true)}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
                     <MessageCircle size={24}/>
                 </span>
                 <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(commentsCount)}</span>
@@ -213,33 +213,34 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                 onClick={toggleSave}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
                     <Bookmark size={24} className={isSaved ? "fill-white" : ""}/>
                 </span>
                 <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{formatCount(saveCount)}</span>
             </button>
 
             <button type="button" onClick={() => void toggleRepost()} disabled={reposting || unreposting}
-                aria-pressed={reposted} className="flex flex-col items-center gap-1 text-white">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40"><Repeat2 size={24} className={reposted ? "text-yellow-400" : ""}/></span>
-                <span className="text-xs md:text-foreground">{t(reposted ? "feed.unrepost" : "feed.repost")}</span>
+                aria-label={t(reposted ? "feed.unrepost" : "feed.repost")} aria-pressed={reposted} className="flex flex-col items-center gap-1 text-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/40"><Repeat2 size={24} className={reposted ? "text-yellow-400" : ""}/></span>
+                <span className="video-action-label text-xs font-medium [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-foreground md:[text-shadow:none]">{t(reposted ? "feed.unrepost" : "feed.repost")}</span>
             </button>
-            <button type="button" onClick={handleShare} className="flex flex-col items-center gap-1 text-white">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+            <button type="button" onClick={handleShare} aria-label={t("feed.share")} className="flex flex-col items-center gap-1 text-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
                     <Share2 size={24}/>
                 </span>
-                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("feed.share")}</span>
+                <span className="video-action-label text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("feed.share")}</span>
             </button>
 
             <button
                 type="button"
                 onClick={() => {if (requireAuth()) setIsReportOpen(true);}}
+                aria-label={t("report.reportButton")}
                 className="flex flex-col items-center gap-1 text-white"
             >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 md:h-11 md:w-11 backdrop-blur-sm transition-transform active:scale-90">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform active:scale-90">
                     <Flag size={22}/>
                 </span>
-                <span className="text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("report.reportButton")}</span>
+                <span className="video-action-label text-xs font-medium text-white [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] md:text-black md:[text-shadow:none] md:dark:text-white">{t("report.reportButton")}</span>
             </button>
 
             <ReportVideoDialog
