@@ -98,6 +98,8 @@ resource "aws_instance" "jenkins_agent" {
     duckdns_token       = var.duckdns_token
     letsencrypt_email   = var.letsencrypt_email
     letsencrypt_staging = var.letsencrypt_staging
+    // Public IP, the LAN only mode is for Proxmox
+    duckdns_ip = ""
   })
 }
 
