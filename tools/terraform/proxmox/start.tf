@@ -80,6 +80,7 @@ resource "proxmox_virtual_environment_file" "agent_user_data" {
         duckdns_token       = var.duckdns_token
         letsencrypt_email   = var.letsencrypt_email
         letsencrypt_staging = var.letsencrypt_staging
+        duckdns_ip          = var.lan_only ? var.agent_ip : ""
       }))
     })
   }
@@ -216,5 +217,5 @@ output "jenkins_master_ip" {
 
 output "jenkins_agent_ip" {
   value       = var.agent_ip
-  description = "LAN IP - Jenkins Agent, forward ports 80 and 443 to it"
+  description = "LAN IP - Jenkins Agent, forward ports 80 and 443 to it unless lan_only is set"
 }
