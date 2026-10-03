@@ -173,7 +173,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
         <section
             ref={sectionRef}
             id={video.id}
-            className="relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-black md:bg-neutral-100 md:px-4 md:dark:bg-neutral-950"
+            className="video-card relative flex h-full w-full snap-start snap-always items-center justify-center gap-3 bg-black md:bg-neutral-100 md:px-4 md:dark:bg-neutral-950"
         >
             <div
                 className="relative h-full w-full overflow-hidden bg-black md:aspect-[9/16] md:max-h-[85dvh] md:w-auto md:max-w-full md:rounded-2xl md:shadow-2xl">
@@ -217,12 +217,12 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                         }
                         dispatch(setMuted(next));
                     }}
-                    className="absolute right-3 top-[calc(env(safe-area-inset-top,0px)+3.5rem)] z-20 rounded-full bg-black/40 p-2.5 md:right-4 md:top-4 md:p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
+                    className="absolute right-[max(0.75rem,env(safe-area-inset-right))] top-[calc(env(safe-area-inset-top,0px)+3.5rem)] z-20 rounded-full bg-black/40 p-2.5 md:right-4 md:top-4 md:p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
                     {isMuted ? <VolumeX size={26}/> : <Volume2 size={26}/>}
                 </button>
 
-                <div className="absolute bottom-4 left-4 right-20 text-white [text-shadow:0_1px_4px_rgb(0_0_0/0.7)] md:right-4 md:[text-shadow:none]">
+                <div className="video-caption absolute bottom-4 left-4 right-20 break-words text-white [text-shadow:0_1px_4px_rgb(0_0_0/0.7)] md:right-4 md:[text-shadow:none]">
                     {video.author?.username ? (
                         <Link
                             to={`/@${video.author.username}`}
