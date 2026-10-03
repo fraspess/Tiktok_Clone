@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import {type FormEvent, memo, useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {toast} from "sonner";
@@ -133,16 +134,8 @@ const CommentRow = ({
             <ReportContentDialog contentId={comment.id} contentType="Comment" open={isReportOpen}
                                  onOpenChange={setIsReportOpen}/>
             <div className="flex gap-3">
-                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
-                    {comment.avatarUrl?.medium ? (
-                        <img src={comment.avatarUrl?.medium} alt={comment.authorUsername}
-                             className="h-full w-full object-cover"/>
-                    ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs font-semibold">
-                            {comment.authorUsername?.[0]?.toUpperCase() ?? "?"}
-                        </div>
-                    )}
-                </div>
+                <UserAvatar username={comment.authorUsername} avatar={comment.avatarUrl}
+                            className="h-9 w-9 text-xs"/>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
                         <span className="text-sm font-semibold">{comment.authorUsername}</span>

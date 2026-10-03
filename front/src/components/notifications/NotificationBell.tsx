@@ -5,7 +5,7 @@ import {useTranslation} from "react-i18next";
 import {useNavigate} from "react-router-dom";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button";
-import UserAvatar from "@/components/chat/UserAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import {useNotificationConnection} from "@/hooks/useNotificationConnection";
 import {useGetNotificationsInfiniteQuery, useGetUnreadNotificationCountQuery,
     useMarkAllNotificationsReadMutation, useMarkNotificationReadMutation} from "@/store/apis/notificationApi";

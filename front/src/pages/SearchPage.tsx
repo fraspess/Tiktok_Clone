@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
@@ -108,15 +109,7 @@ const SearchPage = () => {
                                             onClick={() => navigate(`/@${author.username}`)}
                                             className="flex items-center gap-3 rounded-lg p-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-900"
                                         >
-                                            {author.avatar ? (
-                                                <img
-                                                    src={author.avatar.small}
-                                                    alt={author.username}
-                                                    className="h-10 w-10 rounded-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="h-10 w-10 rounded-full bg-neutral-700"/>
-                                            )}
+                                            <UserAvatar username={author.username} avatar={author.avatar} size="sm"/>
                                             <span className="font-medium">@{author.username}</span>
                                         </button>
                                     ))}

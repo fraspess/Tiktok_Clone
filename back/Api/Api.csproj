@@ -23,4 +23,13 @@
         <ProjectReference Include="..\Persistence\Persistence.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Templates\ConfirmEmail.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Templates\ResetPassword.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

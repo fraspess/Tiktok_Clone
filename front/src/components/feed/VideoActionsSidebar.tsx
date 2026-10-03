@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import {useCallback, useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {Bookmark, Flag, Heart, MessageCircle, Plus, Share2, Repeat2} from "lucide-react";
@@ -163,17 +164,8 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
                     to={video.author?.username ? `/@${video.author.username}` : "#"}
                     className="block h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-neutral-700"
                 >
-                    {video.author?.avatar?.small ? (
-                        <img
-                            src={video.author.avatar.small}
-                            alt={video.author.username}
-                            className="h-full w-full object-cover"
-                        />
-                    ) : (
-                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-black dark:text-white">
-                            {video.author?.username?.[0]?.toUpperCase() ?? "?"}
-                        </div>
-                    )}
+                    <UserAvatar username={video.author?.username ?? "?"} avatar={video.author?.avatar}
+                                className="h-full w-full text-sm ring-0"/>
                 </Link>
                 {!isOwnVideo && !isFollowing && (
                     <button
