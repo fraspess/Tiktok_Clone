@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
@@ -114,21 +115,8 @@ const ProfileHeader = ({profile}: ProfileHeaderProps) => {
         <div
             className="flex flex-col items-center gap-4 px-4 py-4 text-center sm:flex-row sm:py-8 sm:items-start sm:text-left"
         >
-            <div className="h-20 w-20 shrink-0 sm:h-28 sm:w-28 overflow-hidden rounded-full bg-neutral-700">
-                {profile.avatar?.large ? (
-                    <img
-                        src={profile.avatar.large}
-                        alt={profile.username}
-                        className="h-full w-full object-cover"
-                    />
-                ) : (
-                    <div
-                        className="flex h-full w-full items-center justify-center text-3xl font-semibold text-white"
-                    >
-                        {profile.username[0]?.toUpperCase() ?? "?"}
-                    </div>
-                )}
-            </div>
+            <UserAvatar username={profile.username} avatar={profile.avatar?.large || profile.avatar}
+                        className="h-20 w-20 text-3xl sm:h-28 sm:w-28"/>
 
             <div className="flex flex-1 flex-col items-center gap-3 sm:items-start">
                 <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-center">

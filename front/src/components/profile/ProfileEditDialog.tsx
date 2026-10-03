@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import {type ChangeEvent, useEffect, useMemo, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
@@ -156,15 +157,8 @@ const ProfileEditDialog = ({profile, open, onOpenChange}: ProfileEditDialogProps
 
                 <div className="flex flex-col items-center gap-3">
                     <div className="relative h-24 w-24">
-                        <div className="h-24 w-24 overflow-hidden rounded-full bg-neutral-700">
-                            {avatarPreviewUrl ? (
-                                <img src={avatarPreviewUrl} alt={username} className="h-full w-full object-cover"/>
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-white">
-                                    {username[0]?.toUpperCase() ?? "?"}
-                                </div>
-                            )}
-                        </div>
+                        <UserAvatar username={username} avatar={avatarPreviewUrl || profile.avatar}
+                                    className="h-24 w-24 text-2xl"/>
 
                         <label
                             className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-md transition-colors hover:bg-primary/90"

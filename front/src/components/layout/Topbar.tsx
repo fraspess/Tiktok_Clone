@@ -22,7 +22,7 @@ import {commentApi} from "@/store/apis/commentApi.ts";
 import {logout as logoutAction} from "@/store/slices/authSlice.ts";
 import {cn} from "@/lib/utils.ts";
 import {hasAdminRole} from "@/lib/jwt.ts";
-import UserAvatar from "@/components/chat/UserAvatar.tsx";
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import NotificationBell from "@/components/notifications/NotificationBell";
 
 interface TopbarProps {

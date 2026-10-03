@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
@@ -94,7 +95,7 @@ function UserRow({user}: {user: SimpleUserDto}) {
     const avatar = getAvatarUrl(user.avatar);
     const ban = async (reason: string) => { try { await banUser({id: user.id, reason}).unwrap(); toast.success(t("admin.userBanned")); setDialogOpen(false); } catch (error) { showError(error, t("admin.banError")); } };
     const unban = async () => { try { await unbanUser(user.id).unwrap(); toast.success(t("admin.userUnbanned")); } catch (error) { showError(error, t("admin.unbanError")); } };
-    return <div className="flex items-center gap-3 border-b border-border px-3 sm:px-6 py-3 last:border-b-0"><div className="flex min-w-0 flex-1 items-center gap-3"><div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-medium">{username.charAt(0).toUpperCase()}{avatar && <img src={getMediaUrl(avatar)} alt={username} loading="lazy" className="absolute inset-0 h-full w-full object-cover" onError={(e) => e.currentTarget.remove()}/>}</div><div className="min-w-0"><p className="truncate text-sm font-medium">@{username}</p>{user.isBanned && <p className="text-xs text-destructive">{t("admin.banned")}</p>}</div></div>
+    return <div className="flex items-center gap-3 border-b border-border px-3 sm:px-6 py-3 last:border-b-0"><div className="flex min-w-0 flex-1 items-center gap-3"><UserAvatar username={username} avatar={avatar} className="h-9 w-9 text-sm"/><div className="min-w-0"><p className="truncate text-sm font-medium">@{username}</p>{user.isBanned && <p className="text-xs text-destructive">{t("admin.banned")}</p>}</div></div>
         <div className="flex shrink-0 items-center gap-2">
             {user.isBanned ? <Button variant="outline" size="sm" onClick={unban} disabled={unbanning}>{unbanning && <Loader2 className="animate-spin"/>}<ShieldCheck/> {t("admin.unban")}</Button> : <Button variant="destructive" size="sm" onClick={() => setDialogOpen(true)}><ShieldX/> {t("admin.ban")}</Button>}
             <Button variant="outline" size="sm" onClick={() => setVideosOpen(true)}>{t("admin.userVideos")}</Button>

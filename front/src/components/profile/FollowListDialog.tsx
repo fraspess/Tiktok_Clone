@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {
@@ -13,7 +14,6 @@ import {
     useLazyGetFollowingQuery,
 } from "@/store/apis/userApi.ts";
 import type {SimpleUser} from "@/types/User.ts";
-import {getAvatarUrl} from "@/lib/getAvatarUrl.ts";
 
 const PAGE_SIZE = 20;
 
@@ -84,18 +84,10 @@ const FollowListDialog = ({username, type, open, onOpenChange}: FollowListDialog
                     ) : (
                         <div className="space-y-1">
                             {users.map((user) => {
-                                const avatar = getAvatarUrl(user.avatar);
                                 return (
                                     <div key={user.id} className="flex items-center gap-3 rounded-md px-2 py-2">
-                                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-neutral-700">
-                                            {avatar ? (
-                                                <img src={avatar} alt={user.username} className="h-full w-full object-cover"/>
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-sm font-medium">
-                                                    {user.username[0]?.toUpperCase() ?? "?"}
-                                                </div>
-                                            )}
-                                        </div>
+                                        <UserAvatar username={user.username} avatar={user.avatar}
+                                                    className="h-9 w-9 text-sm"/>
                                         <span className="text-sm font-medium">@{user.username}</span>
                                     </div>
                                 );

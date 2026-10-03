@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils.ts";
-import UserAvatar from "@/components/chat/UserAvatar.tsx";
+import UserAvatar from "@/components/ui/UserAvatar.tsx";
 import { getConversationDisplayName, getConversationPeer } from "@/lib/conversationHelpers.ts";
 import type { ConversationDto } from "@/types/Conversation.ts";
 
