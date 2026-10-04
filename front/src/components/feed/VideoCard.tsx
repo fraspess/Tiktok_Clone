@@ -217,7 +217,7 @@ const VideoCard = ({video, containerRef}: VideoCardProps) => {
                         }
                         dispatch(setMuted(next));
                     }}
-                    className="absolute right-[max(0.75rem,env(safe-area-inset-right))] top-[calc(env(safe-area-inset-top,0px)+3.5rem)] z-20 rounded-full bg-black/40 p-2.5 md:right-4 md:top-4 md:p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
+                    className="video-mute absolute right-[max(0.75rem,env(safe-area-inset-right))] top-[calc(env(safe-area-inset-top,0px)+3.5rem)] z-20 rounded-full bg-black/40 p-2.5 md:right-4 md:top-4 md:p-3 text-white backdrop-blur-md transition active:scale-90 hover:bg-black/60"
                 >
                     {isMuted ? <VolumeX size={26}/> : <Volume2 size={26}/>}
                 </button>

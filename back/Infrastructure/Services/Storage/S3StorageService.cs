@@ -27,10 +27,10 @@ internal class S3StorageService(IAmazonS3 s3Client, IOptions<AwsS3Options> optio
     {
         return new AvatarDto
         {
-            Small = $"{_options.CdnBaseUrl}/avatars/{userId}/small.webp?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
+            Small = $"{_options.CdnBaseUrl}/avatars/{userId}/small.webp?v={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
             Medium =
-                $"{_options.CdnBaseUrl}/avatars/{userId}/medium.webp?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
-            Large = $"{_options.CdnBaseUrl}/avatars/{userId}/large.webp?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
+                $"{_options.CdnBaseUrl}/avatars/{userId}/medium.webp?v={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
+            Large = $"{_options.CdnBaseUrl}/avatars/{userId}/large.webp?v={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         };
     }
 

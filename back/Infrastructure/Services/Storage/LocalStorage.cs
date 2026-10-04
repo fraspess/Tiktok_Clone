@@ -23,7 +23,7 @@ internal class LocalFileStorageService(IOptions<LocalStorageOptions> options) : 
 
     public AvatarDto GetUserAvatar(Guid userId)
     {
-        var v = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var v = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         return new AvatarDto
         {
             Small = $"{_options.BaseUrl}/avatars/{userId}/small.webp?v={v}",

@@ -146,16 +146,8 @@
         right: max(0.25rem, env(safe-area-inset-right, 0px));
         bottom: 1rem;
         width: 4rem;
-        max-height: calc(100% - env(safe-area-inset-top, 0px) - 8rem);
         gap: clamp(0.25rem, 1cqh, 0.75rem);
-        overflow-y: auto;
-        overscroll-behavior-y: contain;
-        scrollbar-width: none;
         padding-block: 0.25rem;
-    }
-
-    .video-actions::-webkit-scrollbar {
-        display: none;
     }
 
     .video-actions > * {
@@ -183,5 +175,56 @@
         .video-action-label {
             display: none;
         }
+    }
+
+    /* A short landscape feed needs two columns, without a nested scroll area
+       that traps swipes intended to advance to the next video. */
+    @container video-card (height < 28rem) {
+        .video-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            justify-items: center;
+            width: 6rem;
+        }
+
+        .video-actions > button > span:first-child {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+
+        .video-actions > button svg {
+            width: 1.125rem;
+            height: 1.125rem;
+        }
+
+        .video-caption {
+            right: calc(max(0.25rem, env(safe-area-inset-right, 0px)) + 6.75rem);
+        }
+
+        .video-mute {
+            left: max(0.75rem, env(safe-area-inset-left, 0px));
+            right: auto;
+            top: max(0.75rem, env(safe-area-inset-top, 0px));
+        }
+    }
+}
+
+@media (width >= 48rem) and (height < 40rem) {
+    .video-actions {
+        gap: 0.25rem;
+    }
+
+    .video-action-label {
+        display: none;
+    }
+}
+
+@media (width >= 48rem) and (height < 28rem) {
+    .video-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-items: center;
+        width: 6rem;
+        flex-shrink: 0;
     }
 }
