@@ -123,9 +123,9 @@ const ProfileEditDialog = ({profile, open, onOpenChange}: ProfileEditDialogProps
                 await updateUser({username: currentUsername, formData}).unwrap();
             }
 
-            if (usernameChanged) {
-                await refetchMe();
-            }
+            // The topbar and video authors share the current-user query.
+            // Wait for it after avatar edits as well as username changes.
+            await refetchMe();
 
             toast.success(t("profile.edit.success"));
             onOpenChange(false);

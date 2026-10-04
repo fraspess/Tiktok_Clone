@@ -67,6 +67,7 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
     const [unfollowUser] = useUnfollowUserMutation();
     const {data: me} = useGetMeQuery(undefined, {skip: !isAuth});
     const isOwnVideo = Boolean(me?.data.id && video.author?.id && me.data.id === video.author.id);
+    const author = isOwnVideo ? me!.data : video.author;
 
     useEffect(() => {
         if (followOverride !== undefined) {
@@ -161,10 +162,10 @@ const VideoActionsSidebar = ({video}: VideoActionsSidebarProps) => {
 
             <div className="relative mb-1">
                 <Link
-                    to={video.author?.username ? `/@${video.author.username}` : "#"}
+                    to={author?.username ? `/@${author.username}` : "#"}
                     className="block h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-neutral-700"
                 >
-                    <UserAvatar username={video.author?.username ?? "?"} avatar={video.author?.avatar}
+                    <UserAvatar username={author?.username ?? "?"} avatar={author?.avatar}
                                 className="h-full w-full text-sm ring-0"/>
                 </Link>
                 {!isOwnVideo && !isFollowing && (
