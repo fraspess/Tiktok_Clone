@@ -103,7 +103,7 @@ fi
 sudo docker run --rm \
   -v $${CERTBOT_DIR}/conf:/etc/letsencrypt \
   -v $${CERTBOT_DIR}/hooks:/hooks:ro \
-  certbot/certbot certonly --manual --preferred-challenges dns -d "$${DOMAIN}" \
+  certbot/certbot certonly --manual --preferred-challenges dns -d "$${DOMAIN}" --cert-name "${cert_name}" \
     --manual-auth-hook "/hooks/duckdns.sh auth" --manual-cleanup-hook "/hooks/duckdns.sh cleanup" \
     %{ if letsencrypt_email != "" }--email "${letsencrypt_email}"%{ else }--register-unsafely-without-email%{ endif } \
     --agree-tos --no-eff-email --non-interactive %{ if letsencrypt_staging }--staging%{ endif }
@@ -126,7 +126,7 @@ sleep 60
 sudo docker run --rm -p 80:80 \
   -v $${CERTBOT_DIR}/conf:/etc/letsencrypt \
   -v $${CERTBOT_DIR}/www:/var/www/certbot \
-  certbot/certbot certonly --standalone -d "$${DOMAIN}" \
+  certbot/certbot certonly --standalone -d "$${DOMAIN}" --cert-name "${cert_name}" \
     %{ if letsencrypt_email != "" }--email "${letsencrypt_email}"%{ else }--register-unsafely-without-email%{ endif } \
     --agree-tos --no-eff-email --non-interactive %{ if letsencrypt_staging }--staging%{ endif }
 %{ endif ~}
