@@ -16,6 +16,12 @@ provider "aws" {
   secret_key = var.aws_secret_key
 }
 
+// Certbot saves the certificate under the name nginx reads it from,
+// so duckdns_subdomain can differ from the domain in the nginx config
+locals {
+  cert_name = regex("live/([^/]+)/fullchain\\.pem", file("${path.module}/../../../front/nginx.server.conf"))[0]
+}
+
 // Keys for  master to agent connection
 resource "tls_private_key" "jenkins_agent" {
   algorithm = "RSA"
@@ -96,6 +102,7 @@ resource "aws_instance" "jenkins_agent" {
     public_key          = tls_private_key.jenkins_agent.public_key_openssh
     duckdns_subdomain   = var.duckdns_subdomain
     duckdns_token       = var.duckdns_token
+    cert_name           = local.cert_name
     letsencrypt_email   = var.letsencrypt_email
     letsencrypt_staging = var.letsencrypt_staging
     // Public IP, the LAN only mode is for Proxmox
