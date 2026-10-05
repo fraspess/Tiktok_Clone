@@ -48,7 +48,7 @@ variable "jenkins_admin_password" {
 
 variable "duckdns_subdomain" {
   type        = string
-  description = "DuckDNS subdomain, must match server_name in front/nginx.server.conf"
+  description = "DuckDNS subdomain, the certificate is saved under the name front/nginx.server.conf reads"
   default     = "much-more-demo"
 }
 
