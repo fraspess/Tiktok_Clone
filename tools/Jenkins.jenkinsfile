@@ -33,5 +33,19 @@ pipeline {
             }
         }
 
+        stage("Health check") {
+            steps {
+                echo 'Checking that TikTok is up ...'
+                sh '''
+                    # Give nginx a few seconds to start after the deploy
+                    sleep 10
+                    # The same check as the api healthcheck in compose.server.yaml
+                    docker exec api curl -f http://localhost:8080/health
+                    # The site answers on 443, -k because the certificate is for the domain, not localhost
+                    curl -fkI https://localhost
+                '''
+            }
+        }
+
     }
 }
